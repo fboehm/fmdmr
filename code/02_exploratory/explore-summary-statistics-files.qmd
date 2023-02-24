@@ -10,6 +10,12 @@ assess the causal effect of FMD on creatinine levels.
 First, we read into R the creatinine summary statistics file.
 
 ```{r}
-cre_file <- here::here("")
+cre_file <- here::here("ukb_gwas", "biomarkers-30700-both_sexes-irnt.tsv.bgz")
 cre_tib <- vroom::vroom(cre_file)
+```
+
+```{r}
+fmd_file <- here::here("fmd_meta_gwas", 
+                        "meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab")
+fmd_tib <- vroom::vroom(fmd_file)
 ```
