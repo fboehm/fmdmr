@@ -1,0 +1,15 @@
+---
+title: "Exploring the creatinine GWAS summary statistics & FMD GWAS meta-analysis summary statistics"
+format: gfm
+---
+
+We want to "explore" the two results files to see how many SNPs are available in each, and to see 
+how many SNPs are in both files. This information will inform 2-sample MR studies to 
+assess the causal effect of FMD on creatinine levels.
+
+First, we read into R the creatinine summary statistics file.
+
+```{r}
+cre_file <- here::here("")
+cre_tib <- vroom::vroom(cre_file)
+```
