@@ -1,6 +1,6 @@
 ---
 title: "Exploring the creatinine GWAS summary statistics & FMD GWAS meta-analysis summary statistics"
-format: html
+format: gfm
 ---
 
 We want to "explore" the two results files to see how many SNPs are available in each, and to see 
@@ -15,7 +15,7 @@ cre_tib <- vroom::vroom(cre_file)
 ```
 
 ```{r}
-fmd_file <- here::here("fmd_meta_gwas", 
+fmd_file <- here::here("data", "fmd_meta_gwas", 
                         "meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab")
 fmd_tib <- vroom::vroom(fmd_file)
 ```
@@ -202,7 +202,7 @@ MendelianRandomization::mr_plot(input)
 
 
 ```{r}
-barton_file <- here::here("barton2021", "GCST90025945_buildGRCh37.tsv")
+barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
 barton_tib <- vroom::vroom(barton_file)
 ```
 
@@ -280,14 +280,14 @@ MendelianRandomization::mr_egger(input, correl = ld_mat)
 ```
 
 ```{r}
-MendelianRandomization::mr_plot(input)
+MendelianRandomization::mr_plot(input, interactive = FALSE)
 ```
 
 
 ## Barton Creatinine analysis
 
 ```{r}
-barton_file <- here::here("barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
+barton_file <- here::here("data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
 barton_tib <- vroom::vroom(barton_file)
 ```
 
@@ -366,7 +366,7 @@ MendelianRandomization::mr_egger(input, correl = ld_mat)
 ```
 
 ```{r}
-MendelianRandomization::mr_plot(input)
+MendelianRandomization::mr_plot(input, interactive = FALSE)
 ```
 
 
