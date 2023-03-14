@@ -210,7 +210,8 @@ barton_tib <- vroom::vroom(barton_file)
 # find shared snps
 small_dat <- fmd_tib %>%
      dplyr::inner_join(barton_tib, by = c("CHROM" = "chromosome", "POS" = "base_pair_location")) %>%
-     dplyr::filter(P < 1e-8) # choose pvalue threshold     
+     dplyr::filter(P < 1e-8)  # choose pvalue threshold     
+
 # harmonised? 
 small_dat %>%
     dplyr::filter(REF == ALLELE0) # same 7 rows
@@ -280,7 +281,15 @@ MendelianRandomization::mr_egger(input, correl = ld_mat)
 ```
 
 ```{r}
-MendelianRandomization::mr_plot(input, interactive = FALSE)
+MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
+MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE)
+MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, method = "all"), 
+                                interactive = FALSE, 
+                                labels = TRUE, orientate = TRUE)
+```
+
+```{r}
+MendelianRandomization::mr_funnel(input)
 ```
 
 
@@ -349,9 +358,7 @@ small_dat_no_ld <- small_dat %>%
 input <- MendelianRandomization::mr_input(
             bx = small_dat_no_ld$BETA, 
             bxse = small_dat_no_ld$SE, 
-            #by = kettunen_small$beta[kettunen_small$hm_rsid %in% colnames(ld_mat)], 
             by = small_dat_no_ld$beta, 
-            #byse = kettunen_small$standard_error[kettunen_small$hm_rsid %in% colnames(ld_mat)], 
             byse = small_dat_no_ld$standard_error,
             corr = ld_mat,
             exposure = "FMD",
@@ -360,13 +367,16 @@ input <- MendelianRandomization::mr_input(
         )
 ```
 
-```{r}
-MendelianRandomization::mr_allmethods(input)
-MendelianRandomization::mr_egger(input, correl = ld_mat)
-```
 
 ```{r}
-MendelianRandomization::mr_plot(input, interactive = FALSE)
+MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
+MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE)
+MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, method = "all"), 
+                                interactive = FALSE, 
+                                labels = TRUE, orientate = TRUE)
 ```
 
 
+```{r}
+MendelianRandomization::mr_funnel(input)
+```
