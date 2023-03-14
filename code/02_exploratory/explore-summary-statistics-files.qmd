@@ -234,6 +234,13 @@ input <- MendelianRandomization::mr_input(
         )
 ```
 
+```{r}
+MendelianRandomization::mr_allmethods(input)
+MendelianRandomization::mr_egger(input, correl = ld_mat)
+
+```
+
+
 
 ```{r}
 MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)

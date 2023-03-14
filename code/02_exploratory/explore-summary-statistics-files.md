@@ -342,16 +342,57 @@ input <- MendelianRandomization::mr_input(
 ```
 
 ``` r
+MendelianRandomization::mr_allmethods(input)
+```
+
+                        Method Estimate Std Error 95% CI        P-value
+                 Simple median    0.013     0.005   0.003 0.022   0.009
+               Weighted median    0.009     0.005  -0.002 0.019   0.096
+     Penalized weighted median    0.011     0.005   0.002 0.021   0.019
+                                                                       
+                           IVW    0.005     0.006  -0.006 0.017   0.358
+                 Penalized IVW    0.005     0.006  -0.006 0.017   0.358
+                    Robust IVW    0.005     0.006  -0.006 0.017   0.358
+          Penalized robust IVW    0.005     0.006  -0.006 0.017   0.358
+                                                                       
+                      MR-Egger    0.015     0.068  -0.119 0.149   0.825
+                   (intercept)   -0.003     0.021  -0.045 0.039   0.885
+            Penalized MR-Egger    0.015     0.068  -0.119 0.149   0.825
+                   (intercept)   -0.003     0.021  -0.045 0.039   0.885
+               Robust MR-Egger    0.015     0.068  -0.119 0.149   0.825
+                   (intercept)   -0.003     0.021  -0.045 0.039   0.885
+     Penalized robust MR-Egger    0.015     0.068  -0.119 0.149   0.825
+                   (intercept)   -0.003     0.021  -0.045 0.039   0.885
+
+``` r
+MendelianRandomization::mr_egger(input, correl = ld_mat)
+```
+
+
+    MR-Egger method
+    (variants correlated, random-effect model)
+
+    Number of Variants =  4 
+
+    ------------------------------------------------------------------
+          Method Estimate Std Error  95% CI       p-value
+        MR-Egger    0.015     0.068 -0.119, 0.149   0.825
+     (intercept)   -0.003     0.021 -0.045, 0.039   0.885
+    ------------------------------------------------------------------
+    Residual Standard Error :  1.735 
+    Heterogeneity test statistic = 6.0172 on 2 degrees of freedom, (p-value = 0.0494)
+
+``` r
 MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
 ```
 
-![](explore-summary-statistics-files_files/figure-commonmark/unnamed-chunk-17-1.png)
+![](explore-summary-statistics-files_files/figure-commonmark/unnamed-chunk-18-1.png)
 
 ``` r
 MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE)
 ```
 
-![](explore-summary-statistics-files_files/figure-commonmark/unnamed-chunk-17-2.png)
+![](explore-summary-statistics-files_files/figure-commonmark/unnamed-chunk-18-2.png)
 
 ``` r
 MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, method = "all"), 
@@ -359,10 +400,10 @@ MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, met
                                 labels = TRUE, orientate = TRUE)
 ```
 
-![](explore-summary-statistics-files_files/figure-commonmark/unnamed-chunk-17-3.png)
+![](explore-summary-statistics-files_files/figure-commonmark/unnamed-chunk-18-3.png)
 
 ``` r
 MendelianRandomization::mr_funnel(input)
 ```
 
-![](explore-summary-statistics-files_files/figure-commonmark/unnamed-chunk-18-1.png)
+![](explore-summary-statistics-files_files/figure-commonmark/unnamed-chunk-19-1.png)
