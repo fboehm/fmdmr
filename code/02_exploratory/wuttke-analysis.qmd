@@ -1,0 +1,71 @@
+---
+title: "Wuttke Analysis"
+format: gfm
+bibliography: ../references.bib
+---
+
+Here, we analyze the traits from @wuttke_imputation-powered_2023.
+
+We use the FMD summary statistics that are publicly available.
+
+```{r}
+library(magrittr)
+```
+
+
+```{r}
+(threshold <- 1e-7)
+fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
+fmd <- vroom::vroom(fmd_file) %>%
+            dplyr::filter(p_value < threshold)
+```
+
+
+```{r}
+# https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
+# follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
+ld_token <- "3fbdb0673b22"
+
+
+remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
+    nr <- nrow(symm_matrix)
+    bad_list <- list()
+    for (row in 1:nr){
+        foo <- upper.tri(symm_matrix, diag = FALSE)[row,]
+        bar <- symm_matrix[row, ] > threshold
+        bad_list[[row]] <- which(foo & bar)
+    }
+    bad_indices <- unique(do.call("c", bad_list))
+    if (length(bad_indices) == 0){
+        return(symm_matrix)
+    } else {
+        out <- as.matrix(symm_matrix[- bad_indices, - bad_indices])
+        rownames(out) <- colnames(out) <- colnames(symm_matrix)[- bad_indices]
+        return(out)
+    }
+}
+```
+
+
+
+
+
+```{r}
+files <- list.files(here::here("data", "wuttke2023"), pattern = "tsv.gz", full.names = TRUE)
+for (file in files){
+    print(file)
+    dat <- vroom::vroom(file)
+    joined <- dat %>%
+                    dplyr::inner_join(fmd, by = c("rsids" = "SNP"))
+
+}
+```
+
+
+
+
+
+
+```{r}
+devtools::session_info()
+```
