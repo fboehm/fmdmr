@@ -129,6 +129,7 @@ for (outcome in outcomes){
         # filter to remove highly correlated SNPs
         small_dat_no_ld <- small_dat %>%
             dplyr::filter(SNP %in% rownames(ld_mat))
+        print(nrow(small_dat_no_ld))
         # make input object
         input <- MendelianRandomization::mr_input(
                     bx = small_dat_no_ld$BETA, 
@@ -144,6 +145,8 @@ for (outcome in outcomes){
         cat('\n\n## `', outcome, "with p-value threshold: ", p_threshold, '`\n\n')    
         # MR analyses   
         print(MendelianRandomization::mr_allmethods(input))
+        print(MendelianRandomization::mr_egger(input))
+        
         # MR plots
  #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_1.png"))
  #       png(fig_fn)
