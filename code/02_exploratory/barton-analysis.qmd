@@ -67,7 +67,7 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 
 
 
-```{r, results = "asis"}
+```{r}
 outcomes <- c("CystatinC", "Creatinine")
 p_thresholds <- c(1e-08, 1e-07, 1e-06)
 for (outcome in outcomes){
