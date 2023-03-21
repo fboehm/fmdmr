@@ -44,8 +44,7 @@ library(magrittr)
 # https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
 # follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
 ld_token <- "3fbdb0673b22"
-
-
+# define function
 remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
     nr <- nrow(symm_matrix)
     bad_list <- list()
@@ -66,99 +65,89 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 ```
 
 
-### Barton Cystatin C
 
 
-```{r}
-barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
-barton_tib <- vroom::vroom(barton_file)
-```
+```{r, results = "asis"}
+outcomes <- c("CystatinC", "Creatinine")p_thresholds <- c(1e-8, 1e-7, 1e-6)
+for (outcome in outcomes){
+    for (p_threshold in p_thresholds){
+        if (outcome == "CystatinC"){
+            barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
+        } else {
+            barton_file <- here::here("data", "barton2021_creatinine", "GCST90025944_buildGRCh37.tsv")
+        }
+        barton_tib <- vroom::vroom(barton_file)
+        # find shared snps
+        small_dat_pre <- fmd_tib %>%
+            dplyr::filter(p_value < p_threshold)  %>% # choose pvalue threshold     
+            dplyr::inner_join(barton_tib, by = c("chromosome", "base_pair_location"))
+        # harmonised? 
+        small_dat <- small_dat_pre %>%
+            dplyr::mutate(harmonised = OA == ALLELE0)
+        (all.equal(small_dat$harmonised, TRUE))
+        # make ld matrix
+        ld_list <- list()
+        for (chr in 1:22){
+            fmd_onechr <- small_dat %>%
+                dplyr::filter(chromosome == chr)
+            if (nrow(fmd_onechr) > 1){
+                foo <- LDlinkR::LDmatrix(fmd_onechr$SNP, 
+                        pop = "CEU", 
+                        r2d = "r2", 
+                        genome_build = "grch37",
+                        token = ld_token, 
+                        file = FALSE
+                        ) 
+                
+                bar <- foo %>% 
+                            dplyr::select(-1) %>%
+                            as.matrix() %>%
+                            remove_offdiagonal_ones(threshold = 0.99)
 
-```{r}
-# find shared snps
-small_dat_pre <- fmd_tib %>%
-     dplyr::filter(p_value < 1e-6)  %>% # choose pvalue threshold     
-     dplyr::inner_join(barton_tib, by = c("chromosome", "base_pair_location"))
-# harmonised? 
-small_dat <- small_dat_pre %>%
-    dplyr::mutate(harmonised = OA == ALLELE0)
-(all.equal(small_dat$harmonised, TRUE))
-```
+                # remove rows & cols for highly correlated SNPs 
 
-
-```{r}
-ld_list <- list()
-for (chr in 1:22){
-    fmd_onechr <- small_dat %>%
-        dplyr::filter(chromosome == chr)
-    if (nrow(fmd_onechr) > 1){
-        foo <- LDlinkR::LDmatrix(fmd_onechr$SNP, 
-                pop = "CEU", 
-                r2d = "r2", 
-                genome_build = "grch37",
-                token = ld_token, 
-                file = FALSE
-                ) 
-        
-        bar <- foo %>% 
-                    dplyr::select(-1) %>%
-                    as.matrix() %>%
-                    remove_offdiagonal_ones(threshold = 0.99)
-
-        # remove rows & cols for highly correlated SNPs 
-
-        ld_list[[chr]] <- bar
-    }
-    if (nrow(fmd_onechr) == 1){
-        ld_list[[chr]] <- as.matrix(1)
-        colnames(ld_list[[chr]]) <- fmd_onechr$SNP      
-    }
-    if (nrow(fmd_onechr) == 0){
-        ld_list[[chr]] <- NA
+                ld_list[[chr]] <- bar
+            }
+            if (nrow(fmd_onechr) == 1){
+                ld_list[[chr]] <- as.matrix(1)
+                colnames(ld_list[[chr]]) <- fmd_onechr$SNP      
+            }
+            if (nrow(fmd_onechr) == 0){
+                ld_list[[chr]] <- NA
+            }
+        }
+        # remove NAs
+        ld_list_nona <- ld_list[!is.na(ld_list)]
+        ld_mat <- as.matrix(Matrix::bdiag(ld_list_nona))
+        rn <- do.call(c, lapply(ld_list_nona, colnames))
+        rownames(ld_mat) <- rn
+        colnames(ld_mat) <- rn
+        # filter to remove highly correlated SNPs
+        small_dat_no_ld <- small_dat %>%
+            dplyr::filter(SNP %in% rownames(ld_mat))
+        # make input object
+        input <- MendelianRandomization::mr_input(
+                    bx = small_dat_no_ld$BETA, 
+                    bxse = small_dat_no_ld$SE, 
+                    by = small_dat_no_ld$beta, 
+                    byse = small_dat_no_ld$standard_error,
+                    corr = ld_mat,
+                    exposure = "FMD",
+                    outcome = outcome,
+                    snps = rownames(ld_mat)
+                )
+        MendelianRandomization::mr_allmethods(input)
+        MendelianRandomization::mr_egger(input, correl = ld_mat)
+        # make header for collection of graphs for each iteration of loop
+        cat('\n\n## `', outcome, "with p-value threshold: ",p_threshold,    '`\n\n')       
+        MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
+        MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE)
+        MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, method = "all"), 
+                                        interactive = FALSE, 
+                                        labels = TRUE, orientate = TRUE)
+        MendelianRandomization::mr_funnel(input)
     }
 }
-# remove NAs
-ld_list_nona <- ld_list[!is.na(ld_list)]
-ld_mat <- as.matrix(Matrix::bdiag(ld_list_nona))
-rn <- do.call(c, lapply(ld_list_nona, colnames))
-rownames(ld_mat) <- rn
-colnames(ld_mat) <- rn
-```
-
-```{r}
-small_dat_no_ld <- small_dat %>%
-    dplyr::filter(SNP %in% rownames(ld_mat))
-```
-
-```{r}
-input <- MendelianRandomization::mr_input(
-            bx = small_dat_no_ld$BETA, 
-            bxse = small_dat_no_ld$SE, 
-            by = small_dat_no_ld$beta, 
-            byse = small_dat_no_ld$standard_error,
-            corr = ld_mat,
-            exposure = "FMD",
-            outcome = "cystatin C",
-            snps = rownames(ld_mat)
-        )
-```
-
-```{r}
-MendelianRandomization::mr_allmethods(input)
-MendelianRandomization::mr_egger(input, correl = ld_mat)
-
-```
-
-```{r}
-MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
-MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE)
-MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, method = "all"), 
-                                interactive = FALSE, 
-                                labels = TRUE, orientate = TRUE)
-```
-
-```{r}
-MendelianRandomization::mr_funnel(input)
 ```
 
 
