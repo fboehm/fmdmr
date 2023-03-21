@@ -7,12 +7,13 @@ We want to "explore" the two results files to see how many SNPs are available in
 how many SNPs are in both files. This information will inform 2-sample MR studies to 
 assess the causal effect of FMD on creatinine levels.
 
-First, we read into R the creatinine summary statistics file.
+First, we read into R the FMD summary statistics file.
 
 
 ```{r}
-fmd_file <- here::here("data", "fmd_meta_gwas", 
-                        "meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab")
+#fmd_file <- here::here("data", "fmd_meta_gwas", 
+#                        "meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab")
+fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd_tib <- vroom::vroom(fmd_file)
 ```
 
@@ -75,22 +76,23 @@ barton_tib <- vroom::vroom(barton_file)
 
 ```{r}
 # find shared snps
-small_dat <- fmd_tib %>%
-     dplyr::inner_join(barton_tib, by = c("CHROM" = "chromosome", "POS" = "base_pair_location")) %>%
-     dplyr::filter(P < 1e-8)  # choose pvalue threshold     
-
+small_dat_pre <- fmd_tib %>%
+     dplyr::filter(p_value < 1e-6)  %>% # choose pvalue threshold     
+     dplyr::inner_join(barton_tib, by = c("chromosome", "base_pair_location"))
 # harmonised? 
-small_dat %>%
-    dplyr::filter(REF == ALLELE0) # same 7 rows
+small_dat <- small_dat_pre %>%
+    dplyr::mutate(harmonised = OA == ALLELE0)
+(all.equal(small_dat$harmonised, TRUE))
 ```
+
 
 ```{r}
 ld_list <- list()
 for (chr in 1:22){
     fmd_onechr <- small_dat %>%
-        dplyr::filter(CHROM == chr)
+        dplyr::filter(chromosome == chr)
     if (nrow(fmd_onechr) > 1){
-        foo <- LDlinkR::LDmatrix(fmd_onechr$rsID, 
+        foo <- LDlinkR::LDmatrix(fmd_onechr$SNP, 
                 pop = "CEU", 
                 r2d = "r2", 
                 genome_build = "grch37",
@@ -109,7 +111,7 @@ for (chr in 1:22){
     }
     if (nrow(fmd_onechr) == 1){
         ld_list[[chr]] <- as.matrix(1)
-        colnames(ld_list[[chr]]) <- fmd_onechr$rsID       
+        colnames(ld_list[[chr]]) <- fmd_onechr$SNP      
     }
     if (nrow(fmd_onechr) == 0){
         ld_list[[chr]] <- NA
@@ -125,7 +127,7 @@ colnames(ld_mat) <- rn
 
 ```{r}
 small_dat_no_ld <- small_dat %>%
-    dplyr::filter(rsID %in% rownames(ld_mat))
+    dplyr::filter(SNP %in% rownames(ld_mat))
 ```
 
 ```{r}
@@ -169,21 +171,22 @@ barton_tib <- vroom::vroom(barton_file)
 
 ```{r}
 # find shared snps
-small_dat <- fmd_tib %>%
-     dplyr::inner_join(barton_tib, by = c("CHROM" = "chromosome", "POS" = "base_pair_location")) %>%
-     dplyr::filter(P < 1e-8) # choose pvalue threshold     
+small_dat_pre <- fmd_tib %>%
+     dplyr::filter(p_value < 1e-6)  %>% # choose pvalue threshold     
+     dplyr::inner_join(barton_tib, by = c("chromosome", "base_pair_location"))
 # harmonised? 
-small_dat %>%
-    dplyr::filter(REF == ALLELE0) 
+small_dat <- small_dat_pre %>%
+    dplyr::mutate(harmonised = OA == ALLELE0) 
+(all.equal(small_dat$harmonised, TRUE))
 ```
 
 ```{r}
 ld_list <- list()
 for (chr in 1:22){
     fmd_onechr <- small_dat %>%
-        dplyr::filter(CHROM == chr)
+        dplyr::filter(chromosome == chr)
     if (nrow(fmd_onechr) > 1){
-        foo <- LDlinkR::LDmatrix(fmd_onechr$rsID, 
+        foo <- LDlinkR::LDmatrix(fmd_onechr$SNP, 
                 pop = "CEU", 
                 r2d = "r2", 
                 genome_build = "grch37",
@@ -202,7 +205,7 @@ for (chr in 1:22){
     }
     if (nrow(fmd_onechr) == 1){
         ld_list[[chr]] <- as.matrix(1)
-        colnames(ld_list[[chr]]) <- fmd_onechr$rsID       
+        colnames(ld_list[[chr]]) <- fmd_onechr$SNP
     }
     if (nrow(fmd_onechr) == 0){
         ld_list[[chr]] <- NA
@@ -218,7 +221,7 @@ colnames(ld_mat) <- rn
 
 ```{r}
 small_dat_no_ld <- small_dat %>%
-    dplyr::filter(rsID %in% rownames(ld_mat))
+    dplyr::filter(SNP %in% rownames(ld_mat))
 ```
 
 ```{r}

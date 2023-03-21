@@ -14,7 +14,7 @@ library(magrittr)
 
 
 ```{r}
-(threshold <- 1e-7)
+(threshold <- 1e-6)
 fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- vroom::vroom(fmd_file) %>%
             dplyr::filter(p_value < threshold)
@@ -57,7 +57,8 @@ for (file in files){
     dat <- vroom::vroom(file)
     joined <- dat %>%
                     dplyr::inner_join(fmd, by = c("rsids" = "SNP"))
-
+    nrow(joined)
+    
 }
 ```
 
