@@ -67,11 +67,13 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 
 
 
-```{r}
+```{r, results = "asis"}
 outcomes <- c("CystatinC", "Creatinine")
 p_thresholds <- c(1e-08, 1e-07, 1e-06)
-for (outcome in outcomes){
-    for (p_threshold in p_thresholds){
+#for (outcome in outcomes){
+#    for (p_threshold in p_thresholds){
+outcome <- outcomes[1]
+p_threshold <- p_thresholds[1]
         if (outcome == "CystatinC"){
             barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
         }
@@ -164,7 +166,7 @@ for (outcome in outcomes){
 #                                        labels = TRUE, orientate = TRUE)
 #        dev.off()
 #        knitr::include_graphics(fig_fn, rel_path = FALSE)
-    }
-}
+#    }
+#}
 ```
 
