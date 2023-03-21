@@ -68,13 +68,15 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 
 
 ```{r, results = "asis"}
-outcomes <- c("CystatinC", "Creatinine")p_thresholds <- c(1e-8, 1e-7, 1e-6)
+outcomes <- c("CystatinC", "Creatinine")
+p_thresholds <- c(1e-8, 1e-7, 1e-6)
 for (outcome in outcomes){
     for (p_threshold in p_thresholds){
         if (outcome == "CystatinC"){
             barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
-        } else {
-            barton_file <- here::here("data", "barton2021_creatinine", "GCST90025944_buildGRCh37.tsv")
+        }
+        if (outcome == "Creatinine"){
+            barton_file <- here::here("data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
         }
         barton_tib <- vroom::vroom(barton_file)
         # find shared snps
