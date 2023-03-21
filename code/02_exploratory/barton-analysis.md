@@ -71,10 +71,10 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 ``` r
 outcomes <- c("CystatinC", "Creatinine")
 p_thresholds <- c(1e-08, 1e-07, 1e-06)
-#for (outcome in outcomes){
-#    for (p_threshold in p_thresholds){
-outcome <- outcomes[1]
-p_threshold <- p_thresholds[1]
+for (outcome in outcomes){
+    for (p_threshold in p_thresholds){
+#outcome <- outcomes[1]
+#p_threshold <- p_thresholds[1]
         if (outcome == "CystatinC"){
             barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
         }
@@ -82,18 +82,6 @@ p_threshold <- p_thresholds[1]
             barton_file <- here::here("data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
         }
         barton_tib <- vroom::vroom(barton_file)
-```
-
-    Rows: 5515075 Columns: 15
-    ── Column specification ────────────────────────────────────────────────────────
-    Delimiter: "\t"
-    chr  (2): ALLELE1, ALLELE0
-    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
-
-    ℹ Use `spec()` to retrieve the full column specification for this data.
-    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
         # find shared snps
         small_dat_pre <- fmd_tib %>%
             dplyr::filter(p_value < p_threshold)  %>% # choose pvalue threshold     
@@ -102,11 +90,6 @@ p_threshold <- p_thresholds[1]
         small_dat <- small_dat_pre %>%
             dplyr::mutate(harmonised = OA == ALLELE0)
         (all.equal(small_dat$harmonised, rep(TRUE, length(small_dat$harmonised))))
-```
-
-\[1\] TRUE
-
-``` r
         # make ld matrix
         ld_list <- list()
         for (chr in 1:22){
@@ -138,12 +121,6 @@ p_threshold <- p_thresholds[1]
                 ld_list[[chr]] <- NA
             }
         }
-```
-
-
-    LDlink server is working...
-
-``` r
         # remove NAs
         ld_list_nona <- ld_list[!is.na(ld_list)]
         ld_mat <- as.matrix(Matrix::bdiag(ld_list_nona))
@@ -166,14 +143,45 @@ p_threshold <- p_thresholds[1]
                 )
         # make header for collection of graphs for each iteration of loop
         cat('\n\n## `', outcome, "with p-value threshold: ", p_threshold, '`\n\n')    
+        # MR analyses   
+        print(MendelianRandomization::mr_allmethods(input))
+        # MR plots
+ #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_1.png"))
+ #       png(fig_fn)
+ #       MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
+ #       dev.off()
+##        knitr::include_graphics(fig_fn, rel_path = FALSE)
+ #       #
+ #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_2.png"))
+ #       png(fig_fn)
+ #       MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE)
+ #       dev.off()
+##        knitr::include_graphics(fig_fn, rel_path = FALSE)
+#
+#        #
+#        fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_3.png"))
+#        png(fig_fn)
+#        MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, method = "all"), 
+#                                        interactive = FALSE, 
+#                                        labels = TRUE, orientate = TRUE)
+#        dev.off()
+#        knitr::include_graphics(fig_fn, rel_path = FALSE)
+    }
+}
 ```
+
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    LDlink server is working...
 
 ## `CystatinC with p-value threshold:  1e-08`
-
-``` r
-        # MR analyses   
-        MendelianRandomization::mr_allmethods(input)
-```
 
                     Method Estimate Std Error 95% CI        P-value
              Simple median    0.006     0.005  -0.004 0.016   0.211
@@ -196,45 +204,172 @@ Penalized weighted median 0.007 0.004 -0.002 0.016 0.128
 Penalized robust MR-Egger 0.073 0.061 -0.046 0.192 0.229 (intercept)
 -0.023 0.019 -0.060 0.014 0.219
 
-``` r
-        MendelianRandomization::mr_egger(input, correl = ld_mat)
-```
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
 
-MR-Egger method (variants correlated, random-effect model)
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-Number of Variants = 3
+    LDlink server is working...
 
-|                                              |
-|:--------------------------------------------:|
-|   Method Estimate Std Error 95% CI p-value   |
-|   MR-Egger 0.073 0.061 -0.046, 0.192 0.229   |
-| (intercept) -0.023 0.019 -0.060, 0.014 0.219 |
+## `CystatinC with p-value threshold:  1e-07`
 
-Residual Standard Error : 2.418 Heterogeneity test statistic = 5.8464 on
-1 degrees of freedom, (p-value = 0.0156)
+                    Method Estimate Std Error 95% CI         P-value
+             Simple median    0.007     0.004  -0.001  0.014   0.073
+           Weighted median    0.007     0.004  -0.001  0.014   0.071
 
-``` r
-        # MR plots
- #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_1.png"))
- #       png(fig_fn)
- #       MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
- #       dev.off()
-##        knitr::include_graphics(fig_fn, rel_path = FALSE)
- #       #
- #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_2.png"))
- #       png(fig_fn)
- #       MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE)
- #       dev.off()
-##        knitr::include_graphics(fig_fn, rel_path = FALSE)
-#
-#        #
-#        fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_3.png"))
-#        png(fig_fn)
-#        MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, method = "all"), 
-#                                        interactive = FALSE, 
-#                                        labels = TRUE, orientate = TRUE)
-#        dev.off()
-#        knitr::include_graphics(fig_fn, rel_path = FALSE)
-#    }
-#}
-```
+Penalized weighted median 0.008 0.004 0.000 0.015 0.042
+
+                       IVW   -0.012     0.008  -0.028  0.004   0.139
+             Penalized IVW   -0.012     0.008  -0.028  0.004   0.139
+                Robust IVW   -0.012     0.008  -0.028  0.004   0.139
+      Penalized robust IVW   -0.012     0.008  -0.028  0.004   0.139
+                                                                    
+                  MR-Egger    0.090     0.019   0.052  0.128   0.000
+               (intercept)   -0.029     0.005  -0.039 -0.018   0.000
+        Penalized MR-Egger    0.090     0.019   0.052  0.128   0.000
+               (intercept)   -0.029     0.005  -0.039 -0.018   0.000
+           Robust MR-Egger    0.090     0.019   0.052  0.128   0.000
+               (intercept)   -0.029     0.005  -0.039 -0.018   0.000
+
+Penalized robust MR-Egger 0.090 0.019 0.052 0.128 0.000 (intercept)
+-0.029 0.005 -0.039 -0.018 0.000
+
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    LDlink server is working...
+
+## `CystatinC with p-value threshold:  1e-06`
+
+                    Method Estimate Std Error 95% CI         P-value
+             Simple median   -0.012     0.004  -0.020 -0.003   0.006
+           Weighted median    0.005     0.004  -0.003  0.013   0.224
+
+Penalized weighted median 0.007 0.004 0.000 0.015 0.050
+
+                       IVW   -0.027     0.004  -0.035 -0.019   0.000
+             Penalized IVW   -0.027     0.004  -0.035 -0.019   0.000
+                Robust IVW   -0.027     0.004  -0.035 -0.019   0.000
+      Penalized robust IVW   -0.027     0.004  -0.035 -0.019   0.000
+                                                                    
+                  MR-Egger    0.067     0.013   0.041  0.093   0.000
+               (intercept)   -0.023     0.003  -0.029 -0.016   0.000
+        Penalized MR-Egger    0.067     0.013   0.041  0.093   0.000
+               (intercept)   -0.023     0.003  -0.029 -0.016   0.000
+           Robust MR-Egger    0.067     0.013   0.041  0.093   0.000
+               (intercept)   -0.023     0.003  -0.029 -0.016   0.000
+
+Penalized robust MR-Egger 0.067 0.013 0.041 0.093 0.000 (intercept)
+-0.023 0.003 -0.029 -0.016 0.000
+
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    LDlink server is working...
+
+## `Creatinine with p-value threshold:  1e-08`
+
+                    Method Estimate Std Error 95% CI        P-value
+             Simple median   -0.004     0.005  -0.014 0.007   0.472
+           Weighted median   -0.003     0.005  -0.013 0.007   0.556
+
+Penalized weighted median 0.000 0.005 -0.009 0.009 0.965
+
+                       IVW   -0.007     0.004  -0.015 0.000   0.057
+             Penalized IVW   -0.007     0.004  -0.015 0.000   0.057
+                Robust IVW   -0.007     0.004  -0.015 0.000   0.057
+      Penalized robust IVW   -0.007     0.004  -0.015 0.000   0.057
+                                                                   
+                  MR-Egger    0.047     0.076  -0.103 0.196   0.542
+               (intercept)   -0.017     0.023  -0.063 0.029   0.475
+        Penalized MR-Egger    0.047     0.076  -0.103 0.196   0.542
+               (intercept)   -0.017     0.023  -0.063 0.029   0.475
+           Robust MR-Egger    0.047     0.076  -0.103 0.196   0.542
+               (intercept)   -0.017     0.023  -0.063 0.029   0.475
+
+Penalized robust MR-Egger 0.047 0.076 -0.103 0.196 0.542 (intercept)
+-0.017 0.023 -0.063 0.029 0.475
+
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    LDlink server is working...
+
+## `Creatinine with p-value threshold:  1e-07`
+
+                    Method Estimate Std Error 95% CI         P-value
+             Simple median    0.001     0.004  -0.007  0.009   0.843
+           Weighted median    0.001     0.004  -0.007  0.010   0.785
+
+Penalized weighted median 0.002 0.005 -0.008 0.012 0.676
+
+                       IVW   -0.018     0.010  -0.037  0.001   0.063
+             Penalized IVW   -0.018     0.010  -0.037  0.001   0.063
+                Robust IVW   -0.018     0.010  -0.037  0.001   0.063
+      Penalized robust IVW   -0.018     0.010  -0.037  0.001   0.063
+                                                                    
+                  MR-Egger    0.098     0.031   0.038  0.159   0.001
+               (intercept)   -0.033     0.009  -0.049 -0.016   0.000
+        Penalized MR-Egger    0.098     0.031   0.038  0.159   0.001
+               (intercept)   -0.033     0.009  -0.049 -0.016   0.000
+           Robust MR-Egger    0.098     0.031   0.038  0.159   0.001
+               (intercept)   -0.033     0.009  -0.049 -0.016   0.000
+
+Penalized robust MR-Egger 0.098 0.031 0.038 0.159 0.001 (intercept)
+-0.033 0.009 -0.049 -0.016 0.000
+
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    LDlink server is working...
+
+## `Creatinine with p-value threshold:  1e-06`
+
+                    Method Estimate Std Error 95% CI         P-value
+             Simple median   -0.018     0.005  -0.027 -0.008   0.000
+           Weighted median   -0.004     0.005  -0.013  0.006   0.444
+
+Penalized weighted median -0.002 0.005 -0.012 0.007 0.613
+
+                       IVW   -0.039     0.005  -0.049 -0.029   0.000
+             Penalized IVW   -0.039     0.005  -0.049 -0.029   0.000
+                Robust IVW   -0.039     0.005  -0.049 -0.029   0.000
+      Penalized robust IVW   -0.039     0.005  -0.049 -0.029   0.000
+                                                                    
+                  MR-Egger    0.083     0.020   0.044  0.122   0.000
+               (intercept)   -0.029     0.005  -0.039 -0.020   0.000
+        Penalized MR-Egger    0.083     0.020   0.044  0.122   0.000
+               (intercept)   -0.029     0.005  -0.039 -0.020   0.000
+           Robust MR-Egger    0.083     0.020   0.044  0.122   0.000
+               (intercept)   -0.029     0.005  -0.039 -0.020   0.000
+
+Penalized robust MR-Egger 0.083 0.020 0.044 0.122 0.000 (intercept)
+-0.029 0.005 -0.039 -0.020 0.000

@@ -70,10 +70,10 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 ```{r, results = "asis"}
 outcomes <- c("CystatinC", "Creatinine")
 p_thresholds <- c(1e-08, 1e-07, 1e-06)
-#for (outcome in outcomes){
-#    for (p_threshold in p_thresholds){
-outcome <- outcomes[1]
-p_threshold <- p_thresholds[1]
+for (outcome in outcomes){
+    for (p_threshold in p_thresholds){
+#outcome <- outcomes[1]
+#p_threshold <- p_thresholds[1]
         if (outcome == "CystatinC"){
             barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
         }
@@ -143,8 +143,7 @@ p_threshold <- p_thresholds[1]
         # make header for collection of graphs for each iteration of loop
         cat('\n\n## `', outcome, "with p-value threshold: ", p_threshold, '`\n\n')    
         # MR analyses   
-        MendelianRandomization::mr_allmethods(input)
-        MendelianRandomization::mr_egger(input, correl = ld_mat)
+        print(MendelianRandomization::mr_allmethods(input))
         # MR plots
  #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_1.png"))
  #       png(fig_fn)
@@ -166,7 +165,7 @@ p_threshold <- p_thresholds[1]
 #                                        labels = TRUE, orientate = TRUE)
 #        dev.off()
 #        knitr::include_graphics(fig_fn, rel_path = FALSE)
-#    }
-#}
+    }
+}
 ```
 
