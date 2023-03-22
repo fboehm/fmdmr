@@ -10,8 +10,6 @@ of FMD on creatinine levels.
 First, we read into R the FMD summary statistics file.
 
 ``` r
-#fmd_file <- here::here("data", "fmd_meta_gwas", 
-#                        "meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab")
 fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd_tib <- vroom::vroom(fmd_file)
 ```
@@ -24,21 +22,6 @@ fmd_tib <- vroom::vroom(fmd_file)
 
     ℹ Use `spec()` to retrieve the full column specification for this data.
     ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-`fmd_tib` has the summary statistics in a different format. It has 12
-columns in total:
-
-“MarkerName” “rsID”  
-“CHROM”  
-“POS”  
-“REF”  
-“ALT”  
-“P”  
-“BETA”  
-“SE”  
-“N”  
-“Rsq_min”  
-“Rsq_max”
 
 ``` r
 library(magrittr)
@@ -145,13 +128,20 @@ for (outcome in outcomes){
         # make header for collection of graphs for each iteration of loop
         cat('\n\n## `', outcome, "with p-value threshold: ", p_threshold, '`\n\n')    
         # MR analyses   
-        print(MendelianRandomization::mr_allmethods(input))
-        print(MendelianRandomization::mr_egger(input))
-        
+        result <- MendelianRandomization::mr_allmethods(input)
+        result@Values %>% 
+            dplyr::mutate_if(is.numeric, signif, digits = 2) %>%
+            dplyr::mutate("Number of SNPs" = length(result@Data@snps)) %>%
+            dplyr::rename("95% CI lower" = 4, "95% CI upper" = 5) %>%
+            knitr::kable() %>%
+            print()
+        ivw_res <- MendelianRandomization::mr_ivw(input, correl = TRUE)
+        egger_res <- MendelianRandomization::mr_egger(input, correl = TRUE)
+
         # MR plots
  #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_1.png"))
  #       png(fig_fn)
- #       MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
+        print(MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE))
  #       dev.off()
 ##        knitr::include_graphics(fig_fn, rel_path = FALSE)
  #       #
@@ -188,52 +178,23 @@ for (outcome in outcomes){
 
 ## `CystatinC with p-value threshold:  1e-08`
 
-                    Method Estimate Std Error 95% CI        P-value
-             Simple median    0.006     0.005  -0.004 0.016   0.211
-           Weighted median    0.006     0.005  -0.003 0.016   0.163
-
-Penalized weighted median 0.007 0.004 -0.002 0.016 0.128
-
-                       IVW   -0.001     0.004  -0.008 0.006   0.820
-             Penalized IVW   -0.001     0.004  -0.008 0.006   0.820
-                Robust IVW   -0.001     0.004  -0.008 0.006   0.820
-      Penalized robust IVW   -0.001     0.004  -0.008 0.006   0.820
-                                                                   
-                  MR-Egger    0.073     0.061  -0.046 0.192   0.229
-               (intercept)   -0.023     0.019  -0.060 0.014   0.219
-        Penalized MR-Egger    0.073     0.061  -0.046 0.192   0.229
-               (intercept)   -0.023     0.019  -0.060 0.014   0.219
-           Robust MR-Egger    0.073     0.061  -0.046 0.192   0.229
-               (intercept)   -0.023     0.019  -0.060 0.014   0.219
-
-Penalized robust MR-Egger 0.073 0.061 -0.046 0.192 0.229 (intercept)
--0.023 0.019 -0.060 0.014 0.219
-
-MR-Egger method (variants correlated, random-effect model)
-
-Number of Variants = 3
-
-|                                                                                                                          Method Estimate Std Error 95% CI p-value MR-Egger 0.073 0.061 -0.046, 0.192 0.229 (intercept) -0.023 0.019 -0.060, 0.014 0.219                                                                                                                           |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|                                                                                                                                 Residual Standard Error : 2.418 Heterogeneity test statistic = 5.8464 on 1 degrees of freedom, (p-value = 0.0156)                                                                                                                                 |
-|                                                                      \`\`\` Rows: 5515075 Columns: 15 ── Column specification ──────────────────────────────────────────────────────── Delimiter: “ chr (2): ALLELE1, ALLELE0 dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG…                                                                       |
-|                                                                                                             ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.                                                                                                             |
-|                                                                                                                                                                         LDlink server is working… \`\`\`                                                                                                                                                                          |
-|                                                                                                                                                                                      \[1\] 6                                                                                                                                                                                      |
-|                                                                                                                                                                  \## `CystatinC with p-value threshold:  1e-07`                                                                                                                                                                   |
-|                                                                                           Method Estimate Std Error 95% CI P-value Simple median 0.007 0.004 -0.001 0.014 0.073 Weighted median 0.007 0.004 -0.001 0.014 0.071 Penalized weighted median 0.008 0.004 0.000 0.015 0.042                                                                                            |
-|                                                                                                 IVW -0.012 0.008 -0.028 0.004 0.139 Penalized IVW -0.012 0.008 -0.028 0.004 0.139 Robust IVW -0.012 0.008 -0.028 0.004 0.139 Penalized robust IVW -0.012 0.008 -0.028 0.004 0.139                                                                                                 |
-| MR-Egger 0.090 0.019 0.052 0.128 0.000 (intercept) -0.029 0.005 -0.039 -0.018 0.000 Penalized MR-Egger 0.090 0.019 0.052 0.128 0.000 (intercept) -0.029 0.005 -0.039 -0.018 0.000 Robust MR-Egger 0.090 0.019 0.052 0.128 0.000 (intercept) -0.029 0.005 -0.039 -0.018 0.000 Penalized robust MR-Egger 0.090 0.019 0.052 0.128 0.000 (intercept) -0.029 0.005 -0.039 -0.018 0.000 |
-|                                                                                                                                                            MR-Egger method (variants correlated, random-effect model)                                                                                                                                                             |
-|                                                                                                                                                                              Number of Variants = 6                                                                                                                                                                               |
-
-      Method Estimate Std Error  95% CI        p-value
-    MR-Egger    0.090     0.019  0.052,  0.128   0.000
-
-## (intercept) -0.029 0.005 -0.039, -0.018 0.000
-
-Residual Standard Error : 1.299 Heterogeneity test statistic = 6.7527 on
-4 degrees of freedom, (p-value = 0.1496)
+| Method                    | Estimate | Std Error | 95% CI lower | 95% CI upper | P-value | Number of SNPs |
+|:--------------------------|---------:|----------:|-------------:|-------------:|--------:|---------------:|
+| Simple median             |  0.00640 |    0.0051 |      -0.0036 |       0.0160 |    0.21 |              3 |
+| Weighted median           |  0.00650 |    0.0047 |      -0.0026 |       0.0160 |    0.16 |              3 |
+| Penalized weighted median |  0.00680 |    0.0045 |      -0.0020 |       0.0160 |    0.13 |              3 |
+| IVW                       | -0.00085 |    0.0037 |      -0.0081 |       0.0064 |    0.82 |              3 |
+| Penalized IVW             | -0.00085 |    0.0037 |      -0.0081 |       0.0064 |    0.82 |              3 |
+| Robust IVW                | -0.00085 |    0.0037 |      -0.0081 |       0.0064 |    0.82 |              3 |
+| Penalized robust IVW      | -0.00085 |    0.0037 |      -0.0081 |       0.0064 |    0.82 |              3 |
+| MR-Egger                  |  0.07300 |    0.0610 |      -0.0460 |       0.1900 |    0.23 |              3 |
+| (intercept)               | -0.02300 |    0.0190 |      -0.0600 |       0.0140 |    0.22 |              3 |
+| Penalized MR-Egger        |  0.07300 |    0.0610 |      -0.0460 |       0.1900 |    0.23 |              3 |
+| (intercept)               | -0.02300 |    0.0190 |      -0.0600 |       0.0140 |    0.22 |              3 |
+| Robust MR-Egger           |  0.07300 |    0.0610 |      -0.0460 |       0.1900 |    0.23 |              3 |
+| (intercept)               | -0.02300 |    0.0190 |      -0.0600 |       0.0140 |    0.22 |              3 |
+| Penalized robust MR-Egger |  0.07300 |    0.0610 |      -0.0460 |       0.1900 |    0.23 |              3 |
+| (intercept)               | -0.02300 |    0.0190 |      -0.0600 |       0.0140 |    0.22 |              3 |
 
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
@@ -245,57 +206,73 @@ Residual Standard Error : 1.299 Heterogeneity test statistic = 6.7527 on
     ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
     LDlink server is working...
+
+<div class="cell-output-display">
+
+![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-1.png)
+
+</div>
+
+\[1\] 6
+
+## `CystatinC with p-value threshold:  1e-07`
+
+| Method                    | Estimate | Std Error | 95% CI lower | 95% CI upper | P-value | Number of SNPs |
+|:--------------------------|---------:|----------:|-------------:|-------------:|--------:|---------------:|
+| Simple median             |   0.0069 |    0.0039 |     -0.00066 |       0.0140 | 7.3e-02 |              6 |
+| Weighted median           |   0.0069 |    0.0038 |     -0.00058 |       0.0140 | 7.1e-02 |              6 |
+| Penalized weighted median |   0.0077 |    0.0038 |      0.00029 |       0.0150 | 4.2e-02 |              6 |
+| IVW                       |  -0.0120 |    0.0081 |     -0.02800 |       0.0039 | 1.4e-01 |              6 |
+| Penalized IVW             |  -0.0120 |    0.0081 |     -0.02800 |       0.0039 | 1.4e-01 |              6 |
+| Robust IVW                |  -0.0120 |    0.0081 |     -0.02800 |       0.0039 | 1.4e-01 |              6 |
+| Penalized robust IVW      |  -0.0120 |    0.0081 |     -0.02800 |       0.0039 | 1.4e-01 |              6 |
+| MR-Egger                  |   0.0900 |    0.0190 |      0.05200 |       0.1300 | 3.5e-06 |              6 |
+| (intercept)               |  -0.0290 |    0.0054 |     -0.03900 |      -0.0180 | 1.0e-07 |              6 |
+| Penalized MR-Egger        |   0.0900 |    0.0190 |      0.05200 |       0.1300 | 3.5e-06 |              6 |
+| (intercept)               |  -0.0290 |    0.0054 |     -0.03900 |      -0.0180 | 1.0e-07 |              6 |
+| Robust MR-Egger           |   0.0900 |    0.0190 |      0.05200 |       0.1300 | 3.5e-06 |              6 |
+| (intercept)               |  -0.0290 |    0.0054 |     -0.03900 |      -0.0180 | 1.0e-07 |              6 |
+| Penalized robust MR-Egger |   0.0900 |    0.0190 |      0.05200 |       0.1300 | 3.5e-06 |              6 |
+| (intercept)               |  -0.0290 |    0.0054 |     -0.03900 |      -0.0180 | 1.0e-07 |              6 |
+
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    LDlink server is working...
+
+<div class="cell-output-display">
+
+![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-2.png)
+
+</div>
 
 \[1\] 10
 
 ## `CystatinC with p-value threshold:  1e-06`
 
-                    Method Estimate Std Error 95% CI         P-value
-             Simple median   -0.012     0.004  -0.020 -0.003   0.006
-           Weighted median    0.005     0.004  -0.003  0.013   0.224
-
-Penalized weighted median 0.007 0.004 0.000 0.015 0.050
-
-                       IVW   -0.027     0.004  -0.035 -0.019   0.000
-             Penalized IVW   -0.027     0.004  -0.035 -0.019   0.000
-                Robust IVW   -0.027     0.004  -0.035 -0.019   0.000
-      Penalized robust IVW   -0.027     0.004  -0.035 -0.019   0.000
-                                                                    
-                  MR-Egger    0.067     0.013   0.041  0.093   0.000
-               (intercept)   -0.023     0.003  -0.029 -0.016   0.000
-        Penalized MR-Egger    0.067     0.013   0.041  0.093   0.000
-               (intercept)   -0.023     0.003  -0.029 -0.016   0.000
-           Robust MR-Egger    0.067     0.013   0.041  0.093   0.000
-               (intercept)   -0.023     0.003  -0.029 -0.016   0.000
-
-Penalized robust MR-Egger 0.067 0.013 0.041 0.093 0.000 (intercept)
--0.023 0.003 -0.029 -0.016 0.000
-
-MR-Egger method (variants correlated, random-effect model)
-
-Number of Variants = 10
-
-|                                                                                                                          Method Estimate Std Error 95% CI p-value MR-Egger 0.067 0.013 0.041, 0.093 0.000 (intercept) -0.023 0.003 -0.029, -0.016 0.000                                                                                                                           |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|                                                                                                                                Residual Standard Error : 1.403 Heterogeneity test statistic = 15.7465 on 8 degrees of freedom, (p-value = 0.0462)                                                                                                                                 |
-|                                                                      \`\`\` Rows: 5515075 Columns: 15 ── Column specification ──────────────────────────────────────────────────────── Delimiter: “ chr (2): ALLELE1, ALLELE0 dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG…                                                                       |
-|                                                                                                             ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.                                                                                                             |
-|                                                                                                                                                                         LDlink server is working… \`\`\`                                                                                                                                                                          |
-|                                                                                                                                                                                      \[1\] 3                                                                                                                                                                                      |
-|                                                                                                                                                                  \## `Creatinine with p-value threshold:  1e-08`                                                                                                                                                                  |
-|                                                                                          Method Estimate Std Error 95% CI P-value Simple median -0.004 0.005 -0.014 0.007 0.472 Weighted median -0.003 0.005 -0.013 0.007 0.556 Penalized weighted median 0.000 0.005 -0.009 0.009 0.965                                                                                          |
-|                                                                                                 IVW -0.007 0.004 -0.015 0.000 0.057 Penalized IVW -0.007 0.004 -0.015 0.000 0.057 Robust IVW -0.007 0.004 -0.015 0.000 0.057 Penalized robust IVW -0.007 0.004 -0.015 0.000 0.057                                                                                                 |
-| MR-Egger 0.047 0.076 -0.103 0.196 0.542 (intercept) -0.017 0.023 -0.063 0.029 0.475 Penalized MR-Egger 0.047 0.076 -0.103 0.196 0.542 (intercept) -0.017 0.023 -0.063 0.029 0.475 Robust MR-Egger 0.047 0.076 -0.103 0.196 0.542 (intercept) -0.017 0.023 -0.063 0.029 0.475 Penalized robust MR-Egger 0.047 0.076 -0.103 0.196 0.542 (intercept) -0.017 0.023 -0.063 0.029 0.475 |
-|                                                                                                                                                            MR-Egger method (variants correlated, random-effect model)                                                                                                                                                             |
-|                                                                                                                                                                              Number of Variants = 3                                                                                                                                                                               |
-
-      Method Estimate Std Error  95% CI       p-value
-    MR-Egger    0.047     0.076 -0.103, 0.196   0.542
-
-## (intercept) -0.017 0.023 -0.063, 0.029 0.475
-
-Residual Standard Error : 2.947 Heterogeneity test statistic = 8.6821 on
-1 degrees of freedom, (p-value = 0.0032)
+| Method                    | Estimate | Std Error | 95% CI lower | 95% CI upper | P-value | Number of SNPs |
+|:--------------------------|---------:|----------:|-------------:|-------------:|--------:|---------------:|
+| Simple median             |  -0.0120 |    0.0043 |     -2.0e-02 |      -0.0034 | 5.8e-03 |             10 |
+| Weighted median           |   0.0051 |    0.0042 |     -3.1e-03 |       0.0130 | 2.2e-01 |             10 |
+| Penalized weighted median |   0.0073 |    0.0037 |      5.9e-06 |       0.0150 | 5.0e-02 |             10 |
+| IVW                       |  -0.0270 |    0.0039 |     -3.5e-02 |      -0.0190 | 0.0e+00 |             10 |
+| Penalized IVW             |  -0.0270 |    0.0039 |     -3.5e-02 |      -0.0190 | 0.0e+00 |             10 |
+| Robust IVW                |  -0.0270 |    0.0039 |     -3.5e-02 |      -0.0190 | 0.0e+00 |             10 |
+| Penalized robust IVW      |  -0.0270 |    0.0039 |     -3.5e-02 |      -0.0190 | 0.0e+00 |             10 |
+| MR-Egger                  |   0.0670 |    0.0130 |      4.1e-02 |       0.0930 | 6.0e-07 |             10 |
+| (intercept)               |  -0.0230 |    0.0032 |     -2.9e-02 |      -0.0160 | 0.0e+00 |             10 |
+| Penalized MR-Egger        |   0.0670 |    0.0130 |      4.1e-02 |       0.0930 | 6.0e-07 |             10 |
+| (intercept)               |  -0.0230 |    0.0032 |     -2.9e-02 |      -0.0160 | 0.0e+00 |             10 |
+| Robust MR-Egger           |   0.0670 |    0.0130 |      4.1e-02 |       0.0930 | 6.0e-07 |             10 |
+| (intercept)               |  -0.0230 |    0.0032 |     -2.9e-02 |      -0.0160 | 0.0e+00 |             10 |
+| Penalized robust MR-Egger |   0.0670 |    0.0130 |      4.1e-02 |       0.0930 | 6.0e-07 |             10 |
+| (intercept)               |  -0.0230 |    0.0032 |     -2.9e-02 |      -0.0160 | 0.0e+00 |             10 |
 
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
@@ -308,53 +285,114 @@ Residual Standard Error : 2.947 Heterogeneity test statistic = 8.6821 on
 
     LDlink server is working...
 
+<div class="cell-output-display">
+
+![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-3.png)
+
+</div>
+
+\[1\] 3
+
+## `Creatinine with p-value threshold:  1e-08`
+
+| Method                    | Estimate | Std Error | 95% CI lower | 95% CI upper | P-value | Number of SNPs |
+|:--------------------------|---------:|----------:|-------------:|-------------:|--------:|---------------:|
+| Simple median             |  -0.0039 |    0.0054 |      -0.0140 |      0.00670 |   0.470 |              3 |
+| Weighted median           |  -0.0030 |    0.0051 |      -0.0130 |      0.00690 |   0.560 |              3 |
+| Penalized weighted median |  -0.0002 |    0.0046 |      -0.0092 |      0.00880 |   0.970 |              3 |
+| IVW                       |  -0.0073 |    0.0038 |      -0.0150 |      0.00021 |   0.057 |              3 |
+| Penalized IVW             |  -0.0073 |    0.0038 |      -0.0150 |      0.00021 |   0.057 |              3 |
+| Robust IVW                |  -0.0073 |    0.0038 |      -0.0150 |      0.00021 |   0.057 |              3 |
+| Penalized robust IVW      |  -0.0073 |    0.0038 |      -0.0150 |      0.00021 |   0.057 |              3 |
+| MR-Egger                  |   0.0470 |    0.0760 |      -0.1000 |      0.20000 |   0.540 |              3 |
+| (intercept)               |  -0.0170 |    0.0230 |      -0.0630 |      0.02900 |   0.480 |              3 |
+| Penalized MR-Egger        |   0.0470 |    0.0760 |      -0.1000 |      0.20000 |   0.540 |              3 |
+| (intercept)               |  -0.0170 |    0.0230 |      -0.0630 |      0.02900 |   0.480 |              3 |
+| Robust MR-Egger           |   0.0470 |    0.0760 |      -0.1000 |      0.20000 |   0.540 |              3 |
+| (intercept)               |  -0.0170 |    0.0230 |      -0.0630 |      0.02900 |   0.480 |              3 |
+| Penalized robust MR-Egger |   0.0470 |    0.0760 |      -0.1000 |      0.20000 |   0.540 |              3 |
+| (intercept)               |  -0.0170 |    0.0230 |      -0.0630 |      0.02900 |   0.480 |              3 |
+
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    LDlink server is working...
+
+<div class="cell-output-display">
+
+![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-4.png)
+
+</div>
+
 \[1\] 6
 
 ## `Creatinine with p-value threshold:  1e-07`
 
-                    Method Estimate Std Error 95% CI         P-value
-             Simple median    0.001     0.004  -0.007  0.009   0.843
-           Weighted median    0.001     0.004  -0.007  0.010   0.785
+| Method                    | Estimate | Std Error | 95% CI lower | 95% CI upper | P-value | Number of SNPs |
+|:--------------------------|---------:|----------:|-------------:|-------------:|--------:|---------------:|
+| Simple median             |  0.00084 |    0.0043 |      -0.0075 |      0.00920 | 0.84000 |              6 |
+| Weighted median           |  0.00120 |    0.0043 |      -0.0073 |      0.00960 | 0.78000 |              6 |
+| Penalized weighted median |  0.00210 |    0.0050 |      -0.0076 |      0.01200 | 0.68000 |              6 |
+| IVW                       | -0.01800 |    0.0098 |      -0.0370 |      0.00095 | 0.06300 |              6 |
+| Penalized IVW             | -0.01800 |    0.0098 |      -0.0370 |      0.00095 | 0.06300 |              6 |
+| Robust IVW                | -0.01800 |    0.0098 |      -0.0370 |      0.00095 | 0.06300 |              6 |
+| Penalized robust IVW      | -0.01800 |    0.0098 |      -0.0370 |      0.00095 | 0.06300 |              6 |
+| MR-Egger                  |  0.09800 |    0.0310 |       0.0380 |      0.16000 | 0.00140 |              6 |
+| (intercept)               | -0.03300 |    0.0085 |      -0.0490 |     -0.01600 | 0.00013 |              6 |
+| Penalized MR-Egger        |  0.09800 |    0.0310 |       0.0380 |      0.16000 | 0.00140 |              6 |
+| (intercept)               | -0.03300 |    0.0085 |      -0.0490 |     -0.01600 | 0.00013 |              6 |
+| Robust MR-Egger           |  0.09800 |    0.0310 |       0.0380 |      0.16000 | 0.00140 |              6 |
+| (intercept)               | -0.03300 |    0.0085 |      -0.0490 |     -0.01600 | 0.00013 |              6 |
+| Penalized robust MR-Egger |  0.09800 |    0.0310 |       0.0380 |      0.16000 | 0.00140 |              6 |
+| (intercept)               | -0.03300 |    0.0085 |      -0.0490 |     -0.01600 | 0.00013 |              6 |
 
-Penalized weighted median 0.002 0.005 -0.008 0.012 0.676
+    Rows: 5515075 Columns: 15
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr  (2): ALLELE1, ALLELE0
+    dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
 
-                       IVW   -0.018     0.010  -0.037  0.001   0.063
-             Penalized IVW   -0.018     0.010  -0.037  0.001   0.063
-                Robust IVW   -0.018     0.010  -0.037  0.001   0.063
-      Penalized robust IVW   -0.018     0.010  -0.037  0.001   0.063
-                                                                    
-                  MR-Egger    0.098     0.031   0.038  0.159   0.001
-               (intercept)   -0.033     0.009  -0.049 -0.016   0.000
-        Penalized MR-Egger    0.098     0.031   0.038  0.159   0.001
-               (intercept)   -0.033     0.009  -0.049 -0.016   0.000
-           Robust MR-Egger    0.098     0.031   0.038  0.159   0.001
-               (intercept)   -0.033     0.009  -0.049 -0.016   0.000
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-Penalized robust MR-Egger 0.098 0.031 0.038 0.159 0.001 (intercept)
--0.033 0.009 -0.049 -0.016 0.000
+    LDlink server is working...
 
-MR-Egger method (variants correlated, random-effect model)
+<div class="cell-output-display">
 
-Number of Variants = 6
+![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-5.png)
 
-|                                                                                                                          Method Estimate Std Error 95% CI p-value MR-Egger 0.098 0.031 0.038, 0.159 0.001 (intercept) -0.033 0.009 -0.049, -0.016 0.000                                                                                                                           |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|                                                                                                                                Residual Standard Error : 2.001 Heterogeneity test statistic = 16.0152 on 4 degrees of freedom, (p-value = 0.0030)                                                                                                                                 |
-|                                                                      \`\`\` Rows: 5515075 Columns: 15 ── Column specification ──────────────────────────────────────────────────────── Delimiter: “ chr (2): ALLELE1, ALLELE0 dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG…                                                                       |
-|                                                                                                             ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.                                                                                                             |
-|                                                                                                                                                                         LDlink server is working… \`\`\`                                                                                                                                                                          |
-|                                                                                                                                                                                     \[1\] 10                                                                                                                                                                                      |
-|                                                                                                                                                                  \## `Creatinine with p-value threshold:  1e-06`                                                                                                                                                                  |
-|                                                                                         Method Estimate Std Error 95% CI P-value Simple median -0.018 0.005 -0.027 -0.008 0.000 Weighted median -0.004 0.005 -0.013 0.006 0.444 Penalized weighted median -0.002 0.005 -0.012 0.007 0.613                                                                                         |
-|                                                                                               IVW -0.039 0.005 -0.049 -0.029 0.000 Penalized IVW -0.039 0.005 -0.049 -0.029 0.000 Robust IVW -0.039 0.005 -0.049 -0.029 0.000 Penalized robust IVW -0.039 0.005 -0.049 -0.029 0.000                                                                                               |
-| MR-Egger 0.083 0.020 0.044 0.122 0.000 (intercept) -0.029 0.005 -0.039 -0.020 0.000 Penalized MR-Egger 0.083 0.020 0.044 0.122 0.000 (intercept) -0.029 0.005 -0.039 -0.020 0.000 Robust MR-Egger 0.083 0.020 0.044 0.122 0.000 (intercept) -0.029 0.005 -0.039 -0.020 0.000 Penalized robust MR-Egger 0.083 0.020 0.044 0.122 0.000 (intercept) -0.029 0.005 -0.039 -0.020 0.000 |
-|                                                                                                                                                            MR-Egger method (variants correlated, random-effect model)                                                                                                                                                             |
-|                                                                                                                                                                              Number of Variants = 10                                                                                                                                                                              |
+</div>
 
-      Method Estimate Std Error  95% CI        p-value
-    MR-Egger    0.083     0.020  0.044,  0.122   0.000
+\[1\] 10
 
-## (intercept) -0.029 0.005 -0.039, -0.020 0.000
+## `Creatinine with p-value threshold:  1e-06`
 
-Residual Standard Error : 2.003 Heterogeneity test statistic = 32.0863
-on 8 degrees of freedom, (p-value = 1e-04)
+| Method                    | Estimate | Std Error | 95% CI lower | 95% CI upper | P-value | Number of SNPs |
+|:--------------------------|---------:|----------:|-------------:|-------------:|--------:|---------------:|
+| Simple median             |  -0.0180 |    0.0048 |       -0.027 |      -0.0083 | 2.2e-04 |             10 |
+| Weighted median           |  -0.0038 |    0.0049 |       -0.013 |       0.0059 | 4.4e-01 |             10 |
+| Penalized weighted median |  -0.0024 |    0.0047 |       -0.012 |       0.0068 | 6.1e-01 |             10 |
+| IVW                       |  -0.0390 |    0.0052 |       -0.049 |      -0.0290 | 0.0e+00 |             10 |
+| Penalized IVW             |  -0.0390 |    0.0052 |       -0.049 |      -0.0290 | 0.0e+00 |             10 |
+| Robust IVW                |  -0.0390 |    0.0052 |       -0.049 |      -0.0290 | 0.0e+00 |             10 |
+| Penalized robust IVW      |  -0.0390 |    0.0052 |       -0.049 |      -0.0290 | 0.0e+00 |             10 |
+| MR-Egger                  |   0.0830 |    0.0200 |        0.044 |       0.1200 | 2.4e-05 |             10 |
+| (intercept)               |  -0.0290 |    0.0047 |       -0.039 |      -0.0200 | 0.0e+00 |             10 |
+| Penalized MR-Egger        |   0.0830 |    0.0200 |        0.044 |       0.1200 | 2.4e-05 |             10 |
+| (intercept)               |  -0.0290 |    0.0047 |       -0.039 |      -0.0200 | 0.0e+00 |             10 |
+| Robust MR-Egger           |   0.0830 |    0.0200 |        0.044 |       0.1200 | 2.4e-05 |             10 |
+| (intercept)               |  -0.0290 |    0.0047 |       -0.039 |      -0.0200 | 0.0e+00 |             10 |
+| Penalized robust MR-Egger |   0.0830 |    0.0200 |        0.044 |       0.1200 | 2.4e-05 |             10 |
+| (intercept)               |  -0.0290 |    0.0047 |       -0.039 |      -0.0200 | 0.0e+00 |             10 |
+
+<div class="cell-output-display">
+
+![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-6.png)
+
+</div>

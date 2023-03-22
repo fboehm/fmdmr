@@ -11,28 +11,10 @@ First, we read into R the FMD summary statistics file.
 
 
 ```{r}
-#fmd_file <- here::here("data", "fmd_meta_gwas", 
-#                        "meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab")
 fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd_tib <- vroom::vroom(fmd_file)
 ```
 
-
-`fmd_tib` has the summary statistics in a different format.
-It has 12 columns in total:
-
-"MarkerName" 
-"rsID"       
-"CHROM"      
-"POS"        
-"REF"       
-"ALT"        
-"P"          
-"BETA"       
-"SE"         
-"N"         
-"Rsq_min"    
-"Rsq_max"   
 
 
 ```{r}
@@ -144,13 +126,20 @@ for (outcome in outcomes){
         # make header for collection of graphs for each iteration of loop
         cat('\n\n## `', outcome, "with p-value threshold: ", p_threshold, '`\n\n')    
         # MR analyses   
-        print(MendelianRandomization::mr_allmethods(input))
-        print(MendelianRandomization::mr_egger(input))
-        
+        result <- MendelianRandomization::mr_allmethods(input)
+        result@Values %>% 
+            dplyr::mutate_if(is.numeric, signif, digits = 2) %>%
+            dplyr::mutate("Number of SNPs" = length(result@Data@snps)) %>%
+            dplyr::rename("95% CI lower" = 4, "95% CI upper" = 5) %>%
+            knitr::kable() %>%
+            print()
+        ivw_res <- MendelianRandomization::mr_ivw(input, correl = TRUE)
+        egger_res <- MendelianRandomization::mr_egger(input, correl = TRUE)
+
         # MR plots
  #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_1.png"))
  #       png(fig_fn)
- #       MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE)
+        print(MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE))
  #       dev.off()
 ##        knitr::include_graphics(fig_fn, rel_path = FALSE)
  #       #
