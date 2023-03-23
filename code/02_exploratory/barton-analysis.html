@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Fred Boehm">
+
+<title>Barton et al.&nbsp;GWAS summary statistics &amp; FMD GWAS meta-analysis summary statistics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="barton-analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="barton-analysis_files/libs/quarto-html/quarto.js"></script>
+<script src="barton-analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="barton-analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="barton-analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="barton-analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="barton-analysis_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="barton-analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="barton-analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="barton-analysis_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#cystatinc-with-p-value-threshold-1e-06" id="toc-cystatinc-with-p-value-threshold-1e-06" class="nav-link active" data-scroll-target="#cystatinc-with-p-value-threshold-1e-06"><span class="toc-section-number">1</span>  <code>CystatinC with p-value threshold:  1e-06</code></a></li>
+  <li><a href="#cystatinc-with-p-value-threshold-1e-07" id="toc-cystatinc-with-p-value-threshold-1e-07" class="nav-link" data-scroll-target="#cystatinc-with-p-value-threshold-1e-07"><span class="toc-section-number">2</span>  <code>CystatinC with p-value threshold:  1e-07</code></a></li>
+  <li><a href="#cystatinc-with-p-value-threshold-1e-08" id="toc-cystatinc-with-p-value-threshold-1e-08" class="nav-link" data-scroll-target="#cystatinc-with-p-value-threshold-1e-08"><span class="toc-section-number">3</span>  <code>CystatinC with p-value threshold:  1e-08</code></a></li>
+  <li><a href="#creatinine-with-p-value-threshold-1e-06" id="toc-creatinine-with-p-value-threshold-1e-06" class="nav-link" data-scroll-target="#creatinine-with-p-value-threshold-1e-06"><span class="toc-section-number">4</span>  <code>Creatinine with p-value threshold:  1e-06</code></a></li>
+  <li><a href="#creatinine-with-p-value-threshold-1e-07" id="toc-creatinine-with-p-value-threshold-1e-07" class="nav-link" data-scroll-target="#creatinine-with-p-value-threshold-1e-07"><span class="toc-section-number">5</span>  <code>Creatinine with p-value threshold:  1e-07</code></a></li>
+  <li><a href="#creatinine-with-p-value-threshold-1e-08" id="toc-creatinine-with-p-value-threshold-1e-08" class="nav-link" data-scroll-target="#creatinine-with-p-value-threshold-1e-08"><span class="toc-section-number">6</span>  <code>Creatinine with p-value threshold:  1e-08</code></a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Barton et al.&nbsp;GWAS summary statistics &amp; FMD GWAS meta-analysis summary statistics</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Fred Boehm </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>We want to “explore” the two results files to see how many SNPs are available in each, and to see how many SNPs are in both files. This information will inform 2-sample MR studies to assess the causal effect of FMD on creatinine levels.</p>
+<p>First, we read into R the FMD summary statistics file.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fmd_file <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"fmd"</span>, <span class="st">"GCST90026612_buildGRCh37.tsv"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>fmd_tib <span class="ot">&lt;-</span> vroom<span class="sc">::</span><span class="fu">vroom</span>(fmd_file)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 5483710 Columns: 12
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr (3): SNP, OA, EA
+dbl (9): chromosome, base_pair_location, EAF, BETA, SE, p_value, Het_P, N_ca...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(magrittr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>ld_token <span class="ot">&lt;-</span> <span class="st">"3fbdb0673b22"</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># define function</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>remove_offdiagonal_ones <span class="ot">&lt;-</span> <span class="cf">function</span>(symm_matrix, <span class="at">threshold =</span> <span class="fl">0.9</span>){</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    nr <span class="ot">&lt;-</span> <span class="fu">nrow</span>(symm_matrix)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    bad_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (row <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nr){</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        foo <span class="ot">&lt;-</span> <span class="fu">upper.tri</span>(symm_matrix, <span class="at">diag =</span> <span class="cn">FALSE</span>)[row,]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        bar <span class="ot">&lt;-</span> symm_matrix[row, ] <span class="sc">&gt;</span> threshold</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        bad_list[[row]] <span class="ot">&lt;-</span> <span class="fu">which</span>(foo <span class="sc">&amp;</span> bar)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    bad_indices <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">do.call</span>(<span class="st">"c"</span>, bad_list))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(bad_indices) <span class="sc">==</span> <span class="dv">0</span>){</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(symm_matrix)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        out <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(symm_matrix[<span class="sc">-</span> bad_indices, <span class="sc">-</span> bad_indices])</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rownames</span>(out) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(out) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(symm_matrix)[<span class="sc">-</span> bad_indices]</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(out)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>outcomes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"CystatinC"</span>, <span class="st">"Creatinine"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>p_thresholds <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">1e-06</span>, <span class="fl">1e-07</span>, <span class="fl">1e-08</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>ld_file <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"fmd"</span>, <span class="st">"ld_matrix.rds"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (outcome <span class="cf">in</span> outcomes){</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (p_threshold <span class="cf">in</span> p_thresholds){</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (outcome <span class="sc">==</span> <span class="st">"CystatinC"</span>){</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            barton_file <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"barton2021_cystatinC"</span>, <span class="st">"GCST90025945_buildGRCh37.tsv"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (outcome <span class="sc">==</span> <span class="st">"Creatinine"</span>){</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            barton_file <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"barton2021_creatinine"</span>, <span class="st">"GCST90025946_buildGRCh37.tsv"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        barton_tib <span class="ot">&lt;-</span> vroom<span class="sc">::</span><span class="fu">vroom</span>(barton_file)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># find shared snps</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        small_dat_pre <span class="ot">&lt;-</span> fmd_tib <span class="sc">%&gt;%</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">filter</span>(p_value <span class="sc">&lt;</span> p_threshold)  <span class="sc">%&gt;%</span> <span class="co"># choose pvalue threshold     </span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">inner_join</span>(barton_tib, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"chromosome"</span>, <span class="st">"base_pair_location"</span>))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># harmonised? </span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        small_dat <span class="ot">&lt;-</span> small_dat_pre <span class="sc">%&gt;%</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">harmonised =</span> OA <span class="sc">==</span> ALLELE0)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        (<span class="fu">all.equal</span>(small_dat<span class="sc">$</span>harmonised, <span class="fu">rep</span>(<span class="cn">TRUE</span>, <span class="fu">length</span>(small_dat<span class="sc">$</span>harmonised))))</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># make ld matrix if ld_file doesn't exist</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="fu">file.exists</span>(ld_file)){</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            ld_mat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(ld_file)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            ld_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>            pt <span class="ot">&lt;-</span> <span class="fu">min</span>(p_thresholds)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (chr <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">22</span>){</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>                fmd_onechr <span class="ot">&lt;-</span> small_dat <span class="sc">%&gt;%</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>                    dplyr<span class="sc">::</span><span class="fu">filter</span>(chromosome <span class="sc">==</span> chr)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> (<span class="fu">nrow</span>(fmd_onechr) <span class="sc">&gt;</span> <span class="dv">1</span>){</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>                    foo <span class="ot">&lt;-</span> LDlinkR<span class="sc">::</span><span class="fu">LDmatrix</span>(fmd_onechr<span class="sc">$</span>SNP, </span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>                            <span class="at">pop =</span> <span class="st">"CEU"</span>, </span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>                            <span class="at">r2d =</span> <span class="st">"r2"</span>, </span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>                            <span class="at">genome_build =</span> <span class="st">"grch37"</span>,</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>                            <span class="at">token =</span> ld_token, </span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>                            <span class="at">file =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>                            ) </span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>                    bar <span class="ot">&lt;-</span> foo <span class="sc">%&gt;%</span> </span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>                                dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">as.matrix</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">remove_offdiagonal_ones</span>(<span class="at">threshold =</span> <span class="fl">0.99</span>)</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># remove rows &amp; cols for highly correlated SNPs </span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>                    ld_list[[chr]] <span class="ot">&lt;-</span> bar</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>                }</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> (<span class="fu">nrow</span>(fmd_onechr) <span class="sc">==</span> <span class="dv">1</span>){</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>                    ld_list[[chr]] <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="dv">1</span>)</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">colnames</span>(ld_list[[chr]]) <span class="ot">&lt;-</span> fmd_onechr<span class="sc">$</span>SNP      </span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>                }</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> (<span class="fu">nrow</span>(fmd_onechr) <span class="sc">==</span> <span class="dv">0</span>){</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>                    ld_list[[chr]] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>                }</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>            <span class="co"># remove NAs</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>            ld_list_nona <span class="ot">&lt;-</span> ld_list[<span class="sc">!</span><span class="fu">is.na</span>(ld_list)]</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>            ld_mat <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Matrix<span class="sc">::</span><span class="fu">bdiag</span>(ld_list_nona))</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>            rn <span class="ot">&lt;-</span> <span class="fu">do.call</span>(c, <span class="fu">lapply</span>(ld_list_nona, colnames))</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>            <span class="fu">rownames</span>(ld_mat) <span class="ot">&lt;-</span> rn</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>            <span class="fu">colnames</span>(ld_mat) <span class="ot">&lt;-</span> rn</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>            <span class="co"># save ld matrix</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>            <span class="fu">saveRDS</span>(ld_mat, ld_file)</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>        <span class="co"># filter to remove highly correlated SNPs</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>        small_dat_no_ld <span class="ot">&lt;-</span> small_dat <span class="sc">%&gt;%</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">filter</span>(SNP <span class="sc">%in%</span> <span class="fu">rownames</span>(ld_mat))</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>        ld_mat_small <span class="ot">&lt;-</span> ld_mat[<span class="fu">rownames</span>(ld_mat) <span class="sc">%in%</span> small_dat_no_ld<span class="sc">$</span>SNP, </span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">colnames</span>(ld_mat) <span class="sc">%in%</span> small_dat_no_ld<span class="sc">$</span>SNP]</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>        <span class="fu">print</span>(<span class="fu">nrow</span>(small_dat_no_ld))</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>        <span class="co"># make input object</span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>        input <span class="ot">&lt;-</span> MendelianRandomization<span class="sc">::</span><span class="fu">mr_input</span>(</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>                    <span class="at">bx =</span> small_dat_no_ld<span class="sc">$</span>BETA, </span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>                    <span class="at">bxse =</span> small_dat_no_ld<span class="sc">$</span>SE, </span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>                    <span class="at">by =</span> small_dat_no_ld<span class="sc">$</span>beta, </span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>                    <span class="at">byse =</span> small_dat_no_ld<span class="sc">$</span>standard_error,</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>                    <span class="at">corr =</span> ld_mat_small,</span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>                    <span class="at">exposure =</span> <span class="st">"FMD"</span>,</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>                    <span class="at">outcome =</span> outcome,</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>                    <span class="at">snps =</span> <span class="fu">rownames</span>(ld_mat_small)</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>        <span class="co"># make header for collection of graphs for each iteration of loop</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="st">'</span><span class="sc">\n\n</span><span class="st">## `'</span>, outcome, <span class="st">"with p-value threshold: "</span>, p_threshold, <span class="st">'`</span><span class="sc">\n\n</span><span class="st">'</span>)    </span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>        <span class="co"># MR analyses   </span></span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>        result <span class="ot">&lt;-</span> MendelianRandomization<span class="sc">::</span><span class="fu">mr_allmethods</span>(input)</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>        result<span class="sc">@</span>Values <span class="sc">%&gt;%</span> </span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">mutate_if</span>(is.numeric, signif, <span class="at">digits =</span> <span class="dv">2</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="st">"Number of SNPs"</span> <span class="ot">=</span> <span class="fu">length</span>(result<span class="sc">@</span>Data<span class="sc">@</span>snps)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="st">"95% CI lower"</span> <span class="ot">=</span> <span class="dv">4</span>, <span class="st">"95% CI upper"</span> <span class="ot">=</span> <span class="dv">5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>            knitr<span class="sc">::</span><span class="fu">kable</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>            <span class="fu">print</span>()</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>        ivw_res <span class="ot">&lt;-</span> MendelianRandomization<span class="sc">::</span><span class="fu">mr_ivw</span>(input, <span class="at">correl =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>        egger_res <span class="ot">&lt;-</span> MendelianRandomization<span class="sc">::</span><span class="fu">mr_egger</span>(input, <span class="at">correl =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>        <span class="co"># MR plots</span></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>        MendelianRandomization<span class="sc">::</span><span class="fu">mr_plot</span>(input, <span class="at">interactive =</span> <span class="cn">FALSE</span>, <span class="at">line =</span> <span class="st">"ivw"</span>, <span class="at">labels =</span> <span class="cn">TRUE</span>, <span class="at">orientate =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>            <span class="fu">print</span>()</span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>        MendelianRandomization<span class="sc">::</span><span class="fu">mr_plot</span>(input, <span class="at">interactive =</span> <span class="cn">FALSE</span>, <span class="at">line =</span> <span class="st">"egger"</span>, <span class="at">labels =</span> <span class="cn">TRUE</span>, <span class="at">orientate =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>            <span class="fu">print</span>()</span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<pre><code>Rows: 5515075 Columns: 15
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr  (2): ALLELE1, ALLELE0
+dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>[1] 10</p>
+<section id="cystatinc-with-p-value-threshold-1e-06" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="cystatinc-with-p-value-threshold-1e-06"><span class="header-section-number">1</span> <code>CystatinC with p-value threshold:  1e-06</code></h2>
+<table class="table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: right;">Std Error</th>
+<th style="text-align: right;">95% CI lower</th>
+<th style="text-align: right;">95% CI upper</th>
+<th style="text-align: right;">P-value</th>
+<th style="text-align: right;">Number of SNPs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Simple median</td>
+<td style="text-align: right;">-0.0120</td>
+<td style="text-align: right;">0.0043</td>
+<td style="text-align: right;">-2.0e-02</td>
+<td style="text-align: right;">-0.0034</td>
+<td style="text-align: right;">5.8e-03</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weighted median</td>
+<td style="text-align: right;">0.0051</td>
+<td style="text-align: right;">0.0042</td>
+<td style="text-align: right;">-3.1e-03</td>
+<td style="text-align: right;">0.0130</td>
+<td style="text-align: right;">2.2e-01</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized weighted median</td>
+<td style="text-align: right;">0.0073</td>
+<td style="text-align: right;">0.0037</td>
+<td style="text-align: right;">5.9e-06</td>
+<td style="text-align: right;">0.0150</td>
+<td style="text-align: right;">5.0e-02</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IVW</td>
+<td style="text-align: right;">-0.0270</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">-3.5e-02</td>
+<td style="text-align: right;">-0.0190</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized IVW</td>
+<td style="text-align: right;">-0.0270</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">-3.5e-02</td>
+<td style="text-align: right;">-0.0190</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust IVW</td>
+<td style="text-align: right;">-0.0270</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">-3.5e-02</td>
+<td style="text-align: right;">-0.0190</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized robust IVW</td>
+<td style="text-align: right;">-0.0270</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">-3.5e-02</td>
+<td style="text-align: right;">-0.0190</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MR-Egger</td>
+<td style="text-align: right;">0.0670</td>
+<td style="text-align: right;">0.0130</td>
+<td style="text-align: right;">4.1e-02</td>
+<td style="text-align: right;">0.0930</td>
+<td style="text-align: right;">6.0e-07</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0230</td>
+<td style="text-align: right;">0.0032</td>
+<td style="text-align: right;">-2.9e-02</td>
+<td style="text-align: right;">-0.0160</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized MR-Egger</td>
+<td style="text-align: right;">0.0670</td>
+<td style="text-align: right;">0.0130</td>
+<td style="text-align: right;">4.1e-02</td>
+<td style="text-align: right;">0.0930</td>
+<td style="text-align: right;">6.0e-07</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0230</td>
+<td style="text-align: right;">0.0032</td>
+<td style="text-align: right;">-2.9e-02</td>
+<td style="text-align: right;">-0.0160</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust MR-Egger</td>
+<td style="text-align: right;">0.0670</td>
+<td style="text-align: right;">0.0130</td>
+<td style="text-align: right;">4.1e-02</td>
+<td style="text-align: right;">0.0930</td>
+<td style="text-align: right;">6.0e-07</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0230</td>
+<td style="text-align: right;">0.0032</td>
+<td style="text-align: right;">-2.9e-02</td>
+<td style="text-align: right;">-0.0160</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized robust MR-Egger</td>
+<td style="text-align: right;">0.0670</td>
+<td style="text-align: right;">0.0130</td>
+<td style="text-align: right;">4.1e-02</td>
+<td style="text-align: right;">0.0930</td>
+<td style="text-align: right;">6.0e-07</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0230</td>
+<td style="text-align: right;">0.0032</td>
+<td style="text-align: right;">-2.9e-02</td>
+<td style="text-align: right;">-0.0160</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+</tbody>
+</table>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<pre><code>Rows: 5515075 Columns: 15
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr  (2): ALLELE1, ALLELE0
+dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
+</div>
+<p>[1] 6</p>
+</section>
+<section id="cystatinc-with-p-value-threshold-1e-07" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="cystatinc-with-p-value-threshold-1e-07"><span class="header-section-number">2</span> <code>CystatinC with p-value threshold:  1e-07</code></h2>
+<table class="table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: right;">Std Error</th>
+<th style="text-align: right;">95% CI lower</th>
+<th style="text-align: right;">95% CI upper</th>
+<th style="text-align: right;">P-value</th>
+<th style="text-align: right;">Number of SNPs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Simple median</td>
+<td style="text-align: right;">0.0069</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">-0.00066</td>
+<td style="text-align: right;">0.0140</td>
+<td style="text-align: right;">7.3e-02</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weighted median</td>
+<td style="text-align: right;">0.0069</td>
+<td style="text-align: right;">0.0038</td>
+<td style="text-align: right;">-0.00058</td>
+<td style="text-align: right;">0.0140</td>
+<td style="text-align: right;">7.1e-02</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized weighted median</td>
+<td style="text-align: right;">0.0077</td>
+<td style="text-align: right;">0.0038</td>
+<td style="text-align: right;">0.00029</td>
+<td style="text-align: right;">0.0150</td>
+<td style="text-align: right;">4.2e-02</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IVW</td>
+<td style="text-align: right;">-0.0120</td>
+<td style="text-align: right;">0.0081</td>
+<td style="text-align: right;">-0.02800</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">1.4e-01</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized IVW</td>
+<td style="text-align: right;">-0.0120</td>
+<td style="text-align: right;">0.0081</td>
+<td style="text-align: right;">-0.02800</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">1.4e-01</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust IVW</td>
+<td style="text-align: right;">-0.0120</td>
+<td style="text-align: right;">0.0081</td>
+<td style="text-align: right;">-0.02800</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">1.4e-01</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized robust IVW</td>
+<td style="text-align: right;">-0.0120</td>
+<td style="text-align: right;">0.0081</td>
+<td style="text-align: right;">-0.02800</td>
+<td style="text-align: right;">0.0039</td>
+<td style="text-align: right;">1.4e-01</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MR-Egger</td>
+<td style="text-align: right;">0.0900</td>
+<td style="text-align: right;">0.0190</td>
+<td style="text-align: right;">0.05200</td>
+<td style="text-align: right;">0.1300</td>
+<td style="text-align: right;">3.5e-06</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0054</td>
+<td style="text-align: right;">-0.03900</td>
+<td style="text-align: right;">-0.0180</td>
+<td style="text-align: right;">1.0e-07</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized MR-Egger</td>
+<td style="text-align: right;">0.0900</td>
+<td style="text-align: right;">0.0190</td>
+<td style="text-align: right;">0.05200</td>
+<td style="text-align: right;">0.1300</td>
+<td style="text-align: right;">3.5e-06</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0054</td>
+<td style="text-align: right;">-0.03900</td>
+<td style="text-align: right;">-0.0180</td>
+<td style="text-align: right;">1.0e-07</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust MR-Egger</td>
+<td style="text-align: right;">0.0900</td>
+<td style="text-align: right;">0.0190</td>
+<td style="text-align: right;">0.05200</td>
+<td style="text-align: right;">0.1300</td>
+<td style="text-align: right;">3.5e-06</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0054</td>
+<td style="text-align: right;">-0.03900</td>
+<td style="text-align: right;">-0.0180</td>
+<td style="text-align: right;">1.0e-07</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized robust MR-Egger</td>
+<td style="text-align: right;">0.0900</td>
+<td style="text-align: right;">0.0190</td>
+<td style="text-align: right;">0.05200</td>
+<td style="text-align: right;">0.1300</td>
+<td style="text-align: right;">3.5e-06</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0054</td>
+<td style="text-align: right;">-0.03900</td>
+<td style="text-align: right;">-0.0180</td>
+<td style="text-align: right;">1.0e-07</td>
+<td style="text-align: right;">6</td>
+</tr>
+</tbody>
+</table>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-3.png" class="img-fluid" width="672"></p>
+</div>
+<pre><code>Rows: 5515075 Columns: 15
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr  (2): ALLELE1, ALLELE0
+dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-4.png" class="img-fluid" width="672"></p>
+</div>
+<p>[1] 3</p>
+</section>
+<section id="cystatinc-with-p-value-threshold-1e-08" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="cystatinc-with-p-value-threshold-1e-08"><span class="header-section-number">3</span> <code>CystatinC with p-value threshold:  1e-08</code></h2>
+<table class="table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: right;">Std Error</th>
+<th style="text-align: right;">95% CI lower</th>
+<th style="text-align: right;">95% CI upper</th>
+<th style="text-align: right;">P-value</th>
+<th style="text-align: right;">Number of SNPs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Simple median</td>
+<td style="text-align: right;">0.00640</td>
+<td style="text-align: right;">0.0051</td>
+<td style="text-align: right;">-0.0036</td>
+<td style="text-align: right;">0.0160</td>
+<td style="text-align: right;">0.21</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weighted median</td>
+<td style="text-align: right;">0.00650</td>
+<td style="text-align: right;">0.0047</td>
+<td style="text-align: right;">-0.0026</td>
+<td style="text-align: right;">0.0160</td>
+<td style="text-align: right;">0.16</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized weighted median</td>
+<td style="text-align: right;">0.00680</td>
+<td style="text-align: right;">0.0045</td>
+<td style="text-align: right;">-0.0020</td>
+<td style="text-align: right;">0.0160</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IVW</td>
+<td style="text-align: right;">-0.00085</td>
+<td style="text-align: right;">0.0037</td>
+<td style="text-align: right;">-0.0081</td>
+<td style="text-align: right;">0.0064</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized IVW</td>
+<td style="text-align: right;">-0.00085</td>
+<td style="text-align: right;">0.0037</td>
+<td style="text-align: right;">-0.0081</td>
+<td style="text-align: right;">0.0064</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust IVW</td>
+<td style="text-align: right;">-0.00085</td>
+<td style="text-align: right;">0.0037</td>
+<td style="text-align: right;">-0.0081</td>
+<td style="text-align: right;">0.0064</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized robust IVW</td>
+<td style="text-align: right;">-0.00085</td>
+<td style="text-align: right;">0.0037</td>
+<td style="text-align: right;">-0.0081</td>
+<td style="text-align: right;">0.0064</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MR-Egger</td>
+<td style="text-align: right;">0.07300</td>
+<td style="text-align: right;">0.0610</td>
+<td style="text-align: right;">-0.0460</td>
+<td style="text-align: right;">0.1900</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.02300</td>
+<td style="text-align: right;">0.0190</td>
+<td style="text-align: right;">-0.0600</td>
+<td style="text-align: right;">0.0140</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized MR-Egger</td>
+<td style="text-align: right;">0.07300</td>
+<td style="text-align: right;">0.0610</td>
+<td style="text-align: right;">-0.0460</td>
+<td style="text-align: right;">0.1900</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.02300</td>
+<td style="text-align: right;">0.0190</td>
+<td style="text-align: right;">-0.0600</td>
+<td style="text-align: right;">0.0140</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust MR-Egger</td>
+<td style="text-align: right;">0.07300</td>
+<td style="text-align: right;">0.0610</td>
+<td style="text-align: right;">-0.0460</td>
+<td style="text-align: right;">0.1900</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.02300</td>
+<td style="text-align: right;">0.0190</td>
+<td style="text-align: right;">-0.0600</td>
+<td style="text-align: right;">0.0140</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized robust MR-Egger</td>
+<td style="text-align: right;">0.07300</td>
+<td style="text-align: right;">0.0610</td>
+<td style="text-align: right;">-0.0460</td>
+<td style="text-align: right;">0.1900</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.02300</td>
+<td style="text-align: right;">0.0190</td>
+<td style="text-align: right;">-0.0600</td>
+<td style="text-align: right;">0.0140</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">3</td>
+</tr>
+</tbody>
+</table>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-5.png" class="img-fluid" width="672"></p>
+</div>
+<pre><code>Rows: 5515075 Columns: 15
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr  (2): ALLELE1, ALLELE0
+dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-6.png" class="img-fluid" width="672"></p>
+</div>
+<p>[1] 10</p>
+</section>
+<section id="creatinine-with-p-value-threshold-1e-06" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="creatinine-with-p-value-threshold-1e-06"><span class="header-section-number">4</span> <code>Creatinine with p-value threshold:  1e-06</code></h2>
+<table class="table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: right;">Std Error</th>
+<th style="text-align: right;">95% CI lower</th>
+<th style="text-align: right;">95% CI upper</th>
+<th style="text-align: right;">P-value</th>
+<th style="text-align: right;">Number of SNPs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Simple median</td>
+<td style="text-align: right;">-0.0180</td>
+<td style="text-align: right;">0.0048</td>
+<td style="text-align: right;">-0.027</td>
+<td style="text-align: right;">-0.0083</td>
+<td style="text-align: right;">2.2e-04</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weighted median</td>
+<td style="text-align: right;">-0.0038</td>
+<td style="text-align: right;">0.0049</td>
+<td style="text-align: right;">-0.013</td>
+<td style="text-align: right;">0.0059</td>
+<td style="text-align: right;">4.4e-01</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized weighted median</td>
+<td style="text-align: right;">-0.0024</td>
+<td style="text-align: right;">0.0047</td>
+<td style="text-align: right;">-0.012</td>
+<td style="text-align: right;">0.0068</td>
+<td style="text-align: right;">6.1e-01</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IVW</td>
+<td style="text-align: right;">-0.0390</td>
+<td style="text-align: right;">0.0052</td>
+<td style="text-align: right;">-0.049</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized IVW</td>
+<td style="text-align: right;">-0.0390</td>
+<td style="text-align: right;">0.0052</td>
+<td style="text-align: right;">-0.049</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust IVW</td>
+<td style="text-align: right;">-0.0390</td>
+<td style="text-align: right;">0.0052</td>
+<td style="text-align: right;">-0.049</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized robust IVW</td>
+<td style="text-align: right;">-0.0390</td>
+<td style="text-align: right;">0.0052</td>
+<td style="text-align: right;">-0.049</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MR-Egger</td>
+<td style="text-align: right;">0.0830</td>
+<td style="text-align: right;">0.0200</td>
+<td style="text-align: right;">0.044</td>
+<td style="text-align: right;">0.1200</td>
+<td style="text-align: right;">2.4e-05</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0047</td>
+<td style="text-align: right;">-0.039</td>
+<td style="text-align: right;">-0.0200</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized MR-Egger</td>
+<td style="text-align: right;">0.0830</td>
+<td style="text-align: right;">0.0200</td>
+<td style="text-align: right;">0.044</td>
+<td style="text-align: right;">0.1200</td>
+<td style="text-align: right;">2.4e-05</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0047</td>
+<td style="text-align: right;">-0.039</td>
+<td style="text-align: right;">-0.0200</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust MR-Egger</td>
+<td style="text-align: right;">0.0830</td>
+<td style="text-align: right;">0.0200</td>
+<td style="text-align: right;">0.044</td>
+<td style="text-align: right;">0.1200</td>
+<td style="text-align: right;">2.4e-05</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0047</td>
+<td style="text-align: right;">-0.039</td>
+<td style="text-align: right;">-0.0200</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized robust MR-Egger</td>
+<td style="text-align: right;">0.0830</td>
+<td style="text-align: right;">0.0200</td>
+<td style="text-align: right;">0.044</td>
+<td style="text-align: right;">0.1200</td>
+<td style="text-align: right;">2.4e-05</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0290</td>
+<td style="text-align: right;">0.0047</td>
+<td style="text-align: right;">-0.039</td>
+<td style="text-align: right;">-0.0200</td>
+<td style="text-align: right;">0.0e+00</td>
+<td style="text-align: right;">10</td>
+</tr>
+</tbody>
+</table>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-7.png" class="img-fluid" width="672"></p>
+</div>
+<pre><code>Rows: 5515075 Columns: 15
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr  (2): ALLELE1, ALLELE0
+dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-8.png" class="img-fluid" width="672"></p>
+</div>
+<p>[1] 6</p>
+</section>
+<section id="creatinine-with-p-value-threshold-1e-07" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="creatinine-with-p-value-threshold-1e-07"><span class="header-section-number">5</span> <code>Creatinine with p-value threshold:  1e-07</code></h2>
+<table class="table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: right;">Std Error</th>
+<th style="text-align: right;">95% CI lower</th>
+<th style="text-align: right;">95% CI upper</th>
+<th style="text-align: right;">P-value</th>
+<th style="text-align: right;">Number of SNPs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Simple median</td>
+<td style="text-align: right;">0.00084</td>
+<td style="text-align: right;">0.0043</td>
+<td style="text-align: right;">-0.0075</td>
+<td style="text-align: right;">0.00920</td>
+<td style="text-align: right;">0.84000</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weighted median</td>
+<td style="text-align: right;">0.00120</td>
+<td style="text-align: right;">0.0043</td>
+<td style="text-align: right;">-0.0073</td>
+<td style="text-align: right;">0.00960</td>
+<td style="text-align: right;">0.78000</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized weighted median</td>
+<td style="text-align: right;">0.00210</td>
+<td style="text-align: right;">0.0050</td>
+<td style="text-align: right;">-0.0076</td>
+<td style="text-align: right;">0.01200</td>
+<td style="text-align: right;">0.68000</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IVW</td>
+<td style="text-align: right;">-0.01800</td>
+<td style="text-align: right;">0.0098</td>
+<td style="text-align: right;">-0.0370</td>
+<td style="text-align: right;">0.00095</td>
+<td style="text-align: right;">0.06300</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized IVW</td>
+<td style="text-align: right;">-0.01800</td>
+<td style="text-align: right;">0.0098</td>
+<td style="text-align: right;">-0.0370</td>
+<td style="text-align: right;">0.00095</td>
+<td style="text-align: right;">0.06300</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust IVW</td>
+<td style="text-align: right;">-0.01800</td>
+<td style="text-align: right;">0.0098</td>
+<td style="text-align: right;">-0.0370</td>
+<td style="text-align: right;">0.00095</td>
+<td style="text-align: right;">0.06300</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized robust IVW</td>
+<td style="text-align: right;">-0.01800</td>
+<td style="text-align: right;">0.0098</td>
+<td style="text-align: right;">-0.0370</td>
+<td style="text-align: right;">0.00095</td>
+<td style="text-align: right;">0.06300</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MR-Egger</td>
+<td style="text-align: right;">0.09800</td>
+<td style="text-align: right;">0.0310</td>
+<td style="text-align: right;">0.0380</td>
+<td style="text-align: right;">0.16000</td>
+<td style="text-align: right;">0.00140</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.03300</td>
+<td style="text-align: right;">0.0085</td>
+<td style="text-align: right;">-0.0490</td>
+<td style="text-align: right;">-0.01600</td>
+<td style="text-align: right;">0.00013</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized MR-Egger</td>
+<td style="text-align: right;">0.09800</td>
+<td style="text-align: right;">0.0310</td>
+<td style="text-align: right;">0.0380</td>
+<td style="text-align: right;">0.16000</td>
+<td style="text-align: right;">0.00140</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.03300</td>
+<td style="text-align: right;">0.0085</td>
+<td style="text-align: right;">-0.0490</td>
+<td style="text-align: right;">-0.01600</td>
+<td style="text-align: right;">0.00013</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust MR-Egger</td>
+<td style="text-align: right;">0.09800</td>
+<td style="text-align: right;">0.0310</td>
+<td style="text-align: right;">0.0380</td>
+<td style="text-align: right;">0.16000</td>
+<td style="text-align: right;">0.00140</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.03300</td>
+<td style="text-align: right;">0.0085</td>
+<td style="text-align: right;">-0.0490</td>
+<td style="text-align: right;">-0.01600</td>
+<td style="text-align: right;">0.00013</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized robust MR-Egger</td>
+<td style="text-align: right;">0.09800</td>
+<td style="text-align: right;">0.0310</td>
+<td style="text-align: right;">0.0380</td>
+<td style="text-align: right;">0.16000</td>
+<td style="text-align: right;">0.00140</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.03300</td>
+<td style="text-align: right;">0.0085</td>
+<td style="text-align: right;">-0.0490</td>
+<td style="text-align: right;">-0.01600</td>
+<td style="text-align: right;">0.00013</td>
+<td style="text-align: right;">6</td>
+</tr>
+</tbody>
+</table>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-9.png" class="img-fluid" width="672"></p>
+</div>
+<pre><code>Rows: 5515075 Columns: 15
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr  (2): ALLELE1, ALLELE0
+dbl (13): chromosome, base_pair_location, GENPOS, A1FREQ, INFO, CHISQ_LINREG...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-10.png" class="img-fluid" width="672"></p>
+</div>
+<p>[1] 3</p>
+</section>
+<section id="creatinine-with-p-value-threshold-1e-08" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="creatinine-with-p-value-threshold-1e-08"><span class="header-section-number">6</span> <code>Creatinine with p-value threshold:  1e-08</code></h2>
+<table class="table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: right;">Std Error</th>
+<th style="text-align: right;">95% CI lower</th>
+<th style="text-align: right;">95% CI upper</th>
+<th style="text-align: right;">P-value</th>
+<th style="text-align: right;">Number of SNPs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Simple median</td>
+<td style="text-align: right;">-0.0039</td>
+<td style="text-align: right;">0.0054</td>
+<td style="text-align: right;">-0.0140</td>
+<td style="text-align: right;">0.00670</td>
+<td style="text-align: right;">0.470</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weighted median</td>
+<td style="text-align: right;">-0.0030</td>
+<td style="text-align: right;">0.0051</td>
+<td style="text-align: right;">-0.0130</td>
+<td style="text-align: right;">0.00690</td>
+<td style="text-align: right;">0.560</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized weighted median</td>
+<td style="text-align: right;">-0.0002</td>
+<td style="text-align: right;">0.0046</td>
+<td style="text-align: right;">-0.0092</td>
+<td style="text-align: right;">0.00880</td>
+<td style="text-align: right;">0.970</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IVW</td>
+<td style="text-align: right;">-0.0073</td>
+<td style="text-align: right;">0.0038</td>
+<td style="text-align: right;">-0.0150</td>
+<td style="text-align: right;">0.00021</td>
+<td style="text-align: right;">0.057</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized IVW</td>
+<td style="text-align: right;">-0.0073</td>
+<td style="text-align: right;">0.0038</td>
+<td style="text-align: right;">-0.0150</td>
+<td style="text-align: right;">0.00021</td>
+<td style="text-align: right;">0.057</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust IVW</td>
+<td style="text-align: right;">-0.0073</td>
+<td style="text-align: right;">0.0038</td>
+<td style="text-align: right;">-0.0150</td>
+<td style="text-align: right;">0.00021</td>
+<td style="text-align: right;">0.057</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Penalized robust IVW</td>
+<td style="text-align: right;">-0.0073</td>
+<td style="text-align: right;">0.0038</td>
+<td style="text-align: right;">-0.0150</td>
+<td style="text-align: right;">0.00021</td>
+<td style="text-align: right;">0.057</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MR-Egger</td>
+<td style="text-align: right;">0.0470</td>
+<td style="text-align: right;">0.0760</td>
+<td style="text-align: right;">-0.1000</td>
+<td style="text-align: right;">0.20000</td>
+<td style="text-align: right;">0.540</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0170</td>
+<td style="text-align: right;">0.0230</td>
+<td style="text-align: right;">-0.0630</td>
+<td style="text-align: right;">0.02900</td>
+<td style="text-align: right;">0.480</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized MR-Egger</td>
+<td style="text-align: right;">0.0470</td>
+<td style="text-align: right;">0.0760</td>
+<td style="text-align: right;">-0.1000</td>
+<td style="text-align: right;">0.20000</td>
+<td style="text-align: right;">0.540</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0170</td>
+<td style="text-align: right;">0.0230</td>
+<td style="text-align: right;">-0.0630</td>
+<td style="text-align: right;">0.02900</td>
+<td style="text-align: right;">0.480</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Robust MR-Egger</td>
+<td style="text-align: right;">0.0470</td>
+<td style="text-align: right;">0.0760</td>
+<td style="text-align: right;">-0.1000</td>
+<td style="text-align: right;">0.20000</td>
+<td style="text-align: right;">0.540</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0170</td>
+<td style="text-align: right;">0.0230</td>
+<td style="text-align: right;">-0.0630</td>
+<td style="text-align: right;">0.02900</td>
+<td style="text-align: right;">0.480</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Penalized robust MR-Egger</td>
+<td style="text-align: right;">0.0470</td>
+<td style="text-align: right;">0.0760</td>
+<td style="text-align: right;">-0.1000</td>
+<td style="text-align: right;">0.20000</td>
+<td style="text-align: right;">0.540</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(intercept)</td>
+<td style="text-align: right;">-0.0170</td>
+<td style="text-align: right;">0.0230</td>
+<td style="text-align: right;">-0.0630</td>
+<td style="text-align: right;">0.02900</td>
+<td style="text-align: right;">0.480</td>
+<td style="text-align: right;">3</td>
+</tr>
+</tbody>
+</table>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-11.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="barton-analysis_files/figure-html/unnamed-chunk-4-12.png" class="img-fluid" width="672"></p>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,6 +1,12 @@
 ---
-title: "Exploring the creatinine GWAS summary statistics & FMD GWAS meta-analysis summary statistics"
-format: gfm
+title: "Barton et al. GWAS summary statistics & FMD GWAS meta-analysis summary statistics"
+author: "Fred Boehm"
+toc: true
+number-sections: true
+format: 
+    html:
+        code-fold: true
+    gfm: default
 ---
 
 We want to "explore" the two results files to see how many SNPs are available in each, and to see 
@@ -51,11 +57,10 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 
 ```{r, results = "asis"}
 outcomes <- c("CystatinC", "Creatinine")
-p_thresholds <- c(1e-08, 1e-07, 1e-06)
+p_thresholds <- c(1e-06, 1e-07, 1e-08)
+ld_file <- here::here("data", "fmd", "ld_matrix.rds")
 for (outcome in outcomes){
     for (p_threshold in p_thresholds){
-#outcome <- outcomes[1]
-#p_threshold <- p_thresholds[1]
         if (outcome == "CystatinC"){
             barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
         }
@@ -71,46 +76,56 @@ for (outcome in outcomes){
         small_dat <- small_dat_pre %>%
             dplyr::mutate(harmonised = OA == ALLELE0)
         (all.equal(small_dat$harmonised, rep(TRUE, length(small_dat$harmonised))))
-        # make ld matrix
-        ld_list <- list()
-        for (chr in 1:22){
-            fmd_onechr <- small_dat %>%
-                dplyr::filter(chromosome == chr)
-            if (nrow(fmd_onechr) > 1){
-                foo <- LDlinkR::LDmatrix(fmd_onechr$SNP, 
-                        pop = "CEU", 
-                        r2d = "r2", 
-                        genome_build = "grch37",
-                        token = ld_token, 
-                        file = FALSE
-                        ) 
-                
-                bar <- foo %>% 
-                            dplyr::select(-1) %>%
-                            as.matrix() %>%
-                            remove_offdiagonal_ones(threshold = 0.99)
+        # make ld matrix if ld_file doesn't exist
+        if (file.exists(ld_file)){
+            ld_mat <- readRDS(ld_file)
+        } else {
+            ld_list <- list()
+            pt <- min(p_thresholds)
+            for (chr in 1:22){
+                fmd_onechr <- small_dat %>%
+                    dplyr::filter(chromosome == chr)
+                if (nrow(fmd_onechr) > 1){
+                    foo <- LDlinkR::LDmatrix(fmd_onechr$SNP, 
+                            pop = "CEU", 
+                            r2d = "r2", 
+                            genome_build = "grch37",
+                            token = ld_token, 
+                            file = FALSE
+                            ) 
+                    
+                    bar <- foo %>% 
+                                dplyr::select(-1) %>%
+                                as.matrix() %>%
+                                remove_offdiagonal_ones(threshold = 0.99)
 
-                # remove rows & cols for highly correlated SNPs 
+                    # remove rows & cols for highly correlated SNPs 
 
-                ld_list[[chr]] <- bar
+                    ld_list[[chr]] <- bar
+                }
+                if (nrow(fmd_onechr) == 1){
+                    ld_list[[chr]] <- as.matrix(1)
+                    colnames(ld_list[[chr]]) <- fmd_onechr$SNP      
+                }
+                if (nrow(fmd_onechr) == 0){
+                    ld_list[[chr]] <- NA
+                }
             }
-            if (nrow(fmd_onechr) == 1){
-                ld_list[[chr]] <- as.matrix(1)
-                colnames(ld_list[[chr]]) <- fmd_onechr$SNP      
-            }
-            if (nrow(fmd_onechr) == 0){
-                ld_list[[chr]] <- NA
-            }
+            # remove NAs
+            ld_list_nona <- ld_list[!is.na(ld_list)]
+            ld_mat <- as.matrix(Matrix::bdiag(ld_list_nona))
+            rn <- do.call(c, lapply(ld_list_nona, colnames))
+            rownames(ld_mat) <- rn
+            colnames(ld_mat) <- rn
+            # save ld matrix
+            saveRDS(ld_mat, ld_file)
         }
-        # remove NAs
-        ld_list_nona <- ld_list[!is.na(ld_list)]
-        ld_mat <- as.matrix(Matrix::bdiag(ld_list_nona))
-        rn <- do.call(c, lapply(ld_list_nona, colnames))
-        rownames(ld_mat) <- rn
-        colnames(ld_mat) <- rn
+
         # filter to remove highly correlated SNPs
         small_dat_no_ld <- small_dat %>%
             dplyr::filter(SNP %in% rownames(ld_mat))
+        ld_mat_small <- ld_mat[rownames(ld_mat) %in% small_dat_no_ld$SNP, 
+                               colnames(ld_mat) %in% small_dat_no_ld$SNP]
         print(nrow(small_dat_no_ld))
         # make input object
         input <- MendelianRandomization::mr_input(
@@ -118,10 +133,10 @@ for (outcome in outcomes){
                     bxse = small_dat_no_ld$SE, 
                     by = small_dat_no_ld$beta, 
                     byse = small_dat_no_ld$standard_error,
-                    corr = ld_mat,
+                    corr = ld_mat_small,
                     exposure = "FMD",
                     outcome = outcome,
-                    snps = rownames(ld_mat)
+                    snps = rownames(ld_mat_small)
                 )
         # make header for collection of graphs for each iteration of loop
         cat('\n\n## `', outcome, "with p-value threshold: ", p_threshold, '`\n\n')    
@@ -137,26 +152,10 @@ for (outcome in outcomes){
         egger_res <- MendelianRandomization::mr_egger(input, correl = TRUE)
 
         # MR plots
- #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_1.png"))
- #       png(fig_fn)
-        print(MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE))
- #       dev.off()
-##        knitr::include_graphics(fig_fn, rel_path = FALSE)
- #       #
- #       fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_2.png"))
- #       png(fig_fn)
- #       MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE)
- #       dev.off()
-##        knitr::include_graphics(fig_fn, rel_path = FALSE)
-#
-#        #
-#        fig_fn <- here::here("figures", "mr_plots", paste0(outcome, "_", p_threshold, "_3.png"))
-#        png(fig_fn)
-#        MendelianRandomization::mr_plot(MendelianRandomization::mr_allmethods(input, method = "all"), 
-#                                        interactive = FALSE, 
-#                                        labels = TRUE, orientate = TRUE)
-#        dev.off()
-#        knitr::include_graphics(fig_fn, rel_path = FALSE)
+        MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE) %>%
+            print()
+        MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE) %>%
+            print()
     }
 }
 ```
