@@ -6,6 +6,7 @@ number-sections: true
 format: 
     html:
         code-fold: true
+        embed-resources: true
     gfm: default
 ---
 
