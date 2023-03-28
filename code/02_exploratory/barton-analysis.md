@@ -57,6 +57,7 @@ library(magrittr)
 # https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
 # follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
 ld_token <- "3fbdb0673b22"
+barton_sample_size <- 437660 # https://www.ebi.ac.uk/gwas/efotraits/EFO_0004518 - see Barton et al. 2021
 # define function
 remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
     nr <- nrow(symm_matrix)
@@ -178,6 +179,78 @@ for (outcome in outcomes){
             print()
         MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE) %>%
             print()
+        ## MR.SPI
+       res_mrspi <- MR.SPI::MR.SPI(gamma = small_dat_no_ld$BETA, #FMD beta. lowercase gamma is the exposure
+                        se_gamma = small_dat_no_ld$SE, #FMD se
+                        Gamma = small_dat_no_ld$beta, #outcome beta
+                        se_Gamma = small_dat_no_ld$standard_error, #outcome se
+                        n1 = small_dat_no_ld$N_cases[1] + small_dat_no_ld$N_ctrls[1],# FMD sample size
+                        n2 = barton_sample_size, #outcome sample size
+                        unif = TRUE
+        ) 
+        res_mrspi %>%
+            print()
+        if (nrow(small_dat_no_ld) >= 10){
+            ## devtools::install_github("xiaoran-liang/MRAHC")
+            res_mrahc_a <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 4,
+                                        outremove = FALSE)
+            res_mrahc_b <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 3,
+                                        outremove = FALSE)
+            res_mrahc_c <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 4,
+                                        outremove = TRUE)
+            res_mrahc_d <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 3,
+                                        outremove = TRUE)
+            res_mrahc_e <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 4,
+                                        outremove = TRUE, 
+                                        iter = TRUE)
+            res_mrahc_f <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 3,
+                                        outremove = TRUE,
+                                        iter = TRUE)
+        
+                                    # NOTE FROM MRAHC PACKAGE DOCUMENTATION: #'In a two-sample MR design, we recommend using the sample size of the outcome sample.
+            res_mrahc_a %>%
+                print()
+            res_mrahc_b %>%
+                print()
+            res_mrahc_c %>%
+                print()
+            res_mrahc_d %>%
+                print()
+            res_mrahc_e %>%
+                print()
+            res_mrahc_f %>%
+                print()
+        }
     }
 }
 ```
@@ -218,6 +291,175 @@ for (outcome in outcomes){
 ![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-1.png)
 
 </div>
+
+10 SNPs used as candidate instruments. MR.SPI identifies 10 relevant
+instruments and 6 valid instruments. Estimated Causal Effect by MR.SPI:
+-0.014 Uniform Confidence Interval: (-0.048 , -0.013)
+
+\$betaHat \[1\] -0.01355321
+
+\$beta.sdHat \[,1\] \[1,\] 0.005751408
+
+\$ci \[,1\] \[,2\] \[1,\] -0.04792737 -0.01319778
+
+\$SHat \[1\] 1 2 3 4 5 6 7 8 9 10
+
+\$VHat \[1\] 1 3 4 5 6 7
+
+\$voting.mat 1 2 3 4 5 6 7 8 9 10 1 1 1 1 1 1 1 1 1 1 1 2 1 1 0 0 0 0 0
+1 1 1 3 1 0 1 1 1 1 1 0 0 0 4 1 0 1 1 1 1 1 0 0 0 5 1 0 1 1 1 1 1 0 0 0
+6 1 0 1 1 1 1 1 0 0 0 7 1 0 1 1 1 1 1 0 0 0 8 1 1 0 0 0 0 0 1 1 1 9 1 1
+0 0 0 0 0 1 1 1 10 1 1 0 0 0 0 0 1 1 1
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.007937609
+0.003134577 2.532274 0.9577157 0 \[2,\] 2 5 -0.030092182 0.004585964
+6.561800 0.9952389 0
+
+\$confidence_interval lower upper Cluster1 0.00179395 0.01408127
+Cluster2 -0.03908051 -0.02110386
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.007937609
+0.003134577 2.532274 0.9577157 0 \[2,\] 2 5 -0.030092182 0.004585964
+6.561800 0.9952389 0
+
+\$confidence_interval lower upper Cluster1 0.00179395 0.01408127
+Cluster2 -0.03908051 -0.02110386
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.007937609
+0.003134577 2.532274 0.9577157 0 \[2,\] 2 5 -0.030092182 0.004585964
+6.561800 0.9952389 0
+
+\$confidence_interval lower upper Cluster1 0.00179395 0.01408127
+Cluster2 -0.03908051 -0.02110386
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.007937609
+0.003134577 2.532274 0.9577157 0 \[2,\] 2 5 -0.030092182 0.004585964
+6.561800 0.9952389 0
+
+\$confidence_interval lower upper Cluster1 0.00179395 0.01408127
+Cluster2 -0.03908051 -0.02110386
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.007937609
+0.003134577 2.532274 0.9577157 0 \[2,\] 2 5 -0.030092182 0.004585964
+6.561800 0.9952389 0
+
+\$confidence_interval lower upper Cluster1 0.00179395 0.01408127
+Cluster2 -0.03908051 -0.02110386
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.007937609
+0.003134577 2.532274 0.9577157 0 \[2,\] 2 5 -0.030092182 0.004585964
+6.561800 0.9952389 0
+
+\$confidence_interval lower upper Cluster1 0.00179395 0.01408127
+Cluster2 -0.03908051 -0.02110386
 
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
@@ -262,6 +504,23 @@ for (outcome in outcomes){
 
 </div>
 
+6 SNPs used as candidate instruments. MR.SPI identifies 6 relevant
+instruments and 4 valid instruments. Estimated Causal Effect by MR.SPI:
+0.009 Uniform Confidence Interval: (0 , 0.022)
+
+\$betaHat \[1\] 0.008983117
+
+\$beta.sdHat \[,1\] \[1,\] 0.003341228
+
+\$ci \[,1\] \[,2\] \[1,\] -0.0001466134 0.02155938
+
+\$SHat \[1\] 1 2 3 4 5 6
+
+\$VHat \[1\] 1 4 5 6
+
+\$voting.mat 1 2 3 4 5 6 1 1 0 0 1 1 1 2 0 1 1 0 0 0 3 0 1 1 0 0 0 4 1 0
+0 1 1 1 5 1 0 0 1 1 1 6 1 0 0 1 1 1
+
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
     Delimiter: "\t"
@@ -304,6 +563,22 @@ for (outcome in outcomes){
 ![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-5.png)
 
 </div>
+
+3 SNPs used as candidate instruments. MR.SPI identifies 3 relevant
+instruments and 2 valid instruments. Estimated Causal Effect by MR.SPI:
+0.007 Uniform Confidence Interval: (-0.004 , 0.017)
+
+\$betaHat \[1\] 0.006789435
+
+\$beta.sdHat \[,1\] \[1,\] 0.004181811
+
+\$ci \[,1\] \[,2\] \[1,\] -0.004487812 0.01721818
+
+\$SHat \[1\] 1 2 3
+
+\$VHat \[1\] 1 3
+
+\$voting.mat 1 2 3 1 1 0 1 2 0 1 0 3 1 0 1
 
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
@@ -348,6 +623,178 @@ for (outcome in outcomes){
 
 </div>
 
+    Warning in Searching.CI.sampling(gamma, Gamma, V_gamma, V_Gamma, InitiSet =
+    VHat, : Sampling Criterion not met, trasfer to Searching Method.
+
+10 SNPs used as candidate instruments. MR.SPI identifies 10 relevant
+instruments and 10 valid instruments. Estimated Causal Effect by MR.SPI:
+-0.041 Uniform Confidence Interval: (-0.035 , -0.018)
+
+\$betaHat \[1\] -0.04078254
+
+\$beta.sdHat \[,1\] \[1,\] 0.004936994
+
+\$ci \[,1\] \[,2\] \[1,\] -0.03509017 -0.01772538
+
+\$SHat \[1\] 1 2 3 4 5 6 7 8 9 10
+
+\$VHat \[1\] 1 2 3 4 5 6 7 8 9 10
+
+\$voting.mat 1 2 3 4 5 6 7 8 9 10 1 1 1 0 0 0 1 1 1 1 1 2 1 1 0 0 0 1 0
+1 1 1 3 0 0 1 1 1 1 1 0 0 0 4 0 0 1 1 1 1 1 0 0 0 5 0 0 1 1 1 1 1 0 0 0
+6 1 1 1 1 1 1 1 0 0 0 7 1 0 1 1 1 1 1 0 0 0 8 1 1 0 0 0 0 0 1 1 1 9 1 1
+0 0 0 0 0 1 1 1 10 1 1 0 0 0 0 0 1 1 1
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.006920085
+0.003214780 2.152585 0.04981035 0.5788113 \[2,\] 2 5 -0.041072037
+0.005241087 7.836549 0.86641830 0.0000000
+
+\$confidence_interval lower upper Cluster1 0.000619233 0.01322094
+Cluster2 -0.051344380 -0.03079969
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.006920085
+0.003214780 2.152585 0.04981035 0.5788113 \[2,\] 2 5 -0.041072037
+0.005241087 7.836549 0.86641830 0.0000000
+
+\$confidence_interval lower upper Cluster1 0.000619233 0.01322094
+Cluster2 -0.051344380 -0.03079969
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.006920085
+0.003214780 2.152585 0.04981035 0.5788113 \[2,\] 2 5 -0.041072037
+0.005241087 7.836549 0.86641830 0.0000000
+
+\$confidence_interval lower upper Cluster1 0.000619233 0.01322094
+Cluster2 -0.051344380 -0.03079969
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.006920085
+0.003214780 2.152585 0.04981035 0.5788113 \[2,\] 2 5 -0.041072037
+0.005241087 7.836549 0.86641830 0.0000000
+
+\$confidence_interval lower upper Cluster1 0.000619233 0.01322094
+Cluster2 -0.051344380 -0.03079969
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.006920085
+0.003214780 2.152585 0.04981035 0.5788113 \[2,\] 2 5 -0.041072037
+0.005241087 7.836549 0.86641830 0.0000000
+
+\$confidence_interval lower upper Cluster1 0.000619233 0.01322094
+Cluster2 -0.051344380 -0.03079969
+
+\$Cluster_number \[1\] 2
+
+\$Cluster_number_real \[1\] 2
+
+\$AHC_cluster \$AHC_cluster\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$AHC_cluster_real \$AHC_cluster_real\[\[1\]\] \[1\] 1 2 8 9 10
+
+\$AHC_cluster_real\[\[2\]\] \[1\] 3 4 5 6 7
+
+\$Null_cluster \[1\] 1
+
+\$Junk_cluster NULL
+
+\$F \[1\] 33.16434
+
+\$AHC_results ID length beta se t Qp I^2 \[1,\] 1 5 0.006920085
+0.003214780 2.152585 0.04981035 0.5788113 \[2,\] 2 5 -0.041072037
+0.005241087 7.836549 0.86641830 0.0000000
+
+\$confidence_interval lower upper Cluster1 0.000619233 0.01322094
+Cluster2 -0.051344380 -0.03079969
+
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
     Delimiter: "\t"
@@ -390,6 +837,23 @@ for (outcome in outcomes){
 ![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-9.png)
 
 </div>
+
+6 SNPs used as candidate instruments. MR.SPI identifies 6 relevant
+instruments and 4 valid instruments. Estimated Causal Effect by MR.SPI:
+0.01 Uniform Confidence Interval: (0.001 , 0.027)
+
+\$betaHat \[1\] 0.0100577
+
+\$beta.sdHat \[,1\] \[1,\] 0.00349955
+
+\$ci \[,1\] \[,2\] \[1,\] 0.0009929442 0.02704014
+
+\$SHat \[1\] 1 2 3 4 5 6
+
+\$VHat \[1\] 1 4 5 6
+
+\$voting.mat 1 2 3 4 5 6 1 1 0 1 1 1 1 2 0 1 1 0 0 0 3 1 1 1 0 0 0 4 1 0
+0 1 1 1 5 1 0 0 1 1 1 6 1 0 0 1 1 1
 
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
@@ -439,3 +903,144 @@ for (outcome in outcomes){
 ![](barton-analysis_files/figure-commonmark/unnamed-chunk-4-12.png)
 
 </div>
+
+3 SNPs used as candidate instruments. MR.SPI identifies 3 relevant
+instruments and 3 valid instruments. Estimated Causal Effect by MR.SPI:
+-0.013 Uniform Confidence Interval: (-0.021 , 0.009)
+
+\$betaHat \[1\] -0.01295566
+
+\$beta.sdHat \[,1\] \[1,\] 0.00483546
+
+\$ci \[,1\] \[,2\] \[1,\] -0.02135082 0.009037565
+
+\$SHat \[1\] 1 2 3
+
+\$VHat \[1\] 1 2 3
+
+\$voting.mat 1 2 3 1 1 1 1 2 1 1 0 3 1 0 1
+
+``` r
+devtools::session_info()
+```
+
+    ─ Session info ───────────────────────────────────────────────────────────────
+     setting  value
+     version  R version 4.2.3 (2023-03-15)
+     os       Ubuntu 18.04.6 LTS
+     system   x86_64, linux-gnu
+     ui       X11
+     language en_US:
+     collate  en_US.UTF-8
+     ctype    en_US.UTF-8
+     tz       America/Detroit
+     date     2023-03-28
+     pandoc   1.19.2.4 @ /usr/bin/ (via rmarkdown)
+
+    ─ Packages ───────────────────────────────────────────────────────────────────
+     package                * version  date (UTC) lib source
+     arrangements             1.1.9    2020-09-13 [2] CRAN (R 4.0.3)
+     bit                      4.0.5    2022-11-15 [1] CRAN (R 4.2.2)
+     bit64                    4.0.5    2020-08-30 [2] CRAN (R 4.0.3)
+     cachem                   1.0.7    2023-02-24 [1] CRAN (R 4.2.3)
+     callr                    3.7.3    2022-11-02 [1] CRAN (R 4.2.2)
+     cli                      3.6.0    2023-01-09 [1] CRAN (R 4.2.2)
+     codetools                0.2-19   2023-02-01 [1] CRAN (R 4.2.2)
+     colorspace               2.1-0    2023-01-23 [1] CRAN (R 4.2.2)
+     crayon                   1.5.2    2022-09-29 [1] CRAN (R 4.2.1)
+     data.table               1.14.8   2023-02-17 [1] CRAN (R 4.2.2)
+     DBI                      1.1.3    2022-06-18 [1] CRAN (R 4.2.2)
+     DEoptimR                 1.0-11   2022-04-03 [2] CRAN (R 4.2.0)
+     devtools                 2.4.5    2022-10-11 [1] CRAN (R 4.2.2)
+     digest                   0.6.31   2022-12-11 [1] CRAN (R 4.2.2)
+     dplyr                    1.1.0    2023-01-29 [1] CRAN (R 4.2.2)
+     ellipsis                 0.3.2    2021-04-29 [2] CRAN (R 4.2.1)
+     evaluate                 0.20     2023-01-17 [1] CRAN (R 4.2.2)
+     fansi                    1.0.4    2023-01-22 [1] CRAN (R 4.2.2)
+     farver                   2.1.1    2022-07-06 [1] CRAN (R 4.2.3)
+     fastmap                  1.1.1    2023-02-24 [1] CRAN (R 4.2.3)
+     foreach                  1.5.2    2022-02-02 [2] CRAN (R 4.2.0)
+     fs                       1.6.1    2023-02-06 [1] CRAN (R 4.2.2)
+     generics                 0.1.3    2022-07-05 [1] CRAN (R 4.2.3)
+     ggplot2                  3.4.1    2023-02-10 [1] CRAN (R 4.2.2)
+     glmnet                   4.1-6    2022-11-27 [1] CRAN (R 4.2.2)
+     glue                     1.6.2    2022-02-24 [1] CRAN (R 4.2.0)
+     gmp                      0.7-1    2023-02-07 [1] CRAN (R 4.2.2)
+     gtable                   0.3.2    2023-03-17 [1] CRAN (R 4.2.3)
+     here                     1.0.1    2020-12-13 [2] CRAN (R 4.1.1)
+     htmltools                0.5.4    2022-12-07 [1] CRAN (R 4.2.2)
+     htmlwidgets              1.6.2    2023-03-17 [1] CRAN (R 4.2.2)
+     httpuv                   1.6.9    2023-02-14 [1] CRAN (R 4.2.3)
+     httr                     1.4.5    2023-02-24 [1] CRAN (R 4.2.3)
+     igraph                   1.4.1    2023-02-24 [1] CRAN (R 4.2.2)
+     intervals                0.15.3   2023-03-20 [1] CRAN (R 4.2.3)
+     iterators                1.0.14   2022-02-05 [2] CRAN (R 4.2.0)
+     iterpc                   0.4.2    2020-01-10 [2] CRAN (R 4.0.3)
+     jsonlite                 1.8.4    2022-12-06 [1] CRAN (R 4.2.3)
+     knitr                    1.42     2023-01-25 [1] CRAN (R 4.2.3)
+     labeling                 0.4.2    2020-10-20 [2] CRAN (R 4.0.3)
+     later                    1.3.0    2021-08-18 [2] CRAN (R 4.1.1)
+     lattice                  0.20-45  2021-09-22 [2] CRAN (R 4.1.1)
+     lazyeval                 0.2.2    2019-03-15 [2] CRAN (R 4.0.3)
+     lifecycle                1.0.3    2022-10-07 [1] CRAN (R 4.2.2)
+     magrittr               * 2.0.3    2022-03-30 [1] CRAN (R 4.2.0)
+     MASS                     7.3-58.3 2023-03-07 [1] CRAN (R 4.2.3)
+     Matrix                   1.5-3    2022-11-11 [1] CRAN (R 4.2.3)
+     MatrixModels             0.5-1    2022-09-11 [1] CRAN (R 4.2.3)
+     memoise                  2.0.1    2021-11-26 [1] CRAN (R 4.1.2)
+     MendelianRandomization   0.7.0    2023-01-09 [1] CRAN (R 4.2.2)
+     mime                     0.12     2021-09-28 [2] CRAN (R 4.1.1)
+     miniUI                   0.1.1.1  2018-05-18 [2] CRAN (R 4.0.3)
+     MR.SPI                   0.1.0    2023-03-28 [1] Github (MinhaoYaooo/MR-SPI@7657257)
+     MRAHC                    0.1.0    2023-03-28 [1] Github (xiaoran-liang/MRAHC@9c9202f)
+     munsell                  0.5.0    2018-06-12 [2] CRAN (R 4.0.3)
+     pillar                   1.8.1    2022-08-19 [1] CRAN (R 4.2.2)
+     pkgbuild                 1.4.0    2022-11-27 [1] CRAN (R 4.2.2)
+     pkgconfig                2.0.3    2019-09-22 [2] CRAN (R 4.0.3)
+     pkgload                  1.3.2    2022-11-16 [1] CRAN (R 4.2.2)
+     plotly                   4.10.1   2022-11-07 [1] CRAN (R 4.2.2)
+     prettyunits              1.1.1    2020-01-24 [2] CRAN (R 4.0.3)
+     processx                 3.8.0    2022-10-26 [1] CRAN (R 4.2.2)
+     profvis                  0.3.7    2020-11-02 [1] CRAN (R 4.2.2)
+     promises                 1.2.0.1  2021-02-11 [2] CRAN (R 4.0.5)
+     ps                       1.7.2    2022-10-26 [1] CRAN (R 4.2.3)
+     purrr                    1.0.1    2023-01-10 [1] CRAN (R 4.2.2)
+     quantreg                 5.93     2022-05-02 [2] CRAN (R 4.2.0)
+     R6                       2.5.1    2021-08-19 [2] CRAN (R 4.1.1)
+     Rcpp                     1.0.10   2023-01-22 [1] CRAN (R 4.2.2)
+     remotes                  2.4.2    2021-11-30 [1] CRAN (R 4.1.2)
+     rjson                    0.2.21   2022-01-09 [2] CRAN (R 4.2.0)
+     rlang                    1.1.0    2023-03-14 [1] CRAN (R 4.2.2)
+     rmarkdown                2.20     2023-01-19 [1] CRAN (R 4.2.2)
+     robustbase               0.95-0   2022-04-02 [2] CRAN (R 4.2.0)
+     rprojroot                2.0.3    2022-04-02 [2] CRAN (R 4.2.0)
+     scales                   1.2.1    2022-08-20 [1] CRAN (R 4.2.3)
+     sessioninfo              1.2.2    2021-12-06 [1] CRAN (R 4.1.2)
+     shape                    1.4.6    2021-05-19 [2] CRAN (R 4.1.1)
+     shiny                    1.7.1    2021-10-02 [2] CRAN (R 4.1.1)
+     SparseM                  1.81     2021-02-18 [2] CRAN (R 4.0.5)
+     stringi                  1.7.12   2023-01-11 [1] CRAN (R 4.2.2)
+     stringr                  1.5.0    2022-12-02 [1] CRAN (R 4.2.3)
+     survival                 3.5-5    2023-03-12 [1] CRAN (R 4.2.3)
+     tibble                   3.2.0    2023-03-08 [1] CRAN (R 4.2.2)
+     tidyr                    1.3.0    2023-01-24 [1] CRAN (R 4.2.3)
+     tidyselect               1.2.0    2022-10-10 [1] CRAN (R 4.2.2)
+     tzdb                     0.3.0    2022-03-28 [2] CRAN (R 4.2.0)
+     urlchecker               1.0.1    2021-11-30 [1] CRAN (R 4.2.2)
+     usethis                  2.1.6    2022-05-25 [1] CRAN (R 4.2.0)
+     utf8                     1.2.3    2023-01-31 [1] CRAN (R 4.2.3)
+     vctrs                    0.6.0    2023-03-16 [1] CRAN (R 4.2.2)
+     viridisLite              0.4.1    2022-08-22 [1] CRAN (R 4.2.3)
+     vroom                    1.6.1    2023-01-22 [1] CRAN (R 4.2.2)
+     withr                    2.5.0    2022-03-03 [1] CRAN (R 4.2.0)
+     xfun                     0.37     2023-01-31 [1] CRAN (R 4.2.2)
+     xtable                   1.8-4    2019-04-21 [2] CRAN (R 4.0.3)
+     yaml                     2.3.7    2023-01-23 [1] CRAN (R 4.2.3)
+
+     [1] /net/mulan/home/fredboe/R/x86_64-pc-linux-gnu-library/4.0
+     [2] /net/mario/cluster/lib/R/site-library-bionic-40
+     [3] /usr/local/lib/R/site-library
+     [4] /usr/lib/R/site-library
+     [5] /usr/lib/R/library
+
+    ──────────────────────────────────────────────────────────────────────────────

@@ -33,6 +33,7 @@ library(magrittr)
 # https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
 # follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
 ld_token <- "3fbdb0673b22"
+barton_sample_size <- 437660 # https://www.ebi.ac.uk/gwas/efotraits/EFO_0004518 - see Barton et al. 2021
 # define function
 remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
     nr <- nrow(symm_matrix)
@@ -157,7 +158,83 @@ for (outcome in outcomes){
             print()
         MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE) %>%
             print()
+        ## MR.SPI
+       res_mrspi <- MR.SPI::MR.SPI(gamma = small_dat_no_ld$BETA, #FMD beta. lowercase gamma is the exposure
+                        se_gamma = small_dat_no_ld$SE, #FMD se
+                        Gamma = small_dat_no_ld$beta, #outcome beta
+                        se_Gamma = small_dat_no_ld$standard_error, #outcome se
+                        n1 = small_dat_no_ld$N_cases[1] + small_dat_no_ld$N_ctrls[1],# FMD sample size
+                        n2 = barton_sample_size, #outcome sample size
+                        unif = TRUE
+        ) 
+        res_mrspi %>%
+            print()
+        if (nrow(small_dat_no_ld) >= 10){
+            ## devtools::install_github("xiaoran-liang/MRAHC")
+            res_mrahc_a <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 4,
+                                        outremove = FALSE)
+            res_mrahc_b <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 3,
+                                        outremove = FALSE)
+            res_mrahc_c <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 4,
+                                        outremove = TRUE)
+            res_mrahc_d <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 3,
+                                        outremove = TRUE)
+            res_mrahc_e <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 4,
+                                        outremove = TRUE, 
+                                        iter = TRUE)
+            res_mrahc_f <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
+                                        seX = small_dat_no_ld$SE,
+                                        betaY = small_dat_no_ld$beta,
+                                        seY = small_dat_no_ld$standard_error,
+                                        n = barton_sample_size,
+                                        smallcluster = 3,
+                                        outremove = TRUE,
+                                        iter = TRUE)
+        
+                                    # NOTE FROM MRAHC PACKAGE DOCUMENTATION: #'In a two-sample MR design, we recommend using the sample size of the outcome sample.
+            res_mrahc_a %>%
+                print()
+            res_mrahc_b %>%
+                print()
+            res_mrahc_c %>%
+                print()
+            res_mrahc_d %>%
+                print()
+            res_mrahc_e %>%
+                print()
+            res_mrahc_f %>%
+                print()
+        }
     }
 }
+```
+
+```{r}
+devtools::session_info()
 ```
 
