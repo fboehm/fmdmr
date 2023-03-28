@@ -5,40 +5,28 @@ Fred Boehm
 
 - <a href="#cystatinc-with-p-value-threshold-1e-06"
   id="toc-cystatinc-with-p-value-threshold-1e-06"><span
-  class="toc-section-number">0.1</span>
+  class="toc-section-number">1</span>
   <code>CystatinC with p-value threshold:  1e-06</code></a>
-- <a href="#a-tibble-6-7" id="toc-a-tibble-6-7"><span
-  class="toc-section-number">1</span> A tibble: 6 × 7</a>
-  - <a href="#cystatinc-with-p-value-threshold-1e-07"
-    id="toc-cystatinc-with-p-value-threshold-1e-07"><span
-    class="toc-section-number">1.1</span>
-    <code>CystatinC with p-value threshold:  1e-07</code></a>
-- <a href="#a-tibble-4-7" id="toc-a-tibble-4-7"><span
-  class="toc-section-number">2</span> A tibble: 4 × 7</a>
-  - <a href="#cystatinc-with-p-value-threshold-1e-08"
-    id="toc-cystatinc-with-p-value-threshold-1e-08"><span
-    class="toc-section-number">2.1</span>
-    <code>CystatinC with p-value threshold:  1e-08</code></a>
-- <a href="#a-tibble-2-7" id="toc-a-tibble-2-7"><span
-  class="toc-section-number">3</span> A tibble: 2 × 7</a>
-  - <a href="#creatinine-with-p-value-threshold-1e-06"
-    id="toc-creatinine-with-p-value-threshold-1e-06"><span
-    class="toc-section-number">3.1</span>
-    <code>Creatinine with p-value threshold:  1e-06</code></a>
-- <a href="#a-tibble-10-7" id="toc-a-tibble-10-7"><span
-  class="toc-section-number">4</span> A tibble: 10 × 7</a>
-  - <a href="#creatinine-with-p-value-threshold-1e-07"
-    id="toc-creatinine-with-p-value-threshold-1e-07"><span
-    class="toc-section-number">4.1</span>
-    <code>Creatinine with p-value threshold:  1e-07</code></a>
-- <a href="#a-tibble-4-7-1" id="toc-a-tibble-4-7-1"><span
-  class="toc-section-number">5</span> A tibble: 4 × 7</a>
-  - <a href="#creatinine-with-p-value-threshold-1e-08"
-    id="toc-creatinine-with-p-value-threshold-1e-08"><span
-    class="toc-section-number">5.1</span>
-    <code>Creatinine with p-value threshold:  1e-08</code></a>
-- <a href="#a-tibble-3-7" id="toc-a-tibble-3-7"><span
-  class="toc-section-number">6</span> A tibble: 3 × 7</a>
+- <a href="#cystatinc-with-p-value-threshold-1e-07"
+  id="toc-cystatinc-with-p-value-threshold-1e-07"><span
+  class="toc-section-number">2</span>
+  <code>CystatinC with p-value threshold:  1e-07</code></a>
+- <a href="#cystatinc-with-p-value-threshold-1e-08"
+  id="toc-cystatinc-with-p-value-threshold-1e-08"><span
+  class="toc-section-number">3</span>
+  <code>CystatinC with p-value threshold:  1e-08</code></a>
+- <a href="#creatinine-with-p-value-threshold-1e-06"
+  id="toc-creatinine-with-p-value-threshold-1e-06"><span
+  class="toc-section-number">4</span>
+  <code>Creatinine with p-value threshold:  1e-06</code></a>
+- <a href="#creatinine-with-p-value-threshold-1e-07"
+  id="toc-creatinine-with-p-value-threshold-1e-07"><span
+  class="toc-section-number">5</span>
+  <code>Creatinine with p-value threshold:  1e-07</code></a>
+- <a href="#creatinine-with-p-value-threshold-1e-08"
+  id="toc-creatinine-with-p-value-threshold-1e-08"><span
+  class="toc-section-number">6</span>
+  <code>Creatinine with p-value threshold:  1e-08</code></a>
 
 We want to “explore” the two results files to see how many SNPs are
 available in each, and to see how many SNPs are in both files. This
@@ -205,6 +193,7 @@ for (outcome in outcomes){
         # print only the valid SNPs
         small_dat_no_ld[res_mrspi$VHat, ] %>%
             dplyr::select(chromosome, base_pair_location, SNP, BETA, SE, p_value.x, p_value.y) %>%
+            knitr::kable() %>%
             print()
 
         # do clustering (& MRAHC) when I have at least ten snps in the dataset
@@ -329,17 +318,16 @@ instruments and 6 valid instruments. Estimated Causal Effect by MR.SPI:
 6 1 0 1 1 1 1 1 0 0 0 7 1 0 1 1 1 1 1 0 0 0 8 1 1 0 0 0 0 0 1 1 1 9 1 1
 0 0 0 0 0 1 1 1 10 1 1 0 0 0 0 0 1 1 1
 
-# A tibble: 6 × 7
+| chromosome | base_pair_location | SNP        |    BETA |     SE | p_value.x | p_value.y |
+|-----------:|-------------------:|:-----------|--------:|-------:|----------:|----------:|
+|          5 |          152248145 | rs72802886 |  0.5223 | 0.1038 |     5e-07 |   5.9e-01 |
+|         12 |           50503269 | rs836180   |  0.2362 | 0.0442 |     1e-07 |   8.5e-05 |
+|         12 |           50529936 | rs7136570  | -0.2261 | 0.0440 |     3e-07 |   4.9e-05 |
+|         12 |           50537815 | rs7302981  | -0.2266 | 0.0438 |     2e-07 |   1.0e-04 |
+|         12 |           50594947 | rs4459386  | -0.2545 | 0.0436 |     0e+00 |   8.5e-05 |
+|         12 |           51094138 | rs2731443  |  0.2273 | 0.0445 |     3e-07 |   1.7e-04 |
 
-chromosome base_pair_location SNP BETA SE p_value.x p_value.y <dbl>
-<dbl> <chr> <dbl> <dbl> <dbl> <dbl> 1 5 152248145 rs72802886 0.522 0.104
-0.000000492 0.59  
-2 12 50503269 rs836180 0.236 0.0442 0.0000000918 0.000085 3 12 50529936
-rs7136570 -0.226 0.044 0.000000282 0.000049 4 12 50537815 rs7302981
--0.227 0.0438 0.000000232 0.0001  
-5 12 50594947 rs4459386 -0.254 0.0436 0.00000000519 0.000085 6 12
-51094138 rs2731443 0.227 0.0445 0.000000327 0.00017 \$Cluster_number
-\[1\] 2
+\$Cluster_number \[1\] 2
 
 \$Cluster_number_real \[1\] 2
 
@@ -549,13 +537,12 @@ instruments and 4 valid instruments. Estimated Causal Effect by MR.SPI:
 \$voting.mat 1 2 3 4 5 6 1 1 0 0 1 1 1 2 0 1 1 0 0 0 3 0 1 1 0 0 0 4 1 0
 0 1 1 1 5 1 0 0 1 1 1 6 1 0 0 1 1 1
 
-# A tibble: 4 × 7
-
-chromosome base_pair_location SNP BETA SE p_value.x p_value.y <dbl>
-<dbl> <chr> <dbl> <dbl> <dbl> <dbl> 1 6 12903957 rs9349379 -0.363 0.0464
-5.17e-15 0.14 2 12 57527283 rs11172113 -0.291 0.0458 2.02e-10 0.42 3 12
-90008959 rs2681472 -0.352 0.0634 2.75e- 8 0.12 4 12 90013089 rs2681492
--0.358 0.0634 1.69e- 8 0.092
+| chromosome | base_pair_location | SNP        |    BETA |     SE | p_value.x | p_value.y |
+|-----------:|-------------------:|:-----------|--------:|-------:|----------:|----------:|
+|          6 |           12903957 | rs9349379  | -0.3632 | 0.0464 |         0 |     0.140 |
+|         12 |           57527283 | rs11172113 | -0.2913 | 0.0458 |         0 |     0.420 |
+|         12 |           90008959 | rs2681472  | -0.3522 | 0.0634 |         0 |     0.120 |
+|         12 |           90013089 | rs2681492  | -0.3578 | 0.0634 |         0 |     0.092 |
 
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
@@ -616,11 +603,10 @@ instruments and 2 valid instruments. Estimated Causal Effect by MR.SPI:
 
 \$voting.mat 1 2 3 1 1 0 1 2 0 1 0 3 1 0 1
 
-# A tibble: 2 × 7
-
-chromosome base_pair_location SNP BETA SE p_value.x p_value.y <dbl>
-<dbl> <chr> <dbl> <dbl> <dbl> <dbl> 1 6 12903957 rs9349379 -0.363 0.0464
-5.17e-15 0.14 2 12 57527283 rs11172113 -0.291 0.0458 2.02e-10 0.42
+| chromosome | base_pair_location | SNP        |    BETA |     SE | p_value.x | p_value.y |
+|-----------:|-------------------:|:-----------|--------:|-------:|----------:|----------:|
+|          6 |           12903957 | rs9349379  | -0.3632 | 0.0464 |         0 |      0.14 |
+|         12 |           57527283 | rs11172113 | -0.2913 | 0.0458 |         0 |      0.42 |
 
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
@@ -687,20 +673,19 @@ instruments and 10 valid instruments. Estimated Causal Effect by MR.SPI:
 6 1 1 1 1 1 1 1 0 0 0 7 1 0 1 1 1 1 1 0 0 0 8 1 1 0 0 0 0 0 1 1 1 9 1 1
 0 0 0 0 0 1 1 1 10 1 1 0 0 0 0 0 1 1 1
 
-# A tibble: 10 × 7
+| chromosome | base_pair_location | SNP        |    BETA |     SE | p_value.x | p_value.y |
+|-----------:|-------------------:|:-----------|--------:|-------:|----------:|----------:|
+|          5 |          152248145 | rs72802886 |  0.5223 | 0.1038 |     5e-07 |   8.6e-01 |
+|          6 |           12903957 | rs9349379  | -0.3632 | 0.0464 |     0e+00 |   5.4e-01 |
+|         12 |           50503269 | rs836180   |  0.2362 | 0.0442 |     1e-07 |   1.0e-07 |
+|         12 |           50529936 | rs7136570  | -0.2261 | 0.0440 |     3e-07 |   0.0e+00 |
+|         12 |           50537815 | rs7302981  | -0.2266 | 0.0438 |     2e-07 |   1.0e-07 |
+|         12 |           50594947 | rs4459386  | -0.2545 | 0.0436 |     0e+00 |   1.4e-05 |
+|         12 |           51094138 | rs2731443  |  0.2273 | 0.0445 |     3e-07 |   9.2e-06 |
+|         12 |           57527283 | rs11172113 | -0.2913 | 0.0458 |     0e+00 |   3.6e-01 |
+|         12 |           90008959 | rs2681472  | -0.3522 | 0.0634 |     0e+00 |   1.2e-02 |
+|         12 |           90013089 | rs2681492  | -0.3578 | 0.0634 |     0e+00 |   8.8e-03 |
 
-chromosome base_pair_location SNP BETA SE p_value.x p_value.y <dbl>
-<dbl> <chr> <dbl> <dbl> <dbl> <dbl> 1 5 152248145 rs72802886 0.522 0.104
-4.92e- 7 0.86  
-2 6 12903957 rs9349379 -0.363 0.0464 5.17e-15 0.54  
-3 12 50503269 rs836180 0.236 0.0442 9.18e- 8 0.000000088 4 12 50529936
-rs7136570 -0.226 0.044 2.82e- 7 0.000000025 5 12 50537815 rs7302981
--0.227 0.0438 2.33e- 7 0.00000013 6 12 50594947 rs4459386 -0.254 0.0436
-5.19e- 9 0.000014  
-7 12 51094138 rs2731443 0.227 0.0445 3.27e- 7 0.0000092  
-8 12 57527283 rs11172113 -0.291 0.0458 2.02e-10 0.36  
-9 12 90008959 rs2681472 -0.352 0.0634 2.75e- 8 0.012  
-10 12 90013089 rs2681492 -0.358 0.0634 1.69e- 8 0.0088  
 \$Cluster_number \[1\] 2
 
 \$Cluster_number_real \[1\] 2
@@ -911,14 +896,12 @@ instruments and 4 valid instruments. Estimated Causal Effect by MR.SPI:
 \$voting.mat 1 2 3 4 5 6 1 1 0 1 1 1 1 2 0 1 1 0 0 0 3 1 1 1 0 0 0 4 1 0
 0 1 1 1 5 1 0 0 1 1 1 6 1 0 0 1 1 1
 
-# A tibble: 4 × 7
-
-chromosome base_pair_location SNP BETA SE p_value.x p_value.y <dbl>
-<dbl> <chr> <dbl> <dbl> <dbl> <dbl> 1 6 12903957 rs9349379 -0.363 0.0464
-5.17e-15 0.54  
-2 12 57527283 rs11172113 -0.291 0.0458 2.02e-10 0.36  
-3 12 90008959 rs2681472 -0.352 0.0634 2.75e- 8 0.012 4 12 90013089
-rs2681492 -0.358 0.0634 1.69e- 8 0.0088
+| chromosome | base_pair_location | SNP        |    BETA |     SE | p_value.x | p_value.y |
+|-----------:|-------------------:|:-----------|--------:|-------:|----------:|----------:|
+|          6 |           12903957 | rs9349379  | -0.3632 | 0.0464 |         0 |    0.5400 |
+|         12 |           57527283 | rs11172113 | -0.2913 | 0.0458 |         0 |    0.3600 |
+|         12 |           90008959 | rs2681472  | -0.3522 | 0.0634 |         0 |    0.0120 |
+|         12 |           90013089 | rs2681492  | -0.3578 | 0.0634 |         0 |    0.0088 |
 
     Rows: 5515075 Columns: 15
     ── Column specification ────────────────────────────────────────────────────────
@@ -985,13 +968,11 @@ instruments and 3 valid instruments. Estimated Causal Effect by MR.SPI:
 
 \$voting.mat 1 2 3 1 1 1 1 2 1 1 0 3 1 0 1
 
-# A tibble: 3 × 7
-
-chromosome base_pair_location SNP BETA SE p_value.x p_value.y <dbl>
-<dbl> <chr> <dbl> <dbl> <dbl> <dbl> 1 6 12903957 rs9349379 -0.363 0.0464
-5.17e-15 0.54  
-2 12 50594947 rs4459386 -0.254 0.0436 5.19e- 9 0.000014 3 12 57527283
-rs11172113 -0.291 0.0458 2.02e-10 0.36
+| chromosome | base_pair_location | SNP        |    BETA |     SE | p_value.x | p_value.y |
+|-----------:|-------------------:|:-----------|--------:|-------:|----------:|----------:|
+|          6 |           12903957 | rs9349379  | -0.3632 | 0.0464 |         0 |   5.4e-01 |
+|         12 |           50594947 | rs4459386  | -0.2545 | 0.0436 |         0 |   1.4e-05 |
+|         12 |           57527283 | rs11172113 | -0.2913 | 0.0458 |         0 |   3.6e-01 |
 
 ``` r
 devtools::session_info()

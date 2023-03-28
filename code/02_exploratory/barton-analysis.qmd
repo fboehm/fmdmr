@@ -172,6 +172,7 @@ for (outcome in outcomes){
         # print only the valid SNPs
         small_dat_no_ld[res_mrspi$VHat, ] %>%
             dplyr::select(chromosome, base_pair_location, SNP, BETA, SE, p_value.x, p_value.y) %>%
+            knitr::kable() %>%
             print()
 
         # do clustering (& MRAHC) when I have at least ten snps in the dataset
