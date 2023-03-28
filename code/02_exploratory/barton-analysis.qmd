@@ -169,6 +169,12 @@ for (outcome in outcomes){
         ) 
         res_mrspi %>%
             print()
+        # print only the valid SNPs
+        small_dat_no_ld[res_mrspi$VHat, ] %>%
+            dplyr::select(chromosome, base_pair_location, SNP, BETA, SE, p_value.x, p_value.y) %>%
+            print()
+
+        # do clustering (& MRAHC) when I have at least ten snps in the dataset
         if (nrow(small_dat_no_ld) >= 10){
             ## devtools::install_github("xiaoran-liang/MRAHC")
             res_mrahc_a <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
