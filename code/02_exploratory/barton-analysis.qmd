@@ -10,30 +10,68 @@ format:
     gfm: default
 ---
 
-We want to "explore" the two results files to see how many SNPs are available in each, and to see 
+We want to "explore" the results files to see how many SNPs are available in each, and to see 
 how many SNPs are in both files. This information will inform 2-sample MR studies to 
 assess the causal effect of FMD on creatinine levels.
 
 First, we read into R the FMD summary statistics file.
 
 
-```{r}
-fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
-fmd_tib <- vroom::vroom(fmd_file)
-```
-
-
 
 ```{r}
 library(magrittr)
+# https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
+# follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
+ld_token <- "3fbdb0673b22"
+
 ```
 
 
 ```{r}
-# https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
-# follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
-ld_token <- "3fbdb0673b22"
-barton_sample_size <- 437660 # https://www.ebi.ac.uk/gwas/efotraits/EFO_0004518 - see Barton et al. 2021
+fmd_lead_snps_file <- here::here("data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
+fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header = FALSE) %>% as.character()
+fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
+fmd_tib <- vroom::vroom(fmd_file) 
+```
+
+```{r get_proxies}
+# get proxies for all 26 fmd_lead_snps
+snp_fn <- here::here(paste0(fmd_lead_snps[1], "_grch37.txt"))
+if (!file.exists(snp_fn)){
+# query biomaRt & LDlink if the output file doesn't exist
+    ensembl <- biomaRt::useMart("ENSEMBL_MART_SNP", dataset = "hsapiens_snp")
+    atts <- biomaRt::listAttributes(ensembl)
+    snp_ann <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_start", "chrom_end"),
+                    filters = "snp_filter",
+                    values = fmd_lead_snps,
+                    mart = ensembl)
+    proxies <- LDlinkR::LDproxy_batch(snp = snp_ann$refsnp_id, pop = "CEU", token = ld_token, genome_build = "grch37")                  
+}
+snp_fns <- tibble::tibble(fn = dir(here::here())) %>%
+    dplyr::filter(stringr::str_detect(fn, "grch37.txt"))
+proxies <- list()
+for (snp_fn in snp_fns$fn){
+    snp <- stringr::str_remove(snp_fn, "_grch37.txt")
+    proxies[[snp]] <- vroom::vroom(snp_fn, skip = 1, 
+                            col_names = c("row_num", "rs_id", 
+                            "pos", "alleles", "maf", "distance", 
+                            "dprime", "r2", "correlated_alleles", 
+                            "FORGEdb", "RegulomeDB", "function")) %>%
+        dplyr::select(rs_id, maf, distance, r2) %>%
+        dplyr::mutate(primary_snp = snp) %>%
+        dplyr::mutate(in_fmd_snps = rs_id %in% fmd_tib$SNP)
+}
+proxies_tib <- proxies %>%
+    dplyr::bind_rows()
+proxies_tib %>% dplyr::filter(in_fmd_snps) %>% dplyr::group_by(primary_snp) %>% dplyr::count() %>% dplyr::arrange(n)
+
+```
+
+
+
+
+
+```{r}
 # define function
 remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
     nr <- nrow(symm_matrix)
@@ -158,85 +196,6 @@ for (outcome in outcomes){
             print()
         MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE) %>%
             print()
-        ## MR.SPI
-       res_mrspi <- MR.SPI::MR.SPI(gamma = small_dat_no_ld$BETA, #FMD beta. lowercase gamma is the exposure
-                        se_gamma = small_dat_no_ld$SE, #FMD se
-                        Gamma = small_dat_no_ld$beta, #outcome beta
-                        se_Gamma = small_dat_no_ld$standard_error, #outcome se
-                        n1 = small_dat_no_ld$N_cases[1] + small_dat_no_ld$N_ctrls[1],# FMD sample size
-                        n2 = barton_sample_size, #outcome sample size
-                        unif = TRUE
-        ) 
-        res_mrspi %>%
-            print()
-        # print only the valid SNPs
-        small_dat_no_ld[res_mrspi$VHat, ] %>%
-            dplyr::select(chromosome, base_pair_location, SNP, BETA, SE, p_value.x, p_value.y) %>%
-            knitr::kable() %>%
-            print()
-
-        # do clustering (& MRAHC) when I have at least ten snps in the dataset
-        if (nrow(small_dat_no_ld) >= 10){
-            ## devtools::install_github("xiaoran-liang/MRAHC")
-            res_mrahc_a <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
-                                        seX = small_dat_no_ld$SE,
-                                        betaY = small_dat_no_ld$beta,
-                                        seY = small_dat_no_ld$standard_error,
-                                        n = barton_sample_size,
-                                        smallcluster = 4,
-                                        outremove = FALSE)
-            res_mrahc_b <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
-                                        seX = small_dat_no_ld$SE,
-                                        betaY = small_dat_no_ld$beta,
-                                        seY = small_dat_no_ld$standard_error,
-                                        n = barton_sample_size,
-                                        smallcluster = 3,
-                                        outremove = FALSE)
-            res_mrahc_c <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
-                                        seX = small_dat_no_ld$SE,
-                                        betaY = small_dat_no_ld$beta,
-                                        seY = small_dat_no_ld$standard_error,
-                                        n = barton_sample_size,
-                                        smallcluster = 4,
-                                        outremove = TRUE)
-            res_mrahc_d <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
-                                        seX = small_dat_no_ld$SE,
-                                        betaY = small_dat_no_ld$beta,
-                                        seY = small_dat_no_ld$standard_error,
-                                        n = barton_sample_size,
-                                        smallcluster = 3,
-                                        outremove = TRUE)
-            res_mrahc_e <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
-                                        seX = small_dat_no_ld$SE,
-                                        betaY = small_dat_no_ld$beta,
-                                        seY = small_dat_no_ld$standard_error,
-                                        n = barton_sample_size,
-                                        smallcluster = 4,
-                                        outremove = TRUE, 
-                                        iter = TRUE)
-            res_mrahc_f <- MRAHC::MR_AHC(betaX = small_dat_no_ld$BETA, 
-                                        seX = small_dat_no_ld$SE,
-                                        betaY = small_dat_no_ld$beta,
-                                        seY = small_dat_no_ld$standard_error,
-                                        n = barton_sample_size,
-                                        smallcluster = 3,
-                                        outremove = TRUE,
-                                        iter = TRUE)
-        
-                                    # NOTE FROM MRAHC PACKAGE DOCUMENTATION: #'In a two-sample MR design, we recommend using the sample size of the outcome sample.
-            res_mrahc_a %>%
-                print()
-            res_mrahc_b %>%
-                print()
-            res_mrahc_c %>%
-                print()
-            res_mrahc_d %>%
-                print()
-            res_mrahc_e %>%
-                print()
-            res_mrahc_f %>%
-                print()
-        }
     }
 }
 ```
