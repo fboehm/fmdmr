@@ -124,7 +124,18 @@ for (outcome in outcomes){
     for (rs in sa$refsnp_id){
         snp_tib <- get_nearby_snps(dat = barton_tib, lead_snp_annot = sa %>% dplyr::filter(refsnp_id == rs), n_snps = 999) %>%
             dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
-        proxies[[rs]] <- get_ld_matrix(snps = c(rs, snp_tib$chr_pos), ld_token = ld_token)
+        ld_tib <- get_ld_matrix(snps = c(rs, snp_tib$chr_pos), ld_token = ld_token) %>%
+            tibble::as_tibble()    
+
+        ld_tib_small <- ld_tib %>% 
+            dplyr::rename(row_name = RS_number) %>%
+            tidyr::gather(column_name, value, - row_name) %>%
+            dplyr::filter(stringr::str_starts(string = column_name, pattern = "rs")) %>%
+            dplyr::filter(!is.na(value)) %>%
+            dplyr::filter(column_name == rs) %>%
+            dplyr::arrange(dplyr::desc(value)) %>%
+            dplyr::mutate(in_fmd = row_name %in% fmd_tib$SNP)
+        # see if best proxies are in fmd data 
     }
 
 
