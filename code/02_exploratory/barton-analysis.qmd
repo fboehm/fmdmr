@@ -36,35 +36,45 @@ fmd_tib <- vroom::vroom(fmd_file)
 
 ```{r get_proxies}
 # get proxies for all 26 fmd_lead_snps
-snp_fn <- here::here(paste0(fmd_lead_snps[1], "_grch37.txt"))
-if (!file.exists(snp_fn)){
 # query biomaRt & LDlink if the output file doesn't exist
-    ensembl <- biomaRt::useMart("ENSEMBL_MART_SNP", dataset = "hsapiens_snp")
-    atts <- biomaRt::listAttributes(ensembl)
-    snp_ann <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_start", "chrom_end"),
-                    filters = "snp_filter",
-                    values = fmd_lead_snps,
-                    mart = ensembl)
-    proxies <- LDlinkR::LDproxy_batch(snp = snp_ann$refsnp_id, pop = "CEU", token = ld_token, genome_build = "grch37")                  
+ensembl <- biomaRt::useMart("ENSEMBL_MART_SNP", dataset = "hsapiens_snp")
+atts <- biomaRt::listAttributes(ensembl)
+snp_ann <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_start", "chrom_end"),
+                filters = "snp_filter",
+                values = fmd_lead_snps,
+                mart = ensembl) %>%
+                tibble::as_tibble()
+snp_ann %>%
+    print(n = nrow(.))   
+# function to choose SNPs for LDlink query
+#' @param dat a tibble with columns 'chromosome', 'base_pair_location'
+#' @param lead_snp_annot a tibble with exactly one row and with columns 'refsnp_id', 'chr_name', 'chrom_start'
+#' @param n_snps an integer - the number of SNPs to return
+#' @param max_distance an integer - the maximum distance from the lead SNP to returned SNPs
+get_nearby_snps <- function(dat, lead_snp_annot, n_snps = 1000, max_distance = 10^6){
+    nearby_snps <- dat %>%
+        dplyr::filter(chromosome == as.integer(lead_snp_annot$chr_name)) %>%
+        dplyr::filter(abs(base_pair_location - lead_snp_annot$chrom_start) < max_distance) %>%
+        dplyr::arrange(abs(base_pair_location - lead_snp_annot$chrom_start)) %>%
+        dplyr::slice(1:n_snps) 
+    return(nearby_snps)
 }
-snp_fns <- tibble::tibble(fn = dir(here::here())) %>%
-    dplyr::filter(stringr::str_detect(fn, "grch37.txt"))
-proxies <- list()
-for (snp_fn in snp_fns$fn){
-    snp <- stringr::str_remove(snp_fn, "_grch37.txt")
-    proxies[[snp]] <- vroom::vroom(snp_fn, skip = 1, 
-                            col_names = c("row_num", "rs_id", 
-                            "pos", "alleles", "maf", "distance", 
-                            "dprime", "r2", "correlated_alleles", 
-                            "FORGEdb", "RegulomeDB", "function")) %>%
-        dplyr::select(rs_id, maf, distance, r2) %>%
-        dplyr::mutate(primary_snp = snp) %>%
-        dplyr::mutate(in_fmd_snps = rs_id %in% fmd_tib$SNP)
-}
-proxies_tib <- proxies %>%
-    dplyr::bind_rows()
-proxies_tib %>% dplyr::filter(in_fmd_snps) %>% dplyr::group_by(primary_snp) %>% dplyr::count() %>% dplyr::arrange(n)
 
+#' Query LDlinkR for LD matrix for a set of SNPs
+#' @param snps a character vector of SNP rsids - be sure to include lead snp's rsid
+#' @param ld_token a character vector of length 1 - the token for LDlinkR
+#' @param pop a character vector of length 1 - the population for LDlinkR
+#' @return a matrix of LD values for the SNPs in 'snps'
+
+get_ld_matrix <- function(snps, ld_token, pop = "CEU"){
+    stopifnot(length(snps) <= 1000)
+    # get LD matrix for snps
+    ld_mat <- LDlinkR::LDmatrix(snps, token = ld_token, pop = pop)
+    return(ld_mat)
+}
+# get LD matrix for each lead SNP
+sa <- snp_ann %>%
+    dplyr::filter(!is.na(as.integer(chr_name)))
 ```
 
 
@@ -93,110 +103,121 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 ```
 
 
+`LDlinkR::LDmatrix` takes as inputs up to 1000 SNPs at a time.
+
 
 
 ```{r, results = "asis"}
 outcomes <- c("CystatinC", "Creatinine")
-p_thresholds <- c(1e-06, 1e-07, 1e-08)
 ld_file <- here::here("data", "fmd", "ld_matrix.rds")
 for (outcome in outcomes){
-    for (p_threshold in p_thresholds){
-        if (outcome == "CystatinC"){
-            barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
-        }
-        if (outcome == "Creatinine"){
-            barton_file <- here::here("data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
-        }
-        barton_tib <- vroom::vroom(barton_file)
-        # find shared snps
-        small_dat_pre <- fmd_tib %>%
-            dplyr::filter(p_value < p_threshold)  %>% # choose pvalue threshold     
-            dplyr::inner_join(barton_tib, by = c("chromosome", "base_pair_location"))
-        # harmonised? 
-        small_dat <- small_dat_pre %>%
-            dplyr::mutate(harmonised = OA == ALLELE0)
-        (all.equal(small_dat$harmonised, rep(TRUE, length(small_dat$harmonised))))
-        # make ld matrix if ld_file doesn't exist
-        if (file.exists(ld_file)){
-            ld_mat <- readRDS(ld_file)
-        } else {
-            ld_list <- list()
-            pt <- min(p_thresholds)
-            for (chr in 1:22){
-                fmd_onechr <- small_dat %>%
-                    dplyr::filter(chromosome == chr)
-                if (nrow(fmd_onechr) > 1){
-                    foo <- LDlinkR::LDmatrix(fmd_onechr$SNP, 
-                            pop = "CEU", 
-                            r2d = "r2", 
-                            genome_build = "grch37",
-                            token = ld_token, 
-                            file = FALSE
-                            ) 
-                    
-                    bar <- foo %>% 
-                                dplyr::select(-1) %>%
-                                as.matrix() %>%
-                                remove_offdiagonal_ones(threshold = 0.99)
-
-                    # remove rows & cols for highly correlated SNPs 
-
-                    ld_list[[chr]] <- bar
-                }
-                if (nrow(fmd_onechr) == 1){
-                    ld_list[[chr]] <- as.matrix(1)
-                    colnames(ld_list[[chr]]) <- fmd_onechr$SNP      
-                }
-                if (nrow(fmd_onechr) == 0){
-                    ld_list[[chr]] <- NA
-                }
-            }
-            # remove NAs
-            ld_list_nona <- ld_list[!is.na(ld_list)]
-            ld_mat <- as.matrix(Matrix::bdiag(ld_list_nona))
-            rn <- do.call(c, lapply(ld_list_nona, colnames))
-            rownames(ld_mat) <- rn
-            colnames(ld_mat) <- rn
-            # save ld matrix
-            saveRDS(ld_mat, ld_file)
-        }
-
-        # filter to remove highly correlated SNPs
-        small_dat_no_ld <- small_dat %>%
-            dplyr::filter(SNP %in% rownames(ld_mat))
-        ld_mat_small <- ld_mat[rownames(ld_mat) %in% small_dat_no_ld$SNP, 
-                               colnames(ld_mat) %in% small_dat_no_ld$SNP]
-        print(nrow(small_dat_no_ld))
-        # make input object
-        input <- MendelianRandomization::mr_input(
-                    bx = small_dat_no_ld$BETA, 
-                    bxse = small_dat_no_ld$SE, 
-                    by = small_dat_no_ld$beta, 
-                    byse = small_dat_no_ld$standard_error,
-                    corr = ld_mat_small,
-                    exposure = "FMD",
-                    outcome = outcome,
-                    snps = rownames(ld_mat_small)
-                )
-        # make header for collection of graphs for each iteration of loop
-        cat('\n\n## `', outcome, "with p-value threshold: ", p_threshold, '`\n\n')    
-        # MR analyses   
-        result <- MendelianRandomization::mr_allmethods(input)
-        result@Values %>% 
-            dplyr::mutate_if(is.numeric, signif, digits = 2) %>%
-            dplyr::mutate("Number of SNPs" = length(result@Data@snps)) %>%
-            dplyr::rename("95% CI lower" = 4, "95% CI upper" = 5) %>%
-            knitr::kable() %>%
-            print()
-        ivw_res <- MendelianRandomization::mr_ivw(input, correl = TRUE)
-        egger_res <- MendelianRandomization::mr_egger(input, correl = TRUE)
-
-        # MR plots
-        MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE) %>%
-            print()
-        MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE) %>%
-            print()
+    if (outcome == "CystatinC"){
+        barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
     }
+    if (outcome == "Creatinine"){
+        barton_file <- here::here("data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
+    }
+    barton_tib <- vroom::vroom(barton_file)
+    # find shared snps
+    # get proxies for each lead SNP
+    proxies <- list()
+    for (rs in sa$refsnp_id){
+        snp_tib <- get_nearby_snps(dat = barton_tib, lead_snp_annot = sa %>% dplyr::filter(refsnp_id == rs), n_snps = 999) %>%
+            dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
+        proxies[[rs]] <- get_ld_matrix(snps = c(rs, snp_tib$chr_pos), ld_token = ld_token)
+    }
+
+
+
+
+
+    small_dat_pre <- fmd_tib %>%
+        dplyr::filter(p_value < p_threshold)  %>% # choose pvalue threshold     
+        dplyr::inner_join(barton_tib, by = c("chromosome", "base_pair_location"))
+    # harmonised? 
+    small_dat <- small_dat_pre %>%
+        dplyr::mutate(harmonised = OA == ALLELE0)
+    all_harmonised <- all.equal(small_dat$harmonised, rep(TRUE, length(small_dat$harmonised)))
+    stopifnot(all_harmonised)
+    # make ld matrix if ld_file doesn't exist
+    if (file.exists(ld_file)){
+        ld_mat <- readRDS(ld_file)
+    } else {
+        ld_list <- list()
+        for (chr in 1:22){
+            fmd_onechr <- small_dat %>%
+                dplyr::filter(chromosome == chr)
+            if (nrow(fmd_onechr) > 1){
+                foo <- LDlinkR::LDmatrix(fmd_onechr$SNP, 
+                        pop = "CEU", 
+                        r2d = "r2", 
+                        genome_build = "grch37",
+                        token = ld_token, 
+                        file = FALSE
+                        ) 
+                
+                bar <- foo %>% 
+                            dplyr::select(-1) %>%
+                            as.matrix() %>%
+                            remove_offdiagonal_ones(threshold = 0.99)
+
+                # remove rows & cols for highly correlated SNPs 
+
+                ld_list[[chr]] <- bar
+            }
+            if (nrow(fmd_onechr) == 1){
+                ld_list[[chr]] <- as.matrix(1)
+                colnames(ld_list[[chr]]) <- fmd_onechr$SNP      
+            }
+            if (nrow(fmd_onechr) == 0){
+                ld_list[[chr]] <- NA
+            }
+        }
+        # remove NAs
+        ld_list_nona <- ld_list[!is.na(ld_list)]
+        ld_mat <- as.matrix(Matrix::bdiag(ld_list_nona))
+        rn <- do.call(c, lapply(ld_list_nona, colnames))
+        rownames(ld_mat) <- rn
+        colnames(ld_mat) <- rn
+        # save ld matrix
+        saveRDS(ld_mat, ld_file)
+    }
+
+    # filter to remove highly correlated SNPs
+    small_dat_no_ld <- small_dat %>%
+        dplyr::filter(SNP %in% rownames(ld_mat))
+    ld_mat_small <- ld_mat[rownames(ld_mat) %in% small_dat_no_ld$SNP, 
+                            colnames(ld_mat) %in% small_dat_no_ld$SNP]
+    print(nrow(small_dat_no_ld))
+    # make input object
+    input <- MendelianRandomization::mr_input(
+                bx = small_dat_no_ld$BETA, 
+                bxse = small_dat_no_ld$SE, 
+                by = small_dat_no_ld$beta, 
+                byse = small_dat_no_ld$standard_error,
+                corr = ld_mat_small,
+                exposure = "FMD",
+                outcome = outcome,
+                snps = rownames(ld_mat_small)
+            )
+    # make header for collection of graphs for each iteration of loop
+    cat('\n\n## `', outcome, "with p-value threshold: ", p_threshold, '`\n\n')    
+    # MR analyses   
+    result <- MendelianRandomization::mr_allmethods(input)
+    result@Values %>% 
+        dplyr::mutate_if(is.numeric, signif, digits = 2) %>%
+        dplyr::mutate("Number of SNPs" = length(result@Data@snps)) %>%
+        dplyr::rename("95% CI lower" = 4, "95% CI upper" = 5) %>%
+        knitr::kable() %>%
+        print()
+    ivw_res <- MendelianRandomization::mr_ivw(input, correl = TRUE)
+    egger_res <- MendelianRandomization::mr_egger(input, correl = TRUE)
+
+    # MR plots
+    MendelianRandomization::mr_plot(input, interactive = FALSE, line = "ivw", labels = TRUE, orientate = TRUE) %>%
+        print()
+    MendelianRandomization::mr_plot(input, interactive = FALSE, line = "egger", labels = TRUE, orientate = TRUE) %>%
+            print()
 }
 ```
 
