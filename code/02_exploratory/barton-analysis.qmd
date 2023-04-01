@@ -48,14 +48,14 @@ snp_ann %>%
     print(n = nrow(.))   
 # function to choose SNPs for LDlink query
 #' @param dat a tibble with columns 'chromosome', 'base_pair_location'
-#' @param lead_snp_annot a tibble with exactly one row and with columns 'refsnp_id', 'chr_name', 'chrom_start'
+#' @param lead_snp_annot a tibble with exactly one row and with columns 'lead_snp', 'chr', 'position'
 #' @param n_snps an integer - the number of SNPs to return
 #' @param max_distance an integer - the maximum distance from the lead SNP to returned SNPs
 get_nearby_snps <- function(dat, lead_snp_annot, n_snps = 1000, max_distance = 10^6){
     nearby_snps <- dat %>%
-        dplyr::filter(chromosome == as.integer(lead_snp_annot$chr_name)) %>%
-        dplyr::filter(abs(base_pair_location - lead_snp_annot$chrom_start) < max_distance) %>%
-        dplyr::arrange(abs(base_pair_location - lead_snp_annot$chrom_start)) %>%
+        dplyr::filter(chromosome == as.integer(lead_snp_annot$chr)) %>%
+        dplyr::filter(abs(base_pair_location - lead_snp_annot$position) < max_distance) %>%
+        dplyr::arrange(abs(base_pair_location - lead_snp_annot$position)) %>%
         dplyr::slice(1:n_snps) 
     return(nearby_snps)
 }
@@ -72,35 +72,69 @@ get_ld_matrix <- function(snps, ld_token, pop = "CEU"){
     ld_mat <- LDlinkR::LDmatrix(snps, token = ld_token, pop = pop)
     return(ld_mat)
 }
-# get LD matrix for each lead SNP
-sa <- snp_ann %>%
-    dplyr::filter(!is.na(as.integer(chr_name)))
-```
 
-
-
-
-
-```{r}
-# define function
-remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
-    nr <- nrow(symm_matrix)
-    bad_list <- list()
-    for (row in 1:nr){
-        foo <- upper.tri(symm_matrix, diag = FALSE)[row,]
-        bar <- symm_matrix[row, ] > threshold
-        bad_list[[row]] <- which(foo & bar)
+#' Get rs_id from chromosome and position
+#' 
+#' @param chr a character vector of length 1- the chromosome
+#' @param pos a numeric vector of snp positions on the chromosome chr
+get_rsid_from_chr_pos <- function(chr, pos){
+    # get rsid from chromosome and position
+    dataset <- "hsapiens_snp"
+    attributes <- c("refsnp_id", "chr_name", "chrom_start", "chrom_end")
+    # create a biomaRt object for the GRCh37 reference genome
+    mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_SNP", dataset = dataset, host = "https://grch37.ensembl.org")
+    # retrieve the SNP information using biomaRt
+    results <- list()
+    for (pp in pos){
+        filters <- list(chr_name = as.character(chr), start = pp, end = pp) # to return all snps between start and end
+        results[[as.character(pp)]] <- biomaRt::getBM(attributes = attributes, filters = filters, mart = mart) %>%
+            tibble::as_tibble() %>%
+            dplyr::filter(chrom_start == chrom_end) %>%
+            dplyr::filter(stringr::str_starts(refsnp_id, "rs"))
+        cat("Retrieved SNP information for position ", pp, " on chromosome ", chr, "\n")
     }
-    bad_indices <- unique(do.call("c", bad_list))
-    if (length(bad_indices) == 0){
-        return(symm_matrix)
-    } else {
-        out <- as.matrix(symm_matrix[- bad_indices, - bad_indices])
-        rownames(out) <- colnames(out) <- colnames(symm_matrix)[- bad_indices]
-        return(out)
-    }
+     
+    tib <- purrr::discard(results, ~nrow(.x) == 0) %>%
+        dplyr::bind_rows()
+    return(tib)
 }
+####
+#' Organize outputted LD matrix (a data.frame) from LDlink into 3-column tibble & discard NAs 
+#' 
+#' @param ldlink_output a data.frame from LDlinkR::LDmatrix
+#' @param lead_snp_rs_id a character vector of length 1 - the rsid of the lead SNP
+#' @param snp_vec a character vector of SNPs to check if LDlink output is in the vector snp_vec
+organize_ldlink_output <- function(ldlink_output){
+    out <- ldlink_output %>% 
+        dplyr::rename(row_name = RS_number) %>% # column RS_number is hardcoded because it's always in the LDlinkR output
+        tidyr::gather(column_name, value, - row_name) %>%
+        dplyr::filter(stringr::str_starts(string = column_name, pattern = "rs")) %>%
+        dplyr::filter(!is.na(value)) %>%
+        dplyr::arrange(dplyr::desc(value)) 
+    return(out)
+}
+
+#' Choose proxy SNPs for a single lead SNP from the output of organize_ldlink_output.
+#' 
+#' @param ldlink_output a tibble with columns 'row_name', 'value', 'in_snp_set'
+#' @param ld_threshold a numeric value - the threshold for LD to be considered a proxy
+#' @return a tibble with columns 'row_name', 'value', 'in_snp_set' and one row per proxy SNP
+get_proxies_tib <- function(ldlink_output, ld_threshold = 0.8){
+    out <- ldlink_output %>%
+        dplyr::filter(value > ld_threshold) %>%
+        dplyr::filter(in_snp_set)
+    return(out)
+}
+
+# get LD matrix for each lead SNP after renaming and filtering snp_ann to only include SNPs with a chromosome number
+sa <- snp_ann %>%
+    dplyr::filter(!is.na(as.integer(chr_name))) %>%
+    dplyr::mutate(chr = as.integer(chr_name)) %>%
+    dplyr::mutate(lead_snp = refsnp_id, position = chrom_start) %>%
+    dplyr::select( - chrom_end, - chrom_start, - refsnp_id, - chr_name)
 ```
+
+
 
 
 `LDlinkR::LDmatrix` takes as inputs up to 1000 SNPs at a time.
@@ -109,7 +143,6 @@ remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
 
 ```{r, results = "asis"}
 outcomes <- c("CystatinC", "Creatinine")
-ld_file <- here::here("data", "fmd", "ld_matrix.rds")
 for (outcome in outcomes){
     if (outcome == "CystatinC"){
         barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
@@ -117,31 +150,61 @@ for (outcome in outcomes){
     if (outcome == "Creatinine"){
         barton_file <- here::here("data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
     }
-    barton_tib <- vroom::vroom(barton_file)
+    barton_tib <- vroom::vroom(barton_file) %>%
+        dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
     # find shared snps
     # get proxies for each lead SNP
+    # if a lead SNP is itself present in the fmd data, then we don't need a proxy for it in the FMD data
+    # if a lead SNP is not present in the fmd data, then we need a proxy for it from the FMD data
+    # some SNPs are in both FMD and barton data, apparently.
+    # most lead SNPs are not in the barton data. Thus, we need to find proxies for them that are in the barton data.
+    # unfortunately, we need to query LDlinkR for each possible proxy. We can limit to nearby SNPs in high LD. That is, 
+    # we can first choose the lead SNPs that need proxies in the barton data, then choose the proxies for those lead SNPs (ie, from the barton SNPs)
     proxies <- list()
-    for (rs in sa$refsnp_id){
-        snp_tib <- get_nearby_snps(dat = barton_tib, lead_snp_annot = sa %>% dplyr::filter(refsnp_id == rs), n_snps = 999) %>%
-            dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
-        ld_tib <- get_ld_matrix(snps = c(rs, snp_tib$chr_pos), ld_token = ld_token) %>%
-            tibble::as_tibble()    
+    for (row_num in seq_len(nrow(sa))){ #loop over lead SNPs
+        one_snp_tib <- sa %>% dplyr::slice(row_num)
+        rs <- one_snp_tib$lead_snp    
+        # 0. check if lead SNP is in barton and FMD data sets
+        # join one_snp_tib with barton_tib & check number of rows of result
+        one_joined <- one_snp_tib %>%
+            dplyr::inner_join(barton_tib, by = c("chr" = "chromosome", "position" = "base_pair_location"))
+        if (nrow(one_joined) == 1){
+            proxies[[rs]] <- one_snp_tib
+        } else {
+            # if lead SNP is not in barton data, then we need a proxy for it 
+            snp_tib <- get_nearby_snps(dat = barton_tib, lead_snp_annot = one_snp_tib, n_snps = 99)
+            # get rsids for nearby barton snps
+            chr <- snp_tib$chromosome[1]
+            pos <- snp_tib$base_pair_location
+            st2 <- get_rsid_from_chr_pos(chr, pos) %>%
+                dplyr::rename(pos = chrom_start) %>%
+                dplyr::mutate(chr = as.integer(chr_name)) %>%
+                dplyr::select(- chrom_end, - chr_name) %>%
+                dplyr::right_join(snp_tib, by = c("chr" = "chromosome", "pos" = "base_pair_location")) %>%
+                dplyr::filter(!is.na(refsnp_id)) %>%
+                dplyr::mutate(in_fmd_snps = refsnp_id %in% fmd_tib$SNP)            
+            # 1. get barton snps near the lead SNP. Note that lead SNP is taken from fmd data
+            # 2. get LD for pairs of barton snps (where both members of pair are near lead SNP) - note that the LDlinkR output has rs ids only.
+            # 3. get positions (chr and bp) for barton rsids from step 2
+            # 3. get barton snps with high LD with lead SNP
+            
+            
+            
+            ld_tib <- get_ld_matrix(snps = c(rs, st2$refsnp_id), 
+                                    ld_token = ld_token) %>%
+                tibble::as_tibble()    
+            ld_tib_small <- organize_ldlink_output(ldlink_output = ld_tib) %>%
+                dplyr::filter(column_name == rs)
+            # get rs id for SNPs in the barton data
+            
+            # see if best proxies are in fmd data 
+             foo <- get_proxies_tib(ldlink_output = ld_tib_small, ld_threshold = 0.9)
+             proxies[[rs]]
+        }
 
-        ld_tib_small <- ld_tib %>% 
-            dplyr::rename(row_name = RS_number) %>%
-            tidyr::gather(column_name, value, - row_name) %>%
-            dplyr::filter(stringr::str_starts(string = column_name, pattern = "rs")) %>%
-            dplyr::filter(!is.na(value)) %>%
-            dplyr::filter(column_name == rs) %>%
-            dplyr::arrange(dplyr::desc(value)) %>%
-            dplyr::mutate(in_fmd = row_name %in% fmd_tib$SNP)
-        # see if best proxies are in fmd data 
-    }
 
 
-
-
-
+# make a tibble of: lead snps, proxies in fmd, proxies in barton
     small_dat_pre <- fmd_tib %>%
         dplyr::filter(p_value < p_threshold)  %>% # choose pvalue threshold     
         dplyr::inner_join(barton_tib, by = c("chromosome", "base_pair_location"))
