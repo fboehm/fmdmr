@@ -75,27 +75,29 @@ get_ld_matrix <- function(snps, ld_token, pop = "CEU"){
 
 #' Get rs_id from chromosome and position
 #' 
-#' @param chr a character vector of length 1- the chromosome
+#' @param chr a character vector with one entry per SNP - the chromosome
 #' @param pos a numeric vector of snp positions on the chromosome chr
-get_rsid_from_chr_pos <- function(chr, pos){
+#' @param ref_allele a character vector with one entry per SNP - the reference allele
+#' @param alt_allele a character vector with one entry per SNP - the alternate allele
+#' @return a tibble with columns 'chr', 'pos', 'ref_allele', 'alt_allele', 'rsid'
+get_rsid_from_snp_info <- function(chr, pos, ref_allele, alt_allele){
     # get rsid from chromosome and position
-    dataset <- "hsapiens_snp"
-    attributes <- c("refsnp_id", "chr_name", "chrom_start", "chrom_end")
-    # create a biomaRt object for the GRCh37 reference genome
-    mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_SNP", dataset = dataset, host = "https://grch37.ensembl.org")
-    # retrieve the SNP information using biomaRt
-    results <- list()
-    for (pp in pos){
-        filters <- list(chr_name = as.character(chr), start = pp, end = pp) # to return all snps between start and end
-        results[[as.character(pp)]] <- biomaRt::getBM(attributes = attributes, filters = filters, mart = mart) %>%
-            tibble::as_tibble() %>%
-            dplyr::filter(chrom_start == chrom_end) %>%
-            dplyr::filter(stringr::str_starts(refsnp_id, "rs"))
-        cat("Retrieved SNP information for position ", pp, " on chromosome ", chr, "\n")
-    }
-     
-    tib <- purrr::discard(results, ~nrow(.x) == 0) %>%
-        dplyr::bind_rows()
+    # load the GRCh37 db
+    txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene::TxDb.Hsapiens.UCSC.hg19.knownGene
+    snpg <- GenomicRanges::GRanges(seqnames = chr[1], ranges = IRanges::IRanges(start = pos[1], end = pos[1]), strand = "*",
+                ref = ref_allele[1], alt = alt_allele[1], txdb = txdb)
+    snpdb <- AnnotationDbi::loadDb("dbSNP")
+    snpg <- annotateWith(rsid(snpdb), snpg)
+
+    tib <- ref_seq %>%
+        as.character() %>%
+        toupper() %>%
+        tibble::as_tibble() %>%
+        dplyr::rename(ref_allele_per_BSgenome = value) %>%
+        dplyr::mutate(chr = chr,
+                      pos = pos,
+                      ref_allele = ref_allele,
+                      alt_allele = alt_allele)
     return(tib)
 }
 ####
