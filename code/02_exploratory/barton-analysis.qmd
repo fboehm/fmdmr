@@ -33,7 +33,7 @@ fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header =
 fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd_tib <- vroom::vroom(fmd_file) 
 ```
-
+dat
 ```{r get_proxies}
 # get proxies for all 26 fmd_lead_snps
 # query biomaRt & LDlink if the output file doesn't exist
@@ -61,15 +61,16 @@ get_nearby_snps <- function(dat, lead_snp_annot, n_snps = 5000, info_threshold =
 }
 
 #' Query LDlinkR for LD matrix for a set of SNPs
-#' @param snps a character vector of SNP rsids - be sure to include lead snp's rsid
+#' @param snps a character vector of SNP rsids or appropriately formatted chr_pos values - be sure to include lead snp's rsid
 #' @param ld_token a character vector of length 1 - the token for LDlinkR
+#' @param genome_build a character vector of length 1 - the genome build for LDlinkR
 #' @param pop a character vector of length 1 - the population for LDlinkR
 #' @return a matrix of LD values for the SNPs in 'snps'
-
-get_ld_matrix <- function(snps, ld_token, pop = "CEU"){
+#' @details see vignette here for use of LDlinkR functions: https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html. If `snps` inputs chr_pos values, be sure that each begins with "chr"
+get_ld_matrix <- function(snps, ld_token, genome_build, pop = "CEU"){
     stopifnot(length(snps) <= 1000)
     # get LD matrix for snps
-    ld_mat <- LDlinkR::LDmatrix(snps, token = ld_token, pop = pop)
+    ld_mat <- LDlinkR::LDmatrix(snps = snps, token = ld_token, genome_build = genome_build, pop = pop)
     return(ld_mat)
 }
 
@@ -77,12 +78,12 @@ get_ld_matrix <- function(snps, ld_token, pop = "CEU"){
 #' 
 #' @param chr a character vector of length 1- the chromosome
 #' @param pos a numeric vector of snp positions on the chromosome chr
-get_rsid_from_chr_pos <- function(chr, pos){
+get_rsid_from_chr_pos <- function(chr, pos, host = "https://grch37.ensembl.org"){
     # get rsid from chromosome and position
     dataset <- "hsapiens_snp"
     attributes <- c("refsnp_id", "chr_name", "chrom_start", "chrom_end")
     # create a biomaRt object for the GRCh37 reference genome
-    mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_SNP", dataset = dataset, host = "https://grch37.ensembl.org")
+    mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_SNP", dataset = dataset, host = host)
     # retrieve the SNP information using biomaRt
     results <- list()
     for (pp in pos){

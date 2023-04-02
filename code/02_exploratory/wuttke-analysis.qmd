@@ -14,9 +14,10 @@ library(magrittr)
 
 
 ```{r}
-(threshold <- 1e-6)
 fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- vroom::vroom(fmd_file) 
+fmd_lead_snps_file <- here::here("data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
+fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header = FALSE) %>% as.character()
 ```
 
 
@@ -66,26 +67,56 @@ files <- list.files(here::here("data", "wuttke2023"), pattern = "tsv.gz", full.n
 for (file in files){
     print(file)
     dat <- vroom::vroom(file)
+    # get rsids for dat where rsids are missing
+
+    ###############################
     joined <- dat %>%
         dplyr::inner_join(fmd, by = c("rsids" = "SNP"))
     cat(nrow(joined))    
     fmd_lead_snps %in% joined$rsids # only 1 of 26 lead SNPs is in the joined data
+    fmd_lead_snps %in% dat$rsids # 2 of 26 lead SNPs are in dat; however, many dat SNPs have no rsid!
+    # check the pos & chrom for dat SNPs
+
+    # make an annotation tibble for lead FMD snps
+    snp_ann <- get_pos_from_rs_id(fmd_lead_snps) %>%
+        dplyr::arrange(as.integer(chr_name)) %>%
+        tibble::as_tibble() %>%
+        dplyr::mutate(chr = as.integer(chr_name)) %>%
+        dplyr::select(- chr_name)
+    snp_ann %>%
+        dplyr::inner_join(dat, by = c("chr" = "chrom", "pos_grch38" = "pos"))
+    # only 2 of 26 lead SNPs are in dat
+
     # get snps near each lead SNP from fmd_lead_snps
     # get pos GRCh38 for each lead SNP
     for (rs in fmd_lead_snps){
         # NEED TO ACCOUNT FOR DIFFERENT GENOME BUILD!!!
-        ls_tib <- get_pos_from_rs_id(rs)
+        ls_tib <- snp_ann %>%
+            dplyr::filter(refsnp_id == rs)
         proximal_fmd <- get_snps_near_lead(lead_snp_pos = ls_tib$pos_grch37, 
                                             lead_snp_chrom = ls_tib$chr_name, 
                                             dat = fmd, dat_chrom_var = chromosome, 
-                                            dat_pos_var = base_pair_location) 
+                                            dat_pos_var = base_pair_location) %>%
+            dplyr::mutate(dist_to_lead = abs(base_pair_location - ls_tib$pos_grch37)) %>%
+            dplyr::relocate(dist_to_lead) %>%
+            dplyr::arrange(dist_to_lead) %>%
+            dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
         proximal_dat <- get_snps_near_lead(lead_snp_pos = ls_tib$pos_grch38, 
                                             lead_snp_chrom = ls_tib$chr_name, 
                                             dat = dat, dat_chrom_var = chrom, 
-                                            dat_pos_var = pos) 
-
+                                            dat_pos_var = pos) %>%
+            dplyr::mutate(dist_to_lead = abs(pos - ls_tib$pos_grch38)) %>%
+            dplyr::relocate(dist_to_lead) %>%
+            dplyr::arrange(dist_to_lead) %>%
+            dplyr::mutate(chr_pos = paste0("chr", chrom, ":", pos))
         # get LD matrix for lead SNP and nearby SNPs
-        rsids <- c(rs, proximal_fmd$SNP, proximal_dat$rsids) %>% unique()                    
+        rsids <- c(rs, proximal_fmd$SNP, proximal_dat$chr_pos) %>% unique()  
+        ld_tib <- get_ld_matrix(snps = rsids, 
+                                ld_token = ld_token, 
+                                genome_build = "grch38_high_coverage") %>%
+            tibble::as_tibble() %>%
+            organize_ldlink_output()  
+                 
     }
 }
 ```
