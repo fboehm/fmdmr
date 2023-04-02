@@ -50,12 +50,12 @@ snp_ann %>%
 #' @param dat a tibble with columns 'chromosome', 'base_pair_location'
 #' @param lead_snp_annot a tibble with exactly one row and with columns 'lead_snp', 'chr', 'position'
 #' @param n_snps an integer - the number of SNPs to return
-#' @param max_distance an integer - the maximum distance from the lead SNP to returned SNPs
-get_nearby_snps <- function(dat, lead_snp_annot, n_snps = 1000, max_distance = 10^6){
+get_nearby_snps <- function(dat, lead_snp_annot, n_snps = 1000, info_threshold = 0.9, max_distance = 10000){
     nearby_snps <- dat %>%
         dplyr::filter(chromosome == as.integer(lead_snp_annot$chr)) %>%
-        dplyr::filter(abs(base_pair_location - lead_snp_annot$position) < max_distance) %>%
-        dplyr::arrange(abs(base_pair_location - lead_snp_annot$position)) %>%
+        dplyr::mutate(distance = abs(base_pair_location - lead_snp_annot$position)) %>%
+        dplyr::arrange(distance) %>%
+        dplyr::filter(INFO > info_threshold, distance < max_distance) %>%
         dplyr::slice(1:n_snps) 
     return(nearby_snps)
 }
@@ -121,8 +121,7 @@ organize_ldlink_output <- function(ldlink_output){
 #' @return a tibble with columns 'row_name', 'value', 'in_snp_set' and one row per proxy SNP
 get_proxies_tib <- function(ldlink_output, ld_threshold = 0.8){
     out <- ldlink_output %>%
-        dplyr::filter(value > ld_threshold) %>%
-        dplyr::filter(in_snp_set)
+        dplyr::filter(value > ld_threshold) 
     return(out)
 }
 
@@ -172,36 +171,50 @@ for (outcome in outcomes){
             proxies[[rs]] <- one_snp_tib
         } else {
             # if lead SNP is not in barton data, then we need a proxy for it 
-            snp_tib <- get_nearby_snps(dat = barton_tib, lead_snp_annot = one_snp_tib, n_snps = 99)
+            snp_tib <- get_nearby_snps(dat = barton_tib, lead_snp_annot = one_snp_tib)
             # get rsids for nearby barton snps
-            chr <- snp_tib$chromosome[1]
-            pos <- snp_tib$base_pair_location
-            st2 <- get_rsid_from_chr_pos(chr, pos) %>%
-                dplyr::rename(pos = chrom_start) %>%
-                dplyr::mutate(chr = as.integer(chr_name)) %>%
-                dplyr::select(- chrom_end, - chr_name) %>%
-                dplyr::right_join(snp_tib, by = c("chr" = "chromosome", "pos" = "base_pair_location")) %>%
-                dplyr::filter(!is.na(refsnp_id)) %>%
-                dplyr::mutate(in_fmd_snps = refsnp_id %in% fmd_tib$SNP)            
-            # 1. get barton snps near the lead SNP. Note that lead SNP is taken from fmd data
+            if (nrow(snp_tib) > 0){
+                chr <- snp_tib$chromosome[1]
+                pos <- snp_tib$base_pair_location
+                st2 <- get_rsid_from_chr_pos(chr, pos) %>%
+                    dplyr::rename(pos = chrom_start) %>%
+                    dplyr::mutate(chr = as.integer(chr_name)) %>%
+                    dplyr::select(- chrom_end, - chr_name) %>%
+                    dplyr::right_join(snp_tib, by = c("chr" = "chromosome", "pos" = "base_pair_location")) %>%
+                    dplyr::filter(!is.na(refsnp_id)) %>%
+                    dplyr::mutate(in_fmd_snps = refsnp_id %in% fmd_tib$SNP) %>%
+                    dplyr::mutate(lead_snp = one_snp_tib$lead_snp, lead_snp_pos = one_snp_tib$position)
+                # 1. get barton snps near the lead SNP. Note that lead SNP is taken from fmd data
+                # 1b. Check if barton SNP rs ids are in fmd data
+                st2_in_fmd <- st2 %>%
+                    dplyr::filter(in_fmd_snps)
+                proxies[[rs]] <- st2_in_fmd
+            }
+        }
+    }
+    # add ld value to each row of each tibble in proxies object
             # 2. get LD for pairs of barton snps (where both members of pair are near lead SNP) - note that the LDlinkR output has rs ids only.
             # 3. get positions (chr and bp) for barton rsids from step 2
             # 3. get barton snps with high LD with lead SNP
-            
-            
-            
-            ld_tib <- get_ld_matrix(snps = c(rs, st2$refsnp_id), 
-                                    ld_token = ld_token) %>%
-                tibble::as_tibble()    
-            ld_tib_small <- organize_ldlink_output(ldlink_output = ld_tib) %>%
-                dplyr::filter(column_name == rs)
-            # get rs id for SNPs in the barton data
-            
-            # see if best proxies are in fmd data 
-             foo <- get_proxies_tib(ldlink_output = ld_tib_small, ld_threshold = 0.9)
-             proxies[[rs]]
+    proxy_tibs <- list()
+    for (i in seq_along(proxies)){
+        if (nrow(proxies[[i]]) == 0){
+            next
         }
-
+        ld_tib <- get_ld_matrix(snps = c(proxies[[i]]$lead_snp[1], proxies[[i]]$refsnp_id), 
+                                ld_token = ld_token) %>%
+            tibble::as_tibble()    
+        ld_tib_small <- organize_ldlink_output(ldlink_output = ld_tib) %>%
+            dplyr::filter(column_name == proxies[[i]]$lead_snp[1])
+        # get rs id for SNPs in the barton data
+        
+        # see if best proxies are in fmd data 
+        #foo <- get_proxies_tib(ldlink_output = ld_tib_small, ld_threshold = 0.8)
+        proxy_tibs[[i]] <- ld_tib_small
+    }
+    
+}
+# we now have proxies object
 
 
 # make a tibble of: lead snps, proxies in fmd, proxies in barton
