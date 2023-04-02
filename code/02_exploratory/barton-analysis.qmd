@@ -50,12 +50,12 @@ snp_ann %>%
 #' @param dat a tibble with columns 'chromosome', 'base_pair_location'
 #' @param lead_snp_annot a tibble with exactly one row and with columns 'lead_snp', 'chr', 'position'
 #' @param n_snps an integer - the number of SNPs to return
-get_nearby_snps <- function(dat, lead_snp_annot, n_snps = 1000, info_threshold = 0.9, max_distance = 10000){
+get_nearby_snps <- function(dat, lead_snp_annot, n_snps = 5000, info_threshold = 0.9, max_distance = 10000){
     nearby_snps <- dat %>%
         dplyr::filter(chromosome == as.integer(lead_snp_annot$chr)) %>%
         dplyr::mutate(distance = abs(base_pair_location - lead_snp_annot$position)) %>%
         dplyr::arrange(distance) %>%
-        dplyr::filter(INFO > info_threshold, distance < max_distance) %>%
+        dplyr::filter(distance < max_distance) %>%
         dplyr::slice(1:n_snps) 
     return(nearby_snps)
 }
@@ -130,7 +130,10 @@ sa <- snp_ann %>%
     dplyr::filter(!is.na(as.integer(chr_name))) %>%
     dplyr::mutate(chr = as.integer(chr_name)) %>%
     dplyr::mutate(lead_snp = refsnp_id, position = chrom_start) %>%
-    dplyr::select( - chrom_end, - chrom_start, - refsnp_id, - chr_name)
+    dplyr::select( - chrom_end, - chrom_start, - refsnp_id, - chr_name) %>%
+    dplyr::mutate(chr_pos = paste0("chr", chr, ":", position)) %>%
+    dplyr::mutate(in_fmd = lead_snp %in% fmd_tib$SNP) %>%
+    dplyr::mutate(in_barton = chr_pos %in% barton_tib$chr_pos) 
 ```
 
 
@@ -163,37 +166,33 @@ for (outcome in outcomes){
     for (row_num in seq_len(nrow(sa))){ #loop over lead SNPs
         one_snp_tib <- sa %>% dplyr::slice(row_num)
         rs <- one_snp_tib$lead_snp
-        if (rs %in% fmd_tib$SNP){
-            proxies[[rs]] <- one_snp_tib
-            next
-        }    
         # 0. check if lead SNP is in barton and FMD data sets
         # join one_snp_tib with barton_tib & check number of rows of result
-        one_joined <- one_snp_tib %>%
-            dplyr::inner_join(barton_tib, by = c("chr" = "chromosome", "position" = "base_pair_location"))
-        if (nrow(one_joined) == 1){
-            proxies[[rs]] <- one_snp_tib
-        } else {
-            # if lead SNP is not in barton data, then we need a proxy for it 
-            snp_tib <- get_nearby_snps(dat = barton_tib, lead_snp_annot = one_snp_tib)
-            # get rsids for nearby barton snps
-            if (nrow(snp_tib) > 0){
-                chr <- snp_tib$chromosome[1]
-                pos <- snp_tib$base_pair_location
-                st2 <- get_rsid_from_chr_pos(chr, pos) %>%
-                    dplyr::rename(pos = chrom_start) %>%
-                    dplyr::mutate(chr = as.integer(chr_name)) %>%
-                    dplyr::select(- chrom_end, - chr_name) %>%
-                    dplyr::right_join(snp_tib, by = c("chr" = "chromosome", "pos" = "base_pair_location")) %>%
-                    dplyr::filter(!is.na(refsnp_id)) %>%
-                    dplyr::mutate(in_fmd_snps = refsnp_id %in% fmd_tib$SNP) %>%
-                    dplyr::mutate(lead_snp = one_snp_tib$lead_snp, lead_snp_pos = one_snp_tib$position)
-                # 1. get barton snps near the lead SNP. Note that lead SNP is taken from fmd data
-                # 1b. Check if barton SNP rs ids are in fmd data
-                st2_in_fmd <- st2 %>%
-                    dplyr::filter(in_fmd_snps)
-                proxies[[rs]] <- st2_in_fmd
-            }
+        # if lead SNP is not in barton data, then we need a proxy for it 
+        snp_tib <- get_nearby_snps(dat = barton_tib, lead_snp_annot = one_snp_tib) %>%
+            dplyr::mutate(lead_snp = rs) %>%
+            dplyr::relocate(chr_pos, distance, lead_snp)
+        # get rsids for nearby barton snps
+        if (nrow(snp_tib) > 0){
+            chr <- snp_tib$chromosome[1]
+            pos <- snp_tib$base_pair_location
+            st2 <- get_rsid_from_chr_pos(chr, pos) %>%
+                dplyr::rename(pos = chrom_start) %>%
+                dplyr::mutate(chr = as.integer(chr_name)) %>%
+                dplyr::select(- chrom_end, - chr_name) %>%
+                dplyr::right_join(snp_tib, by = c("chr" = "chromosome", "pos" = "base_pair_location")) %>%
+                dplyr::filter(!is.na(refsnp_id)) %>%
+                dplyr::mutate(in_fmd_snps = refsnp_id %in% fmd_tib$SNP) %>%
+                dplyr::mutate(lead_snp = one_snp_tib$lead_snp, lead_snp_pos = one_snp_tib$position) %>%
+                dplyr::mutate(chr_pos = paste0("chr", chr, ":", pos)) %>%
+                dplyr::mutate(in_barton_snps = chr_pos %in% barton_tib$chr_pos) %>%
+                dplyr::relocate(lead_snp, lead_snp_pos, in_fmd_snps, in_barton_snps)
+                
+            # 1. get barton snps near the lead SNP. Note that lead SNP is taken from fmd data
+            # 1b. Check if barton SNP rs ids are in fmd data
+            st2_in_fmd <- st2 %>%
+                dplyr::filter(in_fmd_snps)
+            proxies[[rs]] <- st2_in_fmd
         }
     }
     # add ld value to each row of each tibble in proxies object
@@ -222,8 +221,15 @@ for (outcome in outcomes){
             dplyr::arrange(dplyr::desc(ld))
     }
     # get the combined rs ids for the proxies and true snps
-    
-
+    # split proxies into two lists - one where the lead SNP is in fmd data; the other not
+    proxies_in_fmd <- proxies %>%
+        purrr::discard( ~ncol(.x) > 3 )
+    proxies_not_in_fmd <- proxies %>%
+        purrr::discard( ~ncol(.x) < 4 )
+    proxies_in_fmd %>%
+        dplyr::bind_rows() %>%
+        dplyr::mutate(chr_pos = paste0("chr", chr, ":", position)) %>%
+        dplyr::mutate(in_barton = chr_pos %in% barton_tib$chr_pos)
 
 
 }
