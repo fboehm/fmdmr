@@ -16,8 +16,7 @@ library(magrittr)
 ```{r}
 (threshold <- 1e-6)
 fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
-fmd <- vroom::vroom(fmd_file) %>%
-            dplyr::filter(p_value < threshold)
+fmd <- vroom::vroom(fmd_file) 
 ```
 
 
@@ -25,29 +24,41 @@ fmd <- vroom::vroom(fmd_file) %>%
 # https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
 # follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
 ld_token <- "3fbdb0673b22"
-
-
-remove_offdiagonal_ones <- function(symm_matrix, threshold = 0.9){
-    nr <- nrow(symm_matrix)
-    bad_list <- list()
-    for (row in 1:nr){
-        foo <- upper.tri(symm_matrix, diag = FALSE)[row,]
-        bar <- symm_matrix[row, ] > threshold
-        bad_list[[row]] <- which(foo & bar)
-    }
-    bad_indices <- unique(do.call("c", bad_list))
-    if (length(bad_indices) == 0){
-        return(symm_matrix)
-    } else {
-        out <- as.matrix(symm_matrix[- bad_indices, - bad_indices])
-        rownames(out) <- colnames(out) <- colnames(symm_matrix)[- bad_indices]
-        return(out)
-    }
-}
 ```
 
 
-
+```{r}
+# get GRCh38 position AND GRCh37 for lead SNP
+get_pos_from_rs_id <- function(rs_id){
+    # get rsid from chromosome and position
+    dataset <- "hsapiens_snp"
+    attributes <- c("refsnp_id", "chr_name", "chrom_start", "chrom_end")
+    # create a biomaRt object for the GRCh37 reference genome
+    mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_SNP", dataset = dataset)
+    # retrieve the SNP information using biomaRt
+    filters <- list(snp_filter = rs_id) 
+    result1 <- biomaRt::getBM(attributes = attributes, filters = filters, mart = mart) %>%
+        dplyr::rename(pos_grch38 = chrom_start) 
+    # now GRCh37
+    host <- "https://grch37.ensembl.org"
+    mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_SNP", dataset = dataset, host = host)
+    # retrieve the SNP information using biomaRt
+    result2 <- biomaRt::getBM(attributes = attributes, filters = filters, mart = mart) %>%
+        dplyr::rename(pos_grch37 = chrom_start)
+    result <- result1 %>%
+        dplyr::inner_join(result2, by = c("refsnp_id", "chr_name")) %>%
+        dplyr::select( - chrom_end.x, - chrom_end.y)
+    return(result)
+}
+# get SNPs near a lead SNP and in joined data
+get_snps_near_lead <- function(lead_snp_pos, lead_snp_chrom, dat, dat_chrom_var, dat_pos_var, dist = 100000){
+    out <- dat %>%
+        dplyr::filter({{ dat_chrom_var }} == lead_snp_chrom) %>%
+        dplyr::filter( {{ dat_pos_var }} >= lead_snp_pos - dist & {{ dat_pos_var }} <= lead_snp_pos + dist) 
+        
+    return(out)
+}
+```
 
 
 ```{r}
@@ -56,13 +67,33 @@ for (file in files){
     print(file)
     dat <- vroom::vroom(file)
     joined <- dat %>%
-                    dplyr::inner_join(fmd, by = c("rsids" = "SNP"))
-    nrow(joined)
-    
+        dplyr::inner_join(fmd, by = c("rsids" = "SNP"))
+    cat(nrow(joined))    
+    fmd_lead_snps %in% joined$rsids # only 1 of 26 lead SNPs is in the joined data
+    # get snps near each lead SNP from fmd_lead_snps
+    # get pos GRCh38 for each lead SNP
+    for (rs in fmd_lead_snps){
+        # NEED TO ACCOUNT FOR DIFFERENT GENOME BUILD!!!
+        ls_tib <- get_pos_from_rs_id(rs)
+        proximal_fmd <- get_snps_near_lead(lead_snp_pos = ls_tib$pos_grch37, 
+                                            lead_snp_chrom = ls_tib$chr_name, 
+                                            dat = fmd, dat_chrom_var = chromosome, 
+                                            dat_pos_var = base_pair_location) 
+        proximal_dat <- get_snps_near_lead(lead_snp_pos = ls_tib$pos_grch38, 
+                                            lead_snp_chrom = ls_tib$chr_name, 
+                                            dat = dat, dat_chrom_var = chrom, 
+                                            dat_pos_var = pos) 
+
+        # get LD matrix for lead SNP and nearby SNPs
+        rsids <- c(rs, proximal_fmd$SNP, proximal_dat$rsids) %>% unique()                    
+    }
 }
 ```
 
-
+1. for a lead SNP (ie, FMD-associated SNP), get nearby SNPs in FMD data, paying attention to genome build (GRCh37)
+2. for a lead SNP, get nearby SNPs in Wuttke data, paying attention to genome build (GRCh38)
+3. query LDlinkR for LD matrix for union of SNPs from 1 and 2 (along with lead SNP)
+4. 
 
 
 
