@@ -162,7 +162,11 @@ for (outcome in outcomes){
     proxies <- list()
     for (row_num in seq_len(nrow(sa))){ #loop over lead SNPs
         one_snp_tib <- sa %>% dplyr::slice(row_num)
-        rs <- one_snp_tib$lead_snp    
+        rs <- one_snp_tib$lead_snp
+        if (rs %in% fmd_tib$SNP){
+            proxies[[rs]] <- one_snp_tib
+            next
+        }    
         # 0. check if lead SNP is in barton and FMD data sets
         # join one_snp_tib with barton_tib & check number of rows of result
         one_joined <- one_snp_tib %>%
@@ -198,7 +202,7 @@ for (outcome in outcomes){
             # 3. get barton snps with high LD with lead SNP
     proxy_tibs <- list()
     for (i in seq_along(proxies)){
-        if (nrow(proxies[[i]]) == 0){
+        if (nrow(proxies[[i]]) < 2 || ncol(proxies[[i]]) == 3){
             next
         }
         ld_tib <- get_ld_matrix(snps = c(proxies[[i]]$lead_snp[1], proxies[[i]]$refsnp_id), 
@@ -210,9 +214,18 @@ for (outcome in outcomes){
         
         # see if best proxies are in fmd data 
         #foo <- get_proxies_tib(ldlink_output = ld_tib_small, ld_threshold = 0.8)
-        proxy_tibs[[i]] <- ld_tib_small
+        proxy_tibs[[i]] <- ld_tib_small %>%
+            dplyr::filter(!(row_name == column_name)) %>%
+            dplyr::right_join(proxies[[i]], by = c("row_name" = "refsnp_id", "column_name" = "lead_snp")) %>%
+            dplyr::rename(proxy_rs_id = row_name, proxy_pos = pos, lead_snp = column_name, ld = value) %>%
+            dplyr::relocate(lead_snp, proxy_rs_id, proxy_pos, lead_snp_pos, in_fmd_snps, .after = 1) %>%
+            dplyr::arrange(dplyr::desc(ld))
     }
+    # get the combined rs ids for the proxies and true snps
     
+
+
+
 }
 # we now have proxies object
 
