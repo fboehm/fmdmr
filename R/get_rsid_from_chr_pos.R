@@ -22,7 +22,6 @@ get_rsid_from_chr_pos <- function(chr, pos, host = "https://grch37.ensembl.org")
             dplyr::filter(stringr::str_starts(refsnp_id, "rs"))
         cat("Retrieved SNP information for position ", pp, " on chromosome ", chr, "\n")
     }
-     
     tib <- purrr::discard(results, ~nrow(.x) == 0) %>%
         dplyr::bind_rows()
     return(tib)

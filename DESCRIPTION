@@ -1,5 +1,5 @@
 Package: fmdmr
-Title: What the Package Does (One Line, Title Case)
+Title: Mendelian Randomization Analysis For FMD And Kidney-related Traits
 Version: 0.0.0.9000
 Authors@R:
     person("Frederick", "Boehm", , "frederick.boehm@gmail.com", role = c("aut", "cre"),
@@ -9,7 +9,15 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Imports: here
+Remotes: bioc::release/biomaRt
+Imports: 
+    biomaRt,
+    dplyr,
+    here,
+    LDlinkR,
+    magrittr,
+    purrr,
+    tibble
 Suggests: 
     devtools,
     git2r,
