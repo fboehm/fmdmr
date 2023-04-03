@@ -50,11 +50,20 @@ snp_ann_pre <- snp_ann_grch38 %>%
 snp_ann <- snp_ann_pre %>%
     dplyr::filter(!is.na(as.integer(chr_name))) %>%
     dplyr::mutate(chr = as.integer(chr_name)) %>%
-    dplyr::select( - chr_name)
+    dplyr::select( - chr_name) %>%
+    dplyr::arrange(chr, pos_grch37)
 
 snp_ann %>%
     print(n = nrow(.))   
-
+# which fmd_lead_snps are not in fmd object?
+big_snp_ann <- snp_ann %>%
+    dplyr::mutate(chr_pos = paste0("chr", chr, ":", pos_grch37)) %>%
+    dplyr::left_join(fmd, by = c("chr_pos"))
+# subset snp_ann to include only SNPs that are in fmd (ie, publicly available data)
+good_snps <- big_snp_ann %>%
+    dplyr::filter(!is.na(chromosome)) 
+bad_snps <- big_snp_ann %>%
+    dplyr::filter(is.na(chromosome))
 ```
 
 
@@ -125,7 +134,7 @@ for (file in files){
         dplyr::mutate(chr_pos = paste0("chr", chrom, ":", pos))
     proxy_tib_d <- ld_s        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
-nps_d %>%
+    nps_d %>%
         dplyr::mutate(in_dat_rs = RS_Number %in% dat$rsids) %>%
         dplyr::mutate(in_dat_chr_pos = Coord %in% dat$chr_pos) %>%
         dplyr::relocate(lead_snp, in_dat_rs, in_dat_chr_pos, R2) %>%  
@@ -148,11 +157,11 @@ nps_d %>%
         dplyr::relocate(is_proxy_in_fmd_also_in_dat_rs)
     # filter fmd to get effects for the lead SNPs
     fmd_small <- fmd %>%
-        dplyr::filter(SNP %in% proxy_tib_f$lead_snp)
-    fmd_lead_snps %>%
-        tibble::as_tibble() %>%
-        dplyr::rename(fmd_lead_snp = value)
-}
+        dplyr::filter(SNP %in% proxy_tib_f$lead_snp, p_value < 10 ^ -6)
+    ptf2 <- proxy_tib_f %>%
+        dplyr::filter(lead_snp %in% fmd_small$SNP) 
+    ptd2 <- proxy_tib_d %>%
+        dplyr::filter(lead_snp %in% fmd_small$SNP)
 ```
 
 1. for a lead SNP (ie, FMD-associated SNP), get nearby SNPs in FMD data, paying attention to genome build (GRCh37)
