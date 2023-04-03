@@ -17,7 +17,8 @@ library(magrittr)
 fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- vroom::vroom(fmd_file) %>%
     dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
-
+fmd_lead_snps_file <- here::here("data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
+fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header = FALSE) %>% as.character()
 ```
 
 
@@ -25,32 +26,6 @@ fmd <- vroom::vroom(fmd_file) %>%
 # https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
 # follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
 ld_token <- "3fbdb0673b22"
-```
-
-
-```{r}
-#' Get SNPs in high LD with a lead SNP
-#' @param snps a character vector of SNPs - either rsids or chromosome:position
-#' @param genome_build a character string of the genome build
-#' @param ld_token a character string of the LDlinkR token
-#' @param pop a character string of the population to use for LD calculation
-#' @param r2_threshold a numeric value of the r2 threshold to use in filtering correlated SNPs
-
-get_correlated_snps <- function(snps, genome_build, ld_token, pop = "CEU", r2_threshold = 0.8){
-    ldlink_output <- list()
-    for (snp in snps){
-        ldlink_output[[snp]] <- LDlinkR::LDproxy(snp = snp, genome_build = genome_build, 
-                                                 token = ld_token, pop = pop) %>%
-            tibble::as_tibble() %>%
-            dplyr::filter(R2 >= r2_threshold) %>%
-            dplyr::mutate(lead_snp = snp)
-    }
-    result <- ldlink_output %>%
-        dplyr::bind_rows()
-    return(result)
-}
-
-
 ```
 
 
@@ -91,35 +66,68 @@ get_snps_near_lead <- function(lead_snp_pos, lead_snp_chrom, dat, dat_chrom_var,
 ```{r}
 files <- list.files(here::here("data", "wuttke2023"), pattern = "tsv.gz", full.names = TRUE)
 for (file in files){
-    cat(file)
+    print(file)
     dat <- vroom::vroom(file) %>%
-        dplyr::mutate(chr_pos = paste0("chr", chrom, ":", pos))
-    ld_snps_d <- get_correlated_snps(fmd_lead_snps, genome_build = "grch38", ld_token = ld_token)
-    proxy_tib_d <- ld_snps_d %>%
-        dplyr::mutate(in_dat_rs = RS_Number %in% dat$rsids) %>%
-        dplyr::mutate(in_dat_chr_pos = Coord %in% dat$chr_pos) %>%
-        dplyr::relocate(lead_snp, in_dat_rs, in_dat_chr_pos, R2) %>%  
-        dplyr::filter(in_dat_rs | in_dat_chr_pos) %>%
-        dplyr::group_by(lead_snp) %>%
-        dplyr::arrange(desc(R2)) %>%
-        dplyr::filter(R2 == max(R2)) %>%
-        dplyr::rename(proxy_in_dat = RS_Number) 
-    # same for fmd snps
-    ld_snps_f <- get_correlated_snps(fmd_lead_snps, genome_build = "grch37", ld_token = ld_token)
-    proxy_tib_f <- ld_snps_f %>%
-        dplyr::mutate(in_fmd_rs = RS_Number %in% fmd$SNP) %>%
-        dplyr::mutate(in_fmd_chr_pos = Coord %in% fmd$chr_pos) %>%
-        dplyr::relocate(lead_snp, in_fmd_rs, in_fmd_chr_pos, R2) %>%
-        dplyr::filter(in_fmd_rs | in_fmd_chr_pos) %>%
-        dplyr::group_by(lead_snp) %>%
-        dplyr::filter(R2 == max(R2)) %>%
-        dplyr::rename(proxy_in_fmd = RS_Number) %>%
-        dplyr::mutate(is_proxy_in_fmd_also_in_dat = proxy_in_fmd %in% ) 
-    # filter fmd to get effects for the lead SNPs
-    fmd_small <- fmd %>%
-        dplyr::filter(SNP %in% proxy_tib$lead_snp)
-        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
+        dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
+    # get rsids for dat where rsids are missing
 
+    ###############################
+    joined <- dat %>%
+        dplyr::inner_join(fmd, by = c("rsids" = "SNP")) %>%
+        dplyr::arrange(p_value) %>%
+        dplyr::relocate(p_value)
+    cat(nrow(joined))    
+    fmd_lead_snps %in% joined$rsids # only 1 of 26 lead SNPs is in the joined data
+    fmd_lead_snps %in% dat$rsids # 2 of 26 lead SNPs are in dat; however, many dat SNPs have no rsid!
+    # check the pos & chrom for dat SNPs
+
+    # make an annotation tibble for lead FMD snps
+    snp_ann <- get_pos_from_rs_id(fmd_lead_snps) %>%
+        dplyr::arrange(as.integer(chr_name)) %>%
+        tibble::as_tibble() %>%
+        dplyr::mutate(chr = as.integer(chr_name)) %>%
+        dplyr::select(- chr_name)
+    snp_ann %>%
+        dplyr::inner_join(dat, by = c("chr" = "chrom", "pos_grch38" = "pos"))
+    # only 2 of 26 lead SNPs are in dat
+
+    # get snps near each lead SNP from fmd_lead_snps
+    # get pos GRCh38 for each lead SNP
+    for (rs in fmd_lead_snps){
+        # NEED TO ACCOUNT FOR DIFFERENT GENOME BUILD!!!
+        ls_tib <- snp_ann %>%
+            dplyr::filter(refsnp_id == rs)
+        proximal_fmd <- get_snps_near_lead(lead_snp_pos = ls_tib$pos_grch37, 
+                                            lead_snp_chrom = ls_tib$chr_name, 
+                                            dat = fmd, dat_chrom_var = chromosome, 
+                                            dat_pos_var = base_pair_location) %>%
+            dplyr::mutate(dist_to_lead = abs(base_pair_location - ls_tib$pos_grch37)) %>%
+            dplyr::relocate(dist_to_lead) %>%
+            dplyr::arrange(dist_to_lead) %>%
+            dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
+        proximal_dat <- get_snps_near_lead(lead_snp_pos = ls_tib$pos_grch38, 
+                                            lead_snp_chrom = ls_tib$chr_name, 
+                                            dat = dat, dat_chrom_var = chrom, 
+                                            dat_pos_var = pos) %>%
+            dplyr::mutate(dist_to_lead = abs(pos - ls_tib$pos_grch38)) %>%
+            dplyr::relocate(dist_to_lead) %>%
+            dplyr::arrange(dist_to_lead) %>%
+            dplyr::mutate(chr_pos = paste0("chr", chrom, ":", pos))
+        # get LD matrix for lead SNP and nearby SNPs
+        rsids <- c(rs, proximal_fmd$SNP, proximal_dat$chr_pos) %>% unique()  
+        ld_tib <- get_ld_matrix(snps = rsids, 
+                                ld_token = ld_token, 
+                                genome_build = "grch38_high_coverage") %>%
+            tibble::as_tibble() %>%
+            organize_ldlink_output()  
+         pf2 <- proximal_fmd %>% 
+            dplyr::relocate(p_value, .after=SNP) %>% 
+            dplyr::filter(p_value < 10^-5) %>%
+            dplyr::mutate(in_dat_rs = SNP %in% dat$rsids, 
+                          in_dat_chr_pos = chr_pos %in% proximal_dat$chr_pos) %>%
+            dplyr::relocate(in_dat_rs, in_dat_chr_pos, .after = p_value) %>%
+            dplyr::relocate(chromosome, dist_to_lead, .after = in_dat_chr_pos)     
+    }
 }
 ```
 
