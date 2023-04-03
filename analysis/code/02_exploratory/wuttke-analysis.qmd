@@ -68,59 +68,10 @@ bad_snps <- big_snp_ann %>%
 
 
 ```{r}
-#' Get SNPs in high LD with a lead SNP
-#' @param snps a character vector of SNPs - either rsids or chromosome:position
-#' @param genome_build a character string of the genome build
-#' @param ld_token a character string of the LDlinkR token
-#' @param pop a character string of the population to use for LD calculation
-#' @param r2_threshold a numeric value of the r2 threshold to use in filtering correlated SNPs
-
-get_correlated_snps <- function(snps, genome_build, ld_token, pop = "CEU", r2_threshold = 0.8){
-    ldlink_output <- list()
-    for (snp in snps){
-        ldlink_output[[snp]] <- LDlinkR::LDproxy(snp = snp, genome_build = genome_build, 
-                                                 token = ld_token, pop = pop) %>%
-            tibble::as_tibble() %>%
-            dplyr::filter(R2 >= r2_threshold) %>%
-            dplyr::mutate(lead_snp = snp)
-    }
-    result <- ldlink_output %>%
-        dplyr::bind_rows()
-    return(result)
-}
 ```
 
 
 ```{r}
-# get GRCh38 position AND GRCh37 for lead SNP
-get_pos_from_rs_id <- function(rs_id){
-    # get rsid from chromosome and position
-    dataset <- "hsapiens_snp"
-    attributes <- c("refsnp_id", "chr_name", "chrom_start", "chrom_end")
-    # create a biomaRt object for the GRCh37 reference genome
-    mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_SNP", dataset = dataset)
-    # retrieve the SNP information using biomaRt
-    filters <- list(snp_filter = rs_id) 
-    result1 <- biomaRt::getBM(attributes = attributes, filters = filters, mart = mart) %>%
-        dplyr::rename(pos_grch38 = chrom_start) 
-    # now GRCh37
-    host <- "https://grch37.ensembl.org"
-    mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_SNP", dataset = dataset, host = host)
-    # retrieve the SNP information using biomaRt
-    result2 <- biomaRt::getBM(attributes = attributes, filters = filters, mart = mart) %>%
-        dplyr::rename(pos_grch37 = chrom_start)
-    result <- result1 %>%
-        dplyr::inner_join(result2, by = c("refsnp_id", "chr_name")) %>%
-        dplyr::select( - chrom_end.x, - chrom_end.y)
-    return(result)
-}
-# get SNPs near a lead SNP and in joined data
-get_snps_near_lead <- function(lead_snp_pos, lead_snp_chrom, dat, dat_chrom_var, dat_pos_var, dist = 100000){
-    out <- dat %>%
-        dplyr::filter({{ dat_chrom_var }} == lead_snp_chrom) %>%
-        dplyr::filter( {{ dat_pos_var }} >= lead_snp_pos - dist & {{ dat_pos_var }} <= lead_snp_pos + dist) 
-    return(out)
-}
 ```
 
 
