@@ -14,9 +14,10 @@ library(magrittr)
 
 
 ```{r}
-(threshold <- 1e-6)
 fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
-fmd <- vroom::vroom(fmd_file) 
+fmd <- vroom::vroom(fmd_file) %>%
+    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
+
 ```
 
 
@@ -24,6 +25,32 @@ fmd <- vroom::vroom(fmd_file)
 # https://cran.r-project.org/web/packages/LDlinkR/vignettes/LDlinkR.html
 # follow steps at above url to use LDlinkR to get LD matrix for use with MendelianRandomization R pkg
 ld_token <- "3fbdb0673b22"
+```
+
+
+```{r}
+#' Get SNPs in high LD with a lead SNP
+#' @param snps a character vector of SNPs - either rsids or chromosome:position
+#' @param genome_build a character string of the genome build
+#' @param ld_token a character string of the LDlinkR token
+#' @param pop a character string of the population to use for LD calculation
+#' @param r2_threshold a numeric value of the r2 threshold to use in filtering correlated SNPs
+
+get_correlated_snps <- function(snps, genome_build, ld_token, pop = "CEU", r2_threshold = 0.8){
+    ldlink_output <- list()
+    for (snp in snps){
+        ldlink_output[[snp]] <- LDlinkR::LDproxy(snp = snp, genome_build = genome_build, 
+                                                 token = ld_token, pop = pop) %>%
+            tibble::as_tibble() %>%
+            dplyr::filter(R2 >= r2_threshold) %>%
+            dplyr::mutate(lead_snp = snp)
+    }
+    result <- ldlink_output %>%
+        dplyr::bind_rows()
+    return(result)
+}
+
+
 ```
 
 
@@ -64,40 +91,35 @@ get_snps_near_lead <- function(lead_snp_pos, lead_snp_chrom, dat, dat_chrom_var,
 ```{r}
 files <- list.files(here::here("data", "wuttke2023"), pattern = "tsv.gz", full.names = TRUE)
 for (file in files){
-    print(file)
-    dat <- vroom::vroom(file)
-    joined <- dat %>%
-        dplyr::inner_join(fmd, by = c("rsids" = "SNP"))
-    cat(nrow(joined))    
-    fmd_lead_snps %in% joined$rsids # only 1 of 26 lead SNPs is in the joined data
-    # get snps near each lead SNP from fmd_lead_snps
-    # get pos GRCh38 for each lead SNP
-    tibs <- list()
-    for (rs in fmd_lead_snps){
-        # NEED TO ACCOUNT FOR DIFFERENT GENOME BUILD!!!
-        ls_tib <- get_pos_from_rs_id(rs)
-        proximal_fmd <- get_snps_near_lead(lead_snp_pos = ls_tib$pos_grch37, 
-                                            lead_snp_chrom = ls_tib$chr_name, 
-                                            dat = fmd, dat_chrom_var = chromosome, 
-                                            dat_pos_var = base_pair_location) 
-        proximal_dat <- get_snps_near_lead(lead_snp_pos = ls_tib$pos_grch38, 
-                                            lead_snp_chrom = ls_tib$chr_name, 
-                                            dat = dat, dat_chrom_var = chrom, 
-                                            dat_pos_var = pos) 
+    cat(file)
+    dat <- vroom::vroom(file) %>%
+        dplyr::mutate(chr_pos = paste0("chr", chrom, ":", pos))
+    ld_snps_d <- get_correlated_snps(fmd_lead_snps, genome_build = "grch38", ld_token = ld_token)
+    proxy_tib_d <- ld_snps_d %>%
+        dplyr::mutate(in_dat_rs = RS_Number %in% dat$rsids) %>%
+        dplyr::mutate(in_dat_chr_pos = Coord %in% dat$chr_pos) %>%
+        dplyr::relocate(lead_snp, in_dat_rs, in_dat_chr_pos, R2) %>%  
+        dplyr::filter(in_dat_rs | in_dat_chr_pos) %>%
+        dplyr::group_by(lead_snp) %>%
+        dplyr::arrange(desc(R2)) %>%
+        dplyr::filter(R2 == max(R2)) %>%
+        dplyr::rename(proxy_in_dat = RS_Number) 
+    # same for fmd snps
+    ld_snps_f <- get_correlated_snps(fmd_lead_snps, genome_build = "grch37", ld_token = ld_token)
+    proxy_tib_f <- ld_snps_f %>%
+        dplyr::mutate(in_fmd_rs = RS_Number %in% fmd$SNP) %>%
+        dplyr::mutate(in_fmd_chr_pos = Coord %in% fmd$chr_pos) %>%
+        dplyr::relocate(lead_snp, in_fmd_rs, in_fmd_chr_pos, R2) %>%
+        dplyr::filter(in_fmd_rs | in_fmd_chr_pos) %>%
+        dplyr::group_by(lead_snp) %>%
+        dplyr::filter(R2 == max(R2)) %>%
+        dplyr::rename(proxy_in_fmd = RS_Number) %>%
+        dplyr::mutate(is_proxy_in_fmd_also_in_dat = proxy_in_fmd %in% ) 
+    # filter fmd to get effects for the lead SNPs
+    fmd_small <- fmd %>%
+        dplyr::filter(SNP %in% proxy_tib$lead_snp)
+        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
 
-        # get LD matrix for lead SNP and nearby SNPs
-        rsids <- c(rs, proximal_fmd$SNP, proximal_dat$rsids) %>% unique() %>% (function(x) x[!is.na(x)])    
-        ld_tib <- get_ld_matrix(snps = rsids, ld_token = ld_token) %>%
-            tibble::as_tibble()        
-        ld_small <- organize_ldlink_output(ld_tib) %>%
-            dplyr::filter(column_name == rs) %>%
-            dplyr::filter(!(column_name == row_name)) %>%
-            dplyr::arrange(dplyr::desc(value)) %>%
-            dplyr::mutate(row_in_dat = row_name %in% proximal_dat$rsids) %>%
-            dplyr::filter(row_in_dat) %>%
-            dplyr::slice(1)
-        tibs[[rs]] <- ld_small        
-    }
 }
 ```
 
