@@ -35,30 +35,6 @@ fmd <- vroom::vroom(fmd_file)
 ```
 
 
-```{r get_proxies}
-# get proxies for all 26 fmd_lead_snps
-# query biomaRt & LDlink if the output file doesn't exist
-ensembl_grch37 <- biomaRt::useEnsembl("ENSEMBL_MART_SNP", dataset = "hsapiens_snp", GRCh = 37)
-atts <- biomaRt::listAttributes(ensembl_grch37)
-snp_ann <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_start", "chrom_end"),
-                filters = "snp_filter",
-                values = ,
-                mart = ensembl_grch37) %>%
-                tibble::as_tibble()
-snp_ann %>%
-    print(n = nrow(.))   
-
-
-# get LD matrix for each lead SNP after renaming and filtering snp_ann to only include SNPs with a chromosome number
-sa <- snp_ann %>%
-    dplyr::filter(!is.na(as.integer(chr_name))) %>%
-    dplyr::mutate(chr = as.integer(chr_name)) %>%
-    dplyr::mutate(lead_snp = refsnp_id, position = chrom_start) %>%
-    dplyr::select( - chrom_end, - chrom_start, - refsnp_id, - chr_name) %>%
-    dplyr::mutate(chr_pos = paste0("chr", chr, ":", position)) %>%
-    dplyr::mutate(in_fmd = lead_snp %in% fmd_tib$SNP) %>%
-    dplyr::mutate(in_barton = chr_pos %in% barton_tib$chr_pos) 
-```
 
 
 
