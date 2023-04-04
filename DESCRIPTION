@@ -17,7 +17,9 @@ Imports:
     LDlinkR,
     magrittr,
     purrr,
-    tibble
+    stringr,
+    tibble,
+    tidyr
 Suggests: 
     devtools,
     git2r,

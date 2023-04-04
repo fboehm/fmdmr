@@ -28,51 +28,26 @@ ld_token <- "3fbdb0673b22"
 
 
 ```{r}
-fmd_lead_snps_file <- here::here("data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
-fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header = FALSE) %>% as.character()
-fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
-fmd_tib <- vroom::vroom(fmd_file) 
+#fmd_lead_snps_file <- here::here("data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
+#fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header = FALSE) %>% as.character()
+fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
+fmd <- vroom::vroom(fmd_file) 
 ```
-dat
+
+
 ```{r get_proxies}
 # get proxies for all 26 fmd_lead_snps
 # query biomaRt & LDlink if the output file doesn't exist
-ensembl <- biomaRt::useMart("ENSEMBL_MART_SNP", dataset = "hsapiens_snp")
-atts <- biomaRt::listAttributes(ensembl)
+ensembl_grch37 <- biomaRt::useEnsembl("ENSEMBL_MART_SNP", dataset = "hsapiens_snp", GRCh = 37)
+atts <- biomaRt::listAttributes(ensembl_grch37)
 snp_ann <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_start", "chrom_end"),
                 filters = "snp_filter",
-                values = fmd_lead_snps,
-                mart = ensembl) %>%
+                values = ,
+                mart = ensembl_grch37) %>%
                 tibble::as_tibble()
 snp_ann %>%
     print(n = nrow(.))   
 
-####
-#' Organize outputted LD matrix (a data.frame) from LDlink into 3-column tibble & discard NAs 
-#' 
-#' @param ldlink_output a data.frame from LDlinkR::LDmatrix
-#' @param lead_snp_rs_id a character vector of length 1 - the rsid of the lead SNP
-#' @param snp_vec a character vector of SNPs to check if LDlink output is in the vector snp_vec
-organize_ldlink_output <- function(ldlink_output){
-    out <- ldlink_output %>% 
-        dplyr::rename(row_name = RS_number) %>% # column RS_number is hardcoded because it's always in the LDlinkR output
-        tidyr::gather(column_name, value, - row_name) %>%
-        dplyr::filter(stringr::str_starts(string = column_name, pattern = "rs")) %>%
-        dplyr::filter(!is.na(value)) %>%
-        dplyr::arrange(dplyr::desc(value)) 
-    return(out)
-}
-
-#' Choose proxy SNPs for a single lead SNP from the output of organize_ldlink_output.
-#' 
-#' @param ldlink_output a tibble with columns 'row_name', 'value', 'in_snp_set'
-#' @param ld_threshold a numeric value - the threshold for LD to be considered a proxy
-#' @return a tibble with columns 'row_name', 'value', 'in_snp_set' and one row per proxy SNP
-get_proxies_tib <- function(ldlink_output, ld_threshold = 0.8){
-    out <- ldlink_output %>%
-        dplyr::filter(value > ld_threshold) 
-    return(out)
-}
 
 # get LD matrix for each lead SNP after renaming and filtering snp_ann to only include SNPs with a chromosome number
 sa <- snp_ann %>%
@@ -96,12 +71,12 @@ sa <- snp_ann %>%
 outcomes <- c("CystatinC", "Creatinine")
 for (outcome in outcomes){
     if (outcome == "CystatinC"){
-        barton_file <- here::here("data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
+        barton_file <- here::here("analysis", "data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
     }
     if (outcome == "Creatinine"){
         barton_file <- here::here("data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
     }
-    barton_tib <- vroom::vroom(barton_file) %>%
+    dat <- vroom::vroom(barton_file) %>%
         dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
     # find shared snps
     # get proxies for each lead SNP
