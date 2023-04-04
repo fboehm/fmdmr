@@ -31,12 +31,57 @@ ld_token <- "3fbdb0673b22"
 #fmd_lead_snps_file <- here::here("data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
 #fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header = FALSE) %>% as.character()
 fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
-fmd <- vroom::vroom(fmd_file) 
+fmd <- vroom::vroom(fmd_file) %>%
+    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location)) 
+fmd_leads <- fmd %>%
+    dplyr::filter(p_value < 10^-6) %>%
+    dplyr::arrange(p_value)
+# define quasi-independent SNPs for each chromosome in fmd_leads
+fl2 <- list()
+for (chr in unique(fmd_leads$chromosome)){
+    fmd_leads_chr <- fmd_leads %>% 
+        dplyr::filter(chromosome == chr) %>%
+        dplyr::mutate(chr_name = as.character(chromosome), refsnp_id = SNP, pos = base_pair_location)
+    if (nrow(fmd_leads_chr) <= 1){
+        fl2[[chr]] <- fmd_leads_chr 
+    } else {
+        ld_tib <- get_ld_tib(snps = fmd_leads_chr$SNP, 
+            genome_build = "grch37", 
+            token = ld_token)
+        out <- choose_one_from_corr_snps(snp_info = fmd_leads_chr, ld_tibble = ld_tib, ld_threshold = 0.8)
+        fl2[[chr]] <- out
+    }
+}
+independent_lead_snps <- fl2 %>% 
+    purrr::discard(is.null) %>% 
+    dplyr::bind_rows()
 ```
 
 
-
-
+```{r}
+# are the independent snps in the barton data?
+indep_not_in_dat <- independent_lead_snps %>%
+    dplyr::filter(! chr_pos %in% dat$chr_pos) 
+indep_not_in_dat %>%
+    knitr::kable(caption = "Independent lead SNPs not in Barton data")
+corr_snps_for_leads <- get_correlated_snps(snps = indep_not_in_dat$SNP, 
+                                            genome_build = "grch37", 
+                                            ld_token = ld_token) 
+cs2 <- corr_snps_for_leads %>%
+    dplyr::mutate(proxy_in_dat = Coord %in% dat$chr_pos) %>%
+    dplyr::relocate(lead_snp, proxy_in_dat)
+cs3 <- cs2 %>%
+    dplyr::filter(proxy_in_dat) %>%
+    dplyr::group_by(lead_snp) %>%
+    dplyr::arrange(desc(R2), abs(Distance)) %>%
+    dplyr::slice(1) %>%
+    dplyr::select(- Dprime, - proxy_in_dat)
+cs2 %>%
+    knitr::kable(caption = "Correlated SNPs for independent lead SNPs not in Barton data")
+### independent in dat
+indep_in_dat <- independent_lead_snps %>%
+    dplyr::filter(chr_pos %in% dat$chr_pos) 
+```
 
 
 `LDlinkR::LDmatrix` takes as inputs up to 1000 SNPs at a time.
@@ -54,6 +99,7 @@ for (outcome in outcomes){
     }
     dat <- vroom::vroom(barton_file) %>%
         dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
+    
     # find shared snps
     # get proxies for each lead SNP
     # if a lead SNP is itself present in the fmd data, then we don't need a proxy for it in the FMD data

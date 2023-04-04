@@ -1,7 +1,9 @@
 #' Get LD values for a collection of SNPs on one chromosome
 #' 
 #' @param snps a character vector of SNPs
-#' @param host a character string of the host to use for the LDlinkR query
+#' @param genome_build a character string of the genome build to use for the LDlinkR query
+#' @param token a character string of the LDlinkR token
+#' @param pop a character string of the population to use for the LDlinkR query
 #' @return a tibble with 3 columns: row_name, column_name, value
 #' @details This function is used to get LD values for a collection of SNPs.
 #' @export 
