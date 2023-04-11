@@ -73,7 +73,7 @@ for (file in files) {
         dplyr::mutate(harmonised_dat_effect = ifelse(fmd_effect_allele == alt, beta, -beta))
     mr_in <- MendelianRandomization::mr_input(bx = comb2$fmd_BETA, bxse = comb2$fmd_SE, by = comb2$harmonised_dat_effect, byse = comb2$se)
     mr_out <- MendelianRandomization::mr_allmethods(mr_in)
-    knitr::kable(mr_out@Values)
-    MendelianRandomization::mr_plot(mr_in)
+    knitr::kable(mr_out@Values) %>% print()
+    MendelianRandomization::mr_plot(mr_in) %>% print()
 }
 ```
