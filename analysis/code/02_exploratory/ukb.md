@@ -1,24 +1,30 @@
----
-title: "UKB creatinine & Cystatin C"
-format: gfm
----
+UKB creatinine & Cystatin C
+================
 
-
-```{r}
+``` r
 library(magrittr)
 ```
 
-
-```{r}
+``` r
 fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- vroom::vroom(fmd_file) %>%
     dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
-fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") # snps from Katz et al. 2022 Supp Info Table SII.
-
 ```
 
+    Rows: 5483710 Columns: 12
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr (3): SNP, OA, EA
+    dbl (9): chromosome, base_pair_location, EAF, BETA, SE, p_value, Het_P, N_ca...
 
-```{r}
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") # snps from Katz et al. 2022 Supp Info Table SII.
+```
+
+``` r
 files <- list.files(here::here("analysis", "data", "ukb"), pattern = "both_sexes", full.names = TRUE)
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
 # GRCh37 is used here!
@@ -54,9 +60,7 @@ for (file in files) {
         dplyr::relocate(chr, pos, ref, alt, chr_pos)
     fmd_lead_snps$chr_pos %in% dat$chr_pos
 
-
     #Neale lab denotes by beta the alt allele effect, ie, the increase in phenotype per increase in one alt allele.
-
 
     #Are any of the snps shared between ukb and fmd?
 
@@ -77,3 +81,39 @@ for (file in files) {
     MendelianRandomization::mr_plot(mr_in)
 }
 ```
+
+    /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb/30700_irnt.gwas.imputed_v3.both_sexes.varorder.tsv.bgz 
+
+    Rows: 13791467 Columns: 11
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr (2): variant, minor_allele
+    dbl (8): minor_AF, n_complete_samples, AC, ytx, beta, se, tstat, pval
+    lgl (1): low_confidence_variant
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb/30700_irnt.gwas.imputed_v3.both_sexes.varorder.tsv.bgz.1 
+
+    Rows: 13791467 Columns: 11
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr (2): variant, minor_allele
+    dbl (8): minor_AF, n_complete_samples, AC, ytx, beta, se, tstat, pval
+    lgl (1): low_confidence_variant
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+    /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb/30720_irnt.gwas.imputed_v3.both_sexes.varorder.tsv.bgz 
+
+    Rows: 13791467 Columns: 11
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "\t"
+    chr (2): variant, minor_allele
+    dbl (8): minor_AF, n_complete_samples, AC, ytx, beta, se, tstat, pval
+    lgl (1): low_confidence_variant
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
