@@ -1,6 +1,6 @@
 # README.md
 
-The goal of this project is to perform 2-sample MR studies to identify possible causes of FMD. 
+The goal of this project is to perform 2-sample MR studies to identify possible consequences of FMD. 
 We'll use summary statistics from GWAS. Min-Lee Yang previously shared, via email, the path 
 to the meta-analysis FMD GWAS summary statistics. 
 
