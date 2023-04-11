@@ -36,6 +36,8 @@ fmd <- vroom::vroom(fmd_file) %>%
 fmd_leads <- fmd %>%
     dplyr::filter(p_value < 10^-6) %>%
     dplyr::arrange(p_value)
+# look at chr values for fmd_leads snps
+fmd_leads$chromosome %>% table()    
 # define quasi-independent SNPs for each chromosome in fmd_leads
 fl2 <- list()
 for (chr in unique(fmd_leads$chromosome)){
@@ -44,27 +46,52 @@ for (chr in unique(fmd_leads$chromosome)){
         dplyr::mutate(chr_name = as.character(chromosome), refsnp_id = SNP, pos = base_pair_location)
     if (nrow(fmd_leads_chr) <= 1){
         fl2[[chr]] <- fmd_leads_chr 
-    } else {
-        ld_tib <- get_ld_tib(snps = fmd_leads_chr$SNP, 
-            genome_build = "grch37", 
-            token = ld_token)
-        out <- choose_one_from_corr_snps(snp_info = fmd_leads_chr, ld_tibble = ld_tib, ld_threshold = 0.8)
+    } 
+    if (nrow(fmd_leads_chr) == 2){
+        ld_df <- fmdmr::get_ld_df(snps = fmd_leads_chr$SNP, 
+                                    genome_build = "grch37", 
+                                    token = ld_token)
+        ld_tib <- fmdmr::organize_ldlink_output(ld_df)
+        # exactly four rows in ld_tib
+        # keep both SNPs if R2 < ld_threshold else choose snp with smaller pvalue
+        ld_threshold <- 0.5
+        ldf <- ld_tib %>%
+            dplyr::filter(value > ld_threshold)
+        if (nrow(ldf) == 4){
+            fl2[[chr]] <- fmd_leads_chr %>%
+                dplyr::filter(p_value == min(p_value))
+        } else {
+            fl2[[chr]] <- fmd_leads_chr
+        }
+    }
+    if (nrow(fmd_leads_chr) > 2){
+        # chr 12 only
+        snp_index_to_keep <- c(1,2, 8) # ordered by pvalue
+        out <- fmd_leads_chr %>%
+            dplyr::filter(dplyr::row_number() %in% snp_index_to_keep)
+
+
         fl2[[chr]] <- out
     }
 }
 independent_lead_snps <- fl2 %>% 
     purrr::discard(is.null) %>% 
     dplyr::bind_rows()
-```
+
+#######
+# read dat here
+barton_file <- here::here("analysis", "data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
+dat <- vroom::vroom(barton_file) %>%
+    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
 
 
-```{r}
+######## use dat and fmd
 # are the independent snps in the barton data?
 indep_not_in_dat <- independent_lead_snps %>%
     dplyr::filter(! chr_pos %in% dat$chr_pos) 
 indep_not_in_dat %>%
     knitr::kable(caption = "Independent lead SNPs not in Barton data")
-corr_snps_for_leads <- get_correlated_snps(snps = indep_not_in_dat$SNP, 
+corr_snps_for_leads <- fmdmr::get_correlated_snps(snps = indep_not_in_dat$SNP, 
                                             genome_build = "grch37", 
                                             ld_token = ld_token) 
 cs2 <- corr_snps_for_leads %>%
@@ -78,9 +105,46 @@ cs3 <- cs2 %>%
     dplyr::select(- Dprime, - proxy_in_dat)
 cs2 %>%
     knitr::kable(caption = "Correlated SNPs for independent lead SNPs not in Barton data")
+proxy_snps <- indep_not_in_dat %>%
+    dplyr::filter(SNP %in% cs3$lead_snp)
+# use proxy_snps and cs3 to get proxy snps for independent snps not in dat
+# proxy joined, pj
+pj <- proxy_snps %>%
+    dplyr::inner_join(cs3, by = c("SNP" = "lead_snp"))
+p2 <- pj %>%
+    dplyr::select(SNP, RS_Number) %>%
+    dplyr::rename(fmd_snp = SNP, dat_snp = RS_Number)
+p2$fmd_snp %in% fmd$SNP
 ### independent in dat
 indep_in_dat <- independent_lead_snps %>%
     dplyr::filter(chr_pos %in% dat$chr_pos) 
+########
+# subset fmd to get only those snps that are repped in the barton dat
+f2 <- fmd %>%
+    dplyr::filter(SNP %in% pj$SNP | SNP %in% indep_in_dat$SNP) %>%
+    dplyr::mutate(needs_proxy_in_dat = SNP %in% pj$SNP) %>%
+    dplyr::left_join(p2, by = c("SNP" = "fmd_snp")) 
+d2 <- dat %>%
+    dplyr::filter(chr_pos  %in% pj$Coord) %>%
+    dplyr::select(- CHISQ_LINREG, - P_LINREG, - INFO, - GENPOS, - CHISQ_BOLT_LMM_INF, - CHISQ_BOLT_LMM, - P_BOLT_LMM_INF) 
+p3 <- pj %>%
+    dplyr::relocate(RS_Number, Correlated_Alleles, Alleles, MAF, SNP, OA, EA, EAF) %>%
+    dplyr::rename(fmd_snp = SNP, dat_snp = RS_Number, dat_alleles = Alleles, fmd_oa = OA, fmd_ea = EA)  
+
+# need to construct a tibble 
+    input <- MendelianRandomization::mr_input(
+                bx = f2$BETA, 
+                bxse = f2$SE, 
+                by = small_dat_no_ld$beta, 
+                byse = small_dat_no_ld$standard_error,
+                corr = ld_mat_small,
+                exposure = "FMD",
+                outcome = outcome,
+                snps = rownames(ld_mat_small)
+            )
+
+
+
 ```
 
 
@@ -95,7 +159,7 @@ for (outcome in outcomes){
         barton_file <- here::here("analysis", "data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
     }
     if (outcome == "Creatinine"){
-        barton_file <- here::here("data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
+        barton_file <- here::here("analysis", "data", "barton2021_creatinine", "GCST90025946_buildGRCh37.tsv")
     }
     dat <- vroom::vroom(barton_file) %>%
         dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))

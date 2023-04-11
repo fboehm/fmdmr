@@ -15,29 +15,29 @@
 #'  value = c(1, 0.6, 0.2, 0.6, 1, 0.3, 0.2, 0.3, 1))
 #' choose_one_from_corr_snps(snp_info, ld_tibble, ld_threshold)
 #'  
-choose_one_from_corr_snps <- function(snp_info, ld_tibble, ld_threshold = 0.5){
-    # define correlated SNP clusters
+choose_from_corr_snps <- function(snp_info, ld_mat, ld_threshold = 0.5){
     # then choose the snp with smallest p-value for each cluster
     # choose a row from snp_info then id its correlated SNPs
     out <- list()
     snps_in_ld <- c()
+    k <- 0
     for (row_num in seq_len(nrow(snp_info))){
         ss <- snp_info %>%
             dplyr::slice(row_num) 
-        if (ss$refsnp_id %in% snps_in_ld){
+        if (ss$SNP %in% snps_in_ld){
             next
         }
+        k <- k + 1
         lt <- ld_tibble %>%
-            dplyr::filter(row_name == ss$refsnp_id) %>%
-            dplyr::filter(value >= ld_threshold) 
+            dplyr::filter(value >= ld_threshold, row_name == ss$SNP) 
         snps_in_ld <- c(unique(c(lt$row_name, lt$column_name)), snps_in_ld)
         si <- snp_info %>%
             dplyr::filter(refsnp_id %in% snps_in_ld) %>%
-            dplyr::arrange(p_value) %>%
-            dplyr::slice(1)
-        out[[as.character(si$refsnp_id)]] <- si
+            dplyr::arrange(p_value) 
+        out[[k]] <- si
     }
     result <- purrr::discard(out, ~nrow(.x) == 0) %>%
         dplyr::bind_rows()
     return(result)
 }
+
