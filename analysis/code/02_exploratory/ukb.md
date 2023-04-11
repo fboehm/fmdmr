@@ -77,8 +77,8 @@ for (file in files) {
         dplyr::mutate(harmonised_dat_effect = ifelse(fmd_effect_allele == alt, beta, -beta))
     mr_in <- MendelianRandomization::mr_input(bx = comb2$fmd_BETA, bxse = comb2$fmd_SE, by = comb2$harmonised_dat_effect, byse = comb2$se)
     mr_out <- MendelianRandomization::mr_allmethods(mr_in)
-    knitr::kable(mr_out@Values)
-    MendelianRandomization::mr_plot(mr_in)
+    knitr::kable(mr_out@Values) %>% print()
+    MendelianRandomization::mr_plot(mr_in) %>% print()
 }
 ```
 
@@ -94,6 +94,25 @@ for (file in files) {
     ℹ Use `spec()` to retrieve the full column specification for this data.
     ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
+
+
+    |Method                    |   Estimate| Std Error|    95% CI |          |   P-value|
+    |:-------------------------|----------:|---------:|----------:|---------:|---------:|
+    |Simple median             | -0.0019065| 0.0036449| -0.0090503| 0.0052374| 0.6009414|
+    |Weighted median           | -0.0003843| 0.0036285| -0.0074960| 0.0067274| 0.9156571|
+    |Penalized weighted median |  0.0010226| 0.0036018| -0.0060368| 0.0080821| 0.7764763|
+    |IVW                       | -0.0014697| 0.0039077| -0.0091286| 0.0061892| 0.7068343|
+    |Penalized IVW             |  0.0003576| 0.0033844| -0.0062756| 0.0069908| 0.9158476|
+    |Robust IVW                | -0.0008024| 0.0037051| -0.0080642| 0.0064595| 0.8285556|
+    |Penalized robust IVW      |  0.0004444| 0.0027946| -0.0050329| 0.0059217| 0.8736513|
+    |MR-Egger                  | -0.0001481| 0.0176663| -0.0347734| 0.0344772| 0.9933120|
+    |(intercept)               | -0.0004043| 0.0052539| -0.0107018| 0.0098931| 0.9386576|
+    |Penalized MR-Egger        | -0.0044071| 0.0146638| -0.0331475| 0.0243334| 0.7637646|
+    |(intercept)               |  0.0015018| 0.0044206| -0.0071626| 0.0101661| 0.7340711|
+    |Robust MR-Egger           | -0.0162002| 0.0360859| -0.0869272| 0.0545268| 0.6534791|
+    |(intercept)               |  0.0059965| 0.0138672| -0.0211828| 0.0331757| 0.6654348|
+    |Penalized robust MR-Egger | -0.0123985| 0.0296545| -0.0705204| 0.0457233| 0.6758750|
+    |(intercept)               |  0.0044809| 0.0111381| -0.0173493| 0.0263112| 0.6874576|
     /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb/30700_irnt.gwas.imputed_v3.both_sexes.varorder.tsv.bgz.1 
 
     Rows: 13791467 Columns: 11
@@ -106,6 +125,25 @@ for (file in files) {
     ℹ Use `spec()` to retrieve the full column specification for this data.
     ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
+
+
+    |Method                    |   Estimate| Std Error|    95% CI |          |   P-value|
+    |:-------------------------|----------:|---------:|----------:|---------:|---------:|
+    |Simple median             | -0.0019065| 0.0036449| -0.0090503| 0.0052374| 0.6009414|
+    |Weighted median           | -0.0003843| 0.0036285| -0.0074960| 0.0067274| 0.9156571|
+    |Penalized weighted median |  0.0010226| 0.0036018| -0.0060368| 0.0080821| 0.7764763|
+    |IVW                       | -0.0014697| 0.0039077| -0.0091286| 0.0061892| 0.7068343|
+    |Penalized IVW             |  0.0003576| 0.0033844| -0.0062756| 0.0069908| 0.9158476|
+    |Robust IVW                | -0.0008024| 0.0037051| -0.0080642| 0.0064595| 0.8285556|
+    |Penalized robust IVW      |  0.0004444| 0.0027946| -0.0050329| 0.0059217| 0.8736513|
+    |MR-Egger                  | -0.0001481| 0.0176663| -0.0347734| 0.0344772| 0.9933120|
+    |(intercept)               | -0.0004043| 0.0052539| -0.0107018| 0.0098931| 0.9386576|
+    |Penalized MR-Egger        | -0.0044071| 0.0146638| -0.0331475| 0.0243334| 0.7637646|
+    |(intercept)               |  0.0015018| 0.0044206| -0.0071626| 0.0101661| 0.7340711|
+    |Robust MR-Egger           | -0.0162002| 0.0360859| -0.0869272| 0.0545268| 0.6534791|
+    |(intercept)               |  0.0059965| 0.0138672| -0.0211828| 0.0331757| 0.6654348|
+    |Penalized robust MR-Egger | -0.0123985| 0.0296545| -0.0705204| 0.0457233| 0.6758750|
+    |(intercept)               |  0.0044809| 0.0111381| -0.0173493| 0.0263112| 0.6874576|
     /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb/30720_irnt.gwas.imputed_v3.both_sexes.varorder.tsv.bgz 
 
     Rows: 13791467 Columns: 11
@@ -117,3 +155,23 @@ for (file in files) {
 
     ℹ Use `spec()` to retrieve the full column specification for this data.
     ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+
+
+    |Method                    |   Estimate| Std Error|    95% CI |          |   P-value|
+    |:-------------------------|----------:|---------:|----------:|---------:|---------:|
+    |Simple median             |  0.0007370| 0.0040863| -0.0072719| 0.0087460| 0.8568642|
+    |Weighted median           |  0.0021240| 0.0040818| -0.0058763| 0.0101242| 0.6028250|
+    |Penalized weighted median |  0.0011191| 0.0041778| -0.0070691| 0.0093074| 0.7887962|
+    |IVW                       |  0.0013242| 0.0043741| -0.0072488| 0.0098972| 0.7620868|
+    |Penalized IVW             |  0.0025319| 0.0031750| -0.0036909| 0.0087547| 0.4251794|
+    |Robust IVW                |  0.0019162| 0.0044630| -0.0068310| 0.0106634| 0.6676630|
+    |Penalized robust IVW      |  0.0019187| 0.0028783| -0.0037226| 0.0075600| 0.5050088|
+    |MR-Egger                  |  0.0191350| 0.0186923| -0.0175012| 0.0557712| 0.3059849|
+    |(intercept)               | -0.0054488| 0.0055590| -0.0163443| 0.0054467| 0.3269995|
+    |Penalized MR-Egger        |  0.0127440| 0.0130239| -0.0127824| 0.0382704| 0.3278216|
+    |(intercept)               | -0.0025886| 0.0039387| -0.0103083| 0.0051311| 0.5110321|
+    |Robust MR-Egger           |  0.0037655| 0.0221761| -0.0396989| 0.0472300| 0.8651671|
+    |(intercept)               | -0.0003774| 0.0055851| -0.0113241| 0.0105692| 0.9461205|
+    |Penalized robust MR-Egger |  0.0041369| 0.0218401| -0.0386689| 0.0469428| 0.8497642|
+    |(intercept)               | -0.0006649| 0.0053211| -0.0110940| 0.0097643| 0.9005650|
