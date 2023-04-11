@@ -18,7 +18,7 @@ fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MO
 ```
 
 
-```{r}
+```{r, results = "asis"}
 files <- list.files(here::here("analysis", "data", "ukb"), pattern = "both_sexes", full.names = TRUE)
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
 # GRCh37 is used here!
@@ -76,4 +76,10 @@ for (file in files) {
     knitr::kable(mr_out@Values) %>% print()
     MendelianRandomization::mr_plot(mr_in) %>% print()
 }
+```
+
+
+
+```{r}
+sessioninfo::session_info()
 ```
