@@ -14,10 +14,10 @@ library(magrittr)
 
 
 ```{r}
-fmd_file <- here::here("data", "fmd", "GCST90026612_buildGRCh37.tsv")
+fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- vroom::vroom(fmd_file) %>%
     dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
-fmd_lead_snps_file <- here::here("data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
+fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
 fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header = FALSE) %>% as.character()
 
 ```
@@ -29,7 +29,6 @@ fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header =
 ld_token <- "3fbdb0673b22"
 # make two snp ann objects, one for each build
 ensembl_grch38 <- biomaRt::useEnsembl("ENSEMBL_MART_SNP", dataset = "hsapiens_snp")
-atts <- biomaRt::listAttributes(ensembl)
 snp_ann_grch38 <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_start", "chrom_end"),
                 filters = "snp_filter",
                 values = fmd_lead_snps,
@@ -68,23 +67,15 @@ bad_snps <- big_snp_ann %>%
 
 
 ```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-ld_snps_f <- get_correlated_snps(fmd_lead_snps, genome_build = "grch37", ld_token = ld_token)
-ld_snps_d <- get_correlated_snps(fmd_lead_snps, genome_build = "grch38", ld_token = ld_token)
+ld_snps_f <- fmdmr::get_correlated_snps(fmd_lead_snps, genome_build = "grch37", ld_token = ld_token)
 files <- list.files(here::here("data", "wuttke2023"), pattern = "tsv.gz", full.names = TRUE)
 for (file in files){
     cat(file)
     dat <- vroom::vroom(file) %>%
         dplyr::mutate(chr_pos = paste0("chr", chrom, ":", pos))
-    proxy_tib_d <- ld_s        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
-       dplyr::mutate(lead_snp = proxy_tib$lead_snp)
+    proxy_tib_d <- ld_s        
+        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
+        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
     nps_d %>%
         dplyr::mutate(in_dat_rs = RS_Number %in% dat$rsids) %>%
         dplyr::mutate(in_dat_chr_pos = Coord %in% dat$chr_pos) %>%
