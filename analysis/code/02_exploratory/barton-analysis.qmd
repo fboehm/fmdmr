@@ -33,52 +33,9 @@ ld_token <- "3fbdb0673b22"
 fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- vroom::vroom(fmd_file) %>%
     dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location)) 
-fmd_leads <- fmd %>%
-    dplyr::filter(p_value < 10^-6) %>%
-    dplyr::arrange(p_value)
-# look at chr values for fmd_leads snps
-fmd_leads$chromosome %>% table()    
-# define quasi-independent SNPs for each chromosome in fmd_leads
-fl2 <- list()
-for (chr in unique(fmd_leads$chromosome)){
-    fmd_leads_chr <- fmd_leads %>% 
-        dplyr::filter(chromosome == chr) %>%
-        dplyr::mutate(chr_name = as.character(chromosome), refsnp_id = SNP, pos = base_pair_location)
-    if (nrow(fmd_leads_chr) <= 1){
-        fl2[[chr]] <- fmd_leads_chr 
-    } 
-    if (nrow(fmd_leads_chr) == 2){
-        ld_df <- fmdmr::get_ld_df(snps = fmd_leads_chr$SNP, 
-                                    genome_build = "grch37", 
-                                    token = ld_token)
-        ld_tib <- fmdmr::organize_ldlink_output(ld_df)
-        # exactly four rows in ld_tib
-        # keep both SNPs if R2 < ld_threshold else choose snp with smaller pvalue
-        ld_threshold <- 0.5
-        ldf <- ld_tib %>%
-            dplyr::filter(value > ld_threshold)
-        if (nrow(ldf) == 4){
-            fl2[[chr]] <- fmd_leads_chr %>%
-                dplyr::filter(p_value == min(p_value))
-        } else {
-            fl2[[chr]] <- fmd_leads_chr
-        }
-    }
-    if (nrow(fmd_leads_chr) > 2){
-        # chr 12 only
-        snp_index_to_keep <- c(1,2, 8) # ordered by pvalue
-        out <- fmd_leads_chr %>%
-            dplyr::filter(dplyr::row_number() %in% snp_index_to_keep)
-
-
-        fl2[[chr]] <- out
-    }
-}
-independent_lead_snps <- fl2 %>% 
-    purrr::discard(is.null) %>% 
-    dplyr::bind_rows()
-
-#######
+fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") # snps from Katz et al. 2022 Supp Info Table SII.
+fmd_leads <- readxl::read_xlsx(fmd_lead_snps_file, skip = 1, col_names = TRUE) %>%
+    dplyr::filter(`P-value` < 10^-6)
 # read dat here
 barton_file <- here::here("analysis", "data", "barton2021_cystatinC", "GCST90025945_buildGRCh37.tsv")
 dat <- vroom::vroom(barton_file) %>%

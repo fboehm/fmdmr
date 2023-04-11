@@ -3,6 +3,7 @@
 export("%>%")
 export(choose_from_corr_snps)
 export(convert_df_to_matrix)
+export(get_correlated_snps)
 export(get_ld_df)
 export(get_pos_from_rs_id)
 export(get_rsid_from_chr_pos)

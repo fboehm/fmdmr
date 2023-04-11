@@ -10,7 +10,7 @@ parse_correlated_alleles(allele_string)
 \item{allele_string}{a character string of alleles from the Correlated_Alleles column with form like A=A,G=C}
 }
 \value{
-a tibble with two rows per proxy SNP
+a tibble with two rows per proxy SNP, one row per allele
 }
 \description{
 Parse ldlink output for proxy SNPs' alleles in column called Correlated_Alleles

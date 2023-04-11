@@ -17,8 +17,9 @@ library(magrittr)
 fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- vroom::vroom(fmd_file) %>%
     dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
-fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "katz_fmd_snps.csv") # snps from Katz et al. 2022 Supp Info Table SII.
-fmd_lead_snps <- read.csv(fmd_lead_snps_file, stringsAsFactors = FALSE, header = FALSE) %>% as.character()
+fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") # snps from Katz et al. 2022 Supp Info Table SII.
+fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 1, col_names = TRUE) %>%
+    dplyr::filter(`P-value` < 10^-6)
 
 ```
 
@@ -31,7 +32,7 @@ ld_token <- "3fbdb0673b22"
 ensembl_grch38 <- biomaRt::useEnsembl("ENSEMBL_MART_SNP", dataset = "hsapiens_snp")
 snp_ann_grch38 <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_start", "chrom_end"),
                 filters = "snp_filter",
-                values = fmd_lead_snps,
+                values = fmd_lead_snps$rsID,
                 mart = ensembl_grch38) %>%
                     tibble::as_tibble() %>%
                     dplyr::rename(pos_grch38 = chrom_start) %>%
@@ -39,15 +40,16 @@ snp_ann_grch38 <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_
 ensembl_grch37 <- biomaRt::useEnsembl("ENSEMBL_MART_SNP", dataset = "hsapiens_snp", GRCh = 37)
 snp_ann_grch37 <- biomaRt::getBM(attributes = c("refsnp_id", "chr_name", "chrom_start", "chrom_end"),
                 filters = "snp_filter",
-                values = fmd_lead_snps,
+                values = fmd_lead_snps$rsID,
                 mart = ensembl_grch37) %>%
                     tibble::as_tibble() %>%
                     dplyr::rename(pos_grch37 = chrom_start) %>%
                     dplyr::select(-chrom_end)
 snp_ann_pre <- snp_ann_grch38 %>%
+    dplyr::mutate(chr_name = as.integer(chr_name)) %>%
+    dplyr::filter(!is.na(chr_name)) %>%
     dplyr::left_join(snp_ann_grch37, by = c("refsnp_id", "chr_name"))
 snp_ann <- snp_ann_pre %>%
-    dplyr::filter(!is.na(as.integer(chr_name))) %>%
     dplyr::mutate(chr = as.integer(chr_name)) %>%
     dplyr::select( - chr_name) %>%
     dplyr::arrange(chr, pos_grch37)
@@ -56,54 +58,70 @@ snp_ann %>%
     print(n = nrow(.))   
 # which fmd_lead_snps are not in fmd object?
 big_snp_ann <- snp_ann %>%
-    dplyr::mutate(chr_pos = paste0("chr", chr, ":", pos_grch37)) %>%
-    dplyr::left_join(fmd, by = c("chr_pos"))
+    dplyr::mutate(chr_pos37 = paste0("chr", chr, ":", pos_grch37)) %>%
+    dplyr::left_join(fmd, by = c("chr_pos37" = "chr_pos")) %>%
+    dplyr::select(- chromosome, - base_pair_location, - Het_P, - N_cases, - N_ctrls) %>%
+    dplyr::mutate(chr_pos38 = paste0("chr", chr, ":", pos_grch38)) 
+
 # subset snp_ann to include only SNPs that are in fmd (ie, publicly available data)
 good_snps <- big_snp_ann %>%
     dplyr::filter(!is.na(chromosome)) 
 bad_snps <- big_snp_ann %>%
     dplyr::filter(is.na(chromosome))
+
+
 ```
 
 
 ```{r}
-ld_snps_f <- fmdmr::get_correlated_snps(fmd_lead_snps, genome_build = "grch37", ld_token = ld_token)
-files <- list.files(here::here("data", "wuttke2023"), pattern = "tsv.gz", full.names = TRUE)
+ld_snps_37 <- fmdmr::get_correlated_snps(fmd_lead_snps$rsID, 
+                                        genome_build = "grch37", 
+                                        ld_token = ld_token)
+ld_snps_38 <- fmdmr::get_correlated_snps(fmd_lead_snps$rsID, 
+                                        genome_build = "grch38", 
+                                        ld_token = ld_token)
+
+ld_snps_37 %>%
+    dplyr::group_by(lead_snp) %>%
+    dplyr::count()
+ld_snps_37 %>%
+    dplyr::group_by(lead_snp) %>%
+    dplyr::arrange(desc(R2), abs(Distance)) %>%
+    dplyr::filter(R2 == max(R2)) %>%
+    dplyr::rename(Coord_grch37 = Coord)
+
+
+
+files <- list.files(here::here("analysis", "data", "wuttke2023"), pattern = "tsv.gz", full.names = TRUE)
 for (file in files){
     cat(file)
     dat <- vroom::vroom(file) %>%
         dplyr::mutate(chr_pos = paste0("chr", chrom, ":", pos))
-    proxy_tib_d <- ld_s        
-        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
-        dplyr::mutate(lead_snp = proxy_tib$lead_snp)
-    nps_d %>%
-        dplyr::mutate(in_dat_rs = RS_Number %in% dat$rsids) %>%
-        dplyr::mutate(in_dat_chr_pos = Coord %in% dat$chr_pos) %>%
-        dplyr::relocate(lead_snp, in_dat_rs, in_dat_chr_pos, R2) %>%  
-        dplyr::filter(in_dat_rs | in_dat_chr_pos) %>%
+    # check if lead snps are in dat
+    dat_lead_snps <- dat %>%
+        dplyr::filter(rsids %in% fmd_lead_snps$rsID)    
+    nrow(dat_lead_snps)
+    # Does each lead SNP have a proxy in dat?
+    proxy <- list()
+    for (row in 1:nrow(fmd_lead_snps)){
+        one_lead <- fmd_lead_snps[row, ]
+        d_one <- ld_snps_38 %>%
+            dplyr::filter(lead_snp == one_lead$rsID) %>%
+            dplyr::relocate(lead_snp) %>%
+            dplyr::rename_with(.f = function(x){paste0(x, "_grch38")}, .cols = -lead_snp )
+
+        proxy[[one_lead$rsID]] <- d_one
+    }
+    proxies <- proxy %>%
+        dplyr::bind_rows() %>%
         dplyr::group_by(lead_snp) %>%
-        dplyr::arrange(desc(R2)) %>%
-        #dplyr::filter(R2 == max(R2)) %>%
-        dplyr::rename(proxy_in_dat = RS_Number) 
-    # same for fmd snps
-    proxy_tib_f_pre <- ld_snps_f %>%
-        dplyr::mutate(in_fmd_rs = RS_Number %in% fmd$SNP) %>%
-        dplyr::mutate(in_fmd_chr_pos = Coord %in% fmd$chr_pos) %>%
-        dplyr::relocate(lead_snp, in_fmd_rs, in_fmd_chr_pos, R2) %>%
-        dplyr::filter(in_fmd_rs | in_fmd_chr_pos) %>%
-        dplyr::group_by(lead_snp) 
-    proxy_tib_f <- proxy_tib_f_pre %>%
-        #dplyr::filter(R2 == max(R2)) %>%
-        dplyr::rename(proxy_in_fmd = RS_Number) %>%
-        dplyr::mutate(is_proxy_in_fmd_also_in_dat_rs = proxy_in_fmd %in% dat$rsids) %>%
-        dplyr::relocate(is_proxy_in_fmd_also_in_dat_rs)
-    # filter fmd to get effects for the lead SNPs
-    fmd_small <- fmd %>%
-        dplyr::filter(SNP %in% proxy_tib_f$lead_snp, p_value < 10 ^ -6)
-    ptf2 <- proxy_tib_f %>%
-        dplyr::filter(lead_snp %in% fmd_small$SNP) 
-    ptd2 <- proxy_tib_d %>%
-        dplyr::filter(lead_snp %in% fmd_small$SNP)
+        dplyr::inner_join(dat, by = c("RS_Number_grch38" = "rsids")) %>%
+        dplyr::arrange(desc(R2_grch38), abs(Distance_grch38)) %>%
+        dplyr::slice(1) %>%
+        dplyr::mutate(corr_allele_tib = purrr::map(.x = Correlated_Alleles_grch38, .f = fmdmr::parse_correlated_alleles))
+    proxies %>%
+        dplyr::inner_join(big_snp_ann, by = c("lead_snp" = "refsnp_id")) %>%
+        dplyr::inner_join(dat, by = c("chr_pos38" = "chr_pos"))
 ```
 
 1. for a lead SNP (ie, FMD-associated SNP), get nearby SNPs in FMD data, paying attention to genome build (GRCh37)
@@ -115,5 +133,5 @@ for (file in files){
 
 
 ```{r}
-devtools::session_info()
+sessioninfo::session_info()
 ```

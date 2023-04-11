@@ -2,7 +2,7 @@
 #' 
 #' @param allele_string a character string of alleles from the Correlated_Alleles column with form like A=A,G=C
 #' @details lead SNP's alleles are always on the left side of the equals sign in the Correlated_Alleles column
-#' @return a tibble with two rows per proxy SNP
+#' @return a tibble with two rows per proxy SNP, one row per allele
 #' @export
 #' @examples
 #' a_string <- "A=A,G=C"
@@ -18,3 +18,5 @@ parse_correlated_alleles <- function(allele_string){
         dplyr::rename(lead_allele = V1, proxy_allele = V2)
     return(result)
 }
+
+#' 

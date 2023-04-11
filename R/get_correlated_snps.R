@@ -6,6 +6,7 @@
 #' @param r2_threshold a numeric value of the r2 threshold to use in filtering correlated SNPs
 #' @return a tibble with one row per correlated SNP
 #' @details queries LDlink API once per lead SNP
+#' @export
 
 get_correlated_snps <- function(snps, genome_build, ld_token, pop = "CEU", r2_threshold = 0.8){
     ldlink_output <- list()
