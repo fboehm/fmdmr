@@ -78,41 +78,11 @@ for (file in files) {
     mr_in <- MendelianRandomization::mr_input(bx = comb2$fmd_BETA, bxse = comb2$fmd_SE, by = comb2$harmonised_dat_effect, byse = comb2$se)
     mr_out <- MendelianRandomization::mr_allmethods(mr_in)
     knitr::kable(mr_out@Values) %>% print()
-    MendelianRandomization::mr_plot(mr_in) %>% print()
+    MendelianRandomization::mr_plot(mr_in, interactive = FALSE) %>% print()
 }
 ```
 
 /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb/30700_irnt.gwas.imputed_v3.both_sexes.varorder.tsv.bgz
-
-    Rows: 13791467 Columns: 11
-    ── Column specification ────────────────────────────────────────────────────────
-    Delimiter: "\t"
-    chr (2): variant, minor_allele
-    dbl (8): minor_AF, n_complete_samples, AC, ytx, beta, se, tstat, pval
-    lgl (1): low_confidence_variant
-
-    ℹ Use `spec()` to retrieve the full column specification for this data.
-    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-| Method                    |   Estimate | Std Error |     95% CI |           |   P-value |
-|:--------------------------|-----------:|----------:|-----------:|----------:|----------:|
-| Simple median             | -0.0019065 | 0.0036449 | -0.0090503 | 0.0052374 | 0.6009414 |
-| Weighted median           | -0.0003843 | 0.0036285 | -0.0074960 | 0.0067274 | 0.9156571 |
-| Penalized weighted median |  0.0010226 | 0.0036018 | -0.0060368 | 0.0080821 | 0.7764763 |
-| IVW                       | -0.0014697 | 0.0039077 | -0.0091286 | 0.0061892 | 0.7068343 |
-| Penalized IVW             |  0.0003576 | 0.0033844 | -0.0062756 | 0.0069908 | 0.9158476 |
-| Robust IVW                | -0.0008024 | 0.0037051 | -0.0080642 | 0.0064595 | 0.8285556 |
-| Penalized robust IVW      |  0.0004444 | 0.0027946 | -0.0050329 | 0.0059217 | 0.8736513 |
-| MR-Egger                  | -0.0001481 | 0.0176663 | -0.0347734 | 0.0344772 | 0.9933120 |
-| (intercept)               | -0.0004043 | 0.0052539 | -0.0107018 | 0.0098931 | 0.9386576 |
-| Penalized MR-Egger        | -0.0044071 | 0.0146638 | -0.0331475 | 0.0243334 | 0.7637646 |
-| (intercept)               |  0.0015018 | 0.0044206 | -0.0071626 | 0.0101661 | 0.7340711 |
-| Robust MR-Egger           | -0.0162002 | 0.0360859 | -0.0869272 | 0.0545268 | 0.6534791 |
-| (intercept)               |  0.0059965 | 0.0138672 | -0.0211828 | 0.0331757 | 0.6654348 |
-| Penalized robust MR-Egger | -0.0123985 | 0.0296545 | -0.0705204 | 0.0457233 | 0.6758750 |
-| (intercept)               |  0.0044809 | 0.0111381 | -0.0173493 | 0.0263112 | 0.6874576 |
-
-/net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb/30700_irnt.gwas.imputed_v3.both_sexes.varorder.tsv.bgz.1
 
     Rows: 13791467 Columns: 11
     ── Column specification ────────────────────────────────────────────────────────
@@ -154,6 +124,12 @@ for (file in files) {
     ℹ Use `spec()` to retrieve the full column specification for this data.
     ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-1.png)
+
+</div>
+
 | Method                    |   Estimate | Std Error |     95% CI |           |   P-value |
 |:--------------------------|-----------:|----------:|-----------:|----------:|----------:|
 | Simple median             |  0.0007370 | 0.0040863 | -0.0072719 | 0.0087460 | 0.8568642 |
@@ -171,6 +147,12 @@ for (file in files) {
 | (intercept)               | -0.0003774 | 0.0055851 | -0.0113241 | 0.0105692 | 0.9461205 |
 | Penalized robust MR-Egger |  0.0041369 | 0.0218401 | -0.0386689 | 0.0469428 | 0.8497642 |
 | (intercept)               | -0.0006649 | 0.0053211 | -0.0110940 | 0.0097643 | 0.9005650 |
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-2.png)
+
+</div>
 
 ``` r
 sessioninfo::session_info()
@@ -199,15 +181,14 @@ sessioninfo::session_info()
      codetools                0.2-19   2023-02-01 [1] CRAN (R 4.2.2)
      colorspace               2.1-0    2023-01-23 [1] CRAN (R 4.2.2)
      crayon                   1.5.2    2022-09-29 [1] CRAN (R 4.2.1)
-     crosstalk                1.2.0    2021-11-04 [1] CRAN (R 4.1.2)
      data.table               1.14.8   2023-02-17 [1] CRAN (R 4.2.2)
      DBI                      1.1.3    2022-06-18 [1] CRAN (R 4.2.2)
      DEoptimR                 1.0-11   2022-04-03 [2] CRAN (R 4.2.0)
      digest                   0.6.31   2022-12-11 [1] CRAN (R 4.2.2)
      dplyr                    1.1.1    2023-03-22 [1] CRAN (R 4.2.3)
-     ellipsis                 0.3.2    2021-04-29 [2] CRAN (R 4.2.1)
      evaluate                 0.20     2023-01-17 [1] CRAN (R 4.2.2)
      fansi                    1.0.4    2023-01-22 [1] CRAN (R 4.2.2)
+     farver                   2.1.1    2022-07-06 [1] CRAN (R 4.2.3)
      fastmap                  1.1.1    2023-02-24 [1] CRAN (R 4.2.3)
      foreach                  1.5.2    2022-02-02 [2] CRAN (R 4.2.0)
      generics                 0.1.3    2022-07-05 [1] CRAN (R 4.2.3)
