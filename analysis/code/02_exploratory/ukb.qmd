@@ -1,5 +1,5 @@
 ---
-title: "UKB creatinine & Cystatin C"
+title: "UKB creatinine & Cystatin C as possible consequences of FMD"
 format: gfm
 ---
 
@@ -11,11 +11,38 @@ library(magrittr)
 
 ```{r}
 fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
-fmd <- vroom::vroom(fmd_file) %>%
-    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
-fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") # snps from Katz et al. 2022 Supp Info Table SII.
+fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
+                                        sep = "\t",
+                                        snp_col = "SNP",
+                                        beta_col = "BETA",
+                                        effect_allele_col = "EA",
+                                        other_allele_col = "OA",
+                                        eaf_col = "EAF",
+                                        se_col = "SE",
+                                        pval_col = "p_value",
+                                        chr_col = "chromosome",
+                                        pos_col = "base_pair_location",
+                                        ncase_col = "N_cases",
+                                        ncontrol_col = "N_ctrls"
+                                        )
+
+#fmd <- vroom::vroom(fmd_file) %>%
+#    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
+fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") 
 
 ```
+
+```{r}
+ieugwasr::api_status()
+ao <- TwoSampleMR::available_outcomes()
+cr_ind <- grepl("creatinine", ao$trait, ignore.case = TRUE) 
+ki_ind <- grepl("kidney", ao$trait, ignore.case = TRUE) 
+cc_ind <- grepl("cystatin", ao$trait, ignore.case = TRUE)
+ao[cc_ind, ]
+ao[ki_ind, ]
+
+```
+
 
 
 ```{r, results = "asis"}
@@ -24,7 +51,25 @@ files <- list.files(here::here("analysis", "data", "ukb"), pattern = "both_sexes
 # GRCh37 is used here!
 for (file in files) {
     cat(file, "\n")
-    pre_dat <- vroom::vroom(file)
+    #pre_dat <- vroom::vroom(file)
+    TwoSampleMR::read_outcome_data(filename = file, 
+                                    snps = NULL,
+                                    sep = "\t",
+                                    snp_col = "varoant",
+                                    beta_col = "beta",
+                                    se_col = "se",
+                                    eaf_col = "eaf",
+                                    effect_allele_col = "effect_allele",
+                                    other_allele_col = "other_allele",
+                                    pval_col = "pval",
+                                    units_col = "units",
+                                    samplesize_col = "n_complete_samples",
+                                    gene_col = "gene",
+                                    id_col = "id",
+                                    min_pval = 1e-200,
+                                    log_pval = FALSE
+                                    
+                                    )
     fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 1, col_names = TRUE) %>%
     dplyr::filter(`P-value` < 10^-6) %>%
     dplyr::mutate(chr_pos = paste0("chr", CHROM, ":", POS)) %>%
