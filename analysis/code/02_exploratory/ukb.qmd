@@ -55,7 +55,7 @@ for (file in files) {
     TwoSampleMR::read_outcome_data(filename = file, 
                                     snps = NULL,
                                     sep = "\t",
-                                    snp_col = "varoant",
+                                    snp_col = "variant",
                                     beta_col = "beta",
                                     se_col = "se",
                                     eaf_col = "eaf",
