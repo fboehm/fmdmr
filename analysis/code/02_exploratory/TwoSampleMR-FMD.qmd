@@ -88,13 +88,13 @@ for (threshold in c(10 ^ -6, 10 ^ -5)){
             knitr::kable(caption = paste0("Pleiotropy test for ", names(outcomes)[i])) %>%
             print()
         res_ss <- TwoSampleMR::mr_singlesnp(dat) 
-        res_ss %>%
-            knitr::kable(caption = paste0("Single SNP analysis for ", names(outcomes)[i])) %>%
-            print()
+        #res_ss %>%
+        #    knitr::kable(caption = paste0("Single SNP analysis for ", names(outcomes)[i])) %>%
+        #    print()
         loo <- TwoSampleMR::mr_leaveoneout(dat) 
-        loo %>%
-            knitr::kable(caption = paste0("Leave one out analysis for ", names(outcomes)[i])) %>%
-            print()
+        #loo %>%
+        #    knitr::kable(caption = paste0("Leave one out analysis for ", names(outcomes)[i])) %>%
+        #    print()
         cat("### Plots for ", names(outcomes)[i], " outcomes\n")
         pp <- TwoSampleMR::mr_scatter_plot(res, dat)
         for (index in seq_along(pp)){
