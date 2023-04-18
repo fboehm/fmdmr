@@ -10,8 +10,38 @@ format: gfm
 library(magrittr)
 ```
 
-
 ```{r}
+#ieugwasr::api_status()
+ao <- TwoSampleMR::available_outcomes()
+cr_ind <- grepl("creatinine", ao$trait, ignore.case = TRUE) 
+ki_ind <- grepl("kidney", ao$trait, ignore.case = TRUE) 
+cc_ind <- grepl("cystatin", ao$trait, ignore.case = TRUE)
+cyc_outcomes <- ao[cc_ind, ] %>%
+    dplyr::filter(stringr::str_detect(string = trait, pattern = "Cystatin C") | stringr::str_detect(string = trait, pattern = "eGFRcys") | stringr::str_detect(string = trait, pattern = "Glomerular filtration rate"))
+# get ckd outcomes
+ckd_outcomes <- ao[ki_ind, ] %>%
+    dplyr::filter(stringr::str_detect(string = trait, pattern = "Chronic"))
+ckd_outcomes %>%
+    knitr::kable() %>%
+    print()
+cyc_outcomes %>%
+    knitr::kable() %>%
+    print()
+# creatinine
+cre_outcomes <- ao[cr_ind, ] %>%
+    dplyr::filter(!(stringr::str_detect(string = trait, pattern = "urine")) & !(stringr::str_detect(string = trait, pattern = "Urinary")))
+cre_outcomes %>% 
+    knitr::kable() %>%
+    print()
+outcomes <- list(creatinine = cre_outcomes, cystatin = cyc_outcomes, ckd = ckd_outcomes)
+```
+
+
+
+
+
+
+```{r, results = "asis"}
 fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         sep = "\t",
@@ -31,85 +61,57 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
 #fmd <- vroom::vroom(fmd_file) %>%
 #    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
 fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") 
-fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) %>%
-    dplyr::filter(`P-value` < 10^-6) 
-fmd_filt <- fmd %>%
-    dplyr::filter(SNP %in% fmd_lead_snps$rsID)
-```
 
-```{r}
-#ieugwasr::api_status()
-ao <- TwoSampleMR::available_outcomes()
-cr_ind <- grepl("creatinine", ao$trait, ignore.case = TRUE) 
-ki_ind <- grepl("kidney", ao$trait, ignore.case = TRUE) 
-cc_ind <- grepl("cystatin", ao$trait, ignore.case = TRUE)
-ao[cc_ind, ]
-# get ckd outcomes
-ckd_outcomes <- ao[ki_ind, ] %>%
-    dplyr::filter(stringr::str_detect(string = trait, pattern = "Chronic"))
-ckd <- TwoSampleMR::extract_outcome_data(
-    snps = fmd_filt$SNP,
-    outcomes = ckd_outcomes$id
-)
-dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
-res <- TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw")) 
-res %>%
-    knitr::kable() %>%
-    print()
-```
-
-```{r}
-TwoSampleMR::mr_heterogeneity(dat) %>%
-    knitr::kable() %>%
-    print()
-```
-
-
-```{r}
-TwoSampleMR::mr_pleiotropy_test(dat) %>%
-    knitr::kable() %>%
-    print()
-```
-
-```{r}
-res_ss <- TwoSampleMR::mr_singlesnp(dat) 
-res_ss %>%
-    knitr::kable() %>%
-    print()
-```
-
-```{r}
-loo <- TwoSampleMR::mr_leaveoneout(dat) 
-loo %>%
-    knitr::kable() %>%
-    print()
-```
-
-```{r}
-pp <- TwoSampleMR::mr_scatter_plot(res, dat)
-for (index in seq_along(pp)){
-    print(pp[[index]])
-}
-```
-
-```{r}
-p2 <- TwoSampleMR::mr_forest_plot(res_ss)
-for (index in seq_along(p2)){
-    print(p2[[index]])
-}
-```
-
-```{r}
-p3 <- TwoSampleMR::mr_leaveoneout_plot(loo)
-for (index in seq_along(p3)){
-    print(p3[[index]])
-}
-```
-
-```{r}
-p4 <- TwoSampleMR::mr_funnel_plot(res_ss)
-for (index in seq_along(p4)){ 
-    print(p4[[index]])
+for (threshold in c(10 ^ -6, 10 ^ -5)){
+    fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) %>%
+        dplyr::filter(`P-value` < threshold) 
+    fmd_filt <- fmd %>%
+        dplyr::filter(SNP %in% fmd_lead_snps$rsID)
+    cat("## MR for ", threshold, " threshold\n")
+    # loop over outcomes object
+    for (out in outcomes){
+        cat("### MR for ", names(out), " outcomes\n")
+        oo <- TwoSampleMR::extract_outcome_data(
+            snps = fmd_filt$SNP,
+            outcomes = out[[1]]$id
+        )
+        dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = oo)
+        res <- TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw")) 
+        res %>%
+            knitr::kable(caption = paste0("MR Egger and MR IVW for ", names(out))) %>%
+            print()
+        TwoSampleMR::mr_heterogeneity(dat) %>%
+            knitr::kable(caption = paste0("Heterogeneity test for ", names(out))) %>%
+            print()
+        TwoSampleMR::mr_pleiotropy_test(dat) %>%
+            knitr::kable(caption = paste0("Pleiotropy test for ", names(out))) %>%
+            print()
+        res_ss <- TwoSampleMR::mr_singlesnp(dat) 
+        res_ss %>%
+            knitr::kable(caption = paste0("Single SNP analysis for ", names(out))) %>%
+            print()
+        loo <- TwoSampleMR::mr_leaveoneout(dat) 
+        loo %>%
+            knitr::kable(caption = paste0("Leave one out analysis for ", names(out))) %>%
+            print()
+        cat("### Plots for ", names(out), " outcomes\n")
+        pp <- TwoSampleMR::mr_scatter_plot(res, dat)
+        for (index in seq_along(pp)){
+            print(pp[[index]])
+        }
+        p2 <- TwoSampleMR::mr_forest_plot(res_ss)
+        for (index in seq_along(p2)){
+            print(p2[[index]])
+        }
+        p3 <- TwoSampleMR::mr_leaveoneout_plot(loo)
+        for (index in seq_along(p3)){
+            print(p3[[index]])
+        }
+        p4 <- TwoSampleMR::mr_funnel_plot(res_ss)
+        for (index in seq_along(p4)){ 
+            print(p4[[index]])
+        }
+    }
 }
 ```
 
@@ -139,12 +141,6 @@ res_raps <- mr.raps::mr.raps.mle(b_exp = dat$beta.exposure,
 print(res_raps)
 ```
 
-```{r}
-```
-
-```{r}
-
-```
 
 
 
