@@ -40,56 +40,11 @@ fmd_filt <- fmd %>%
 ```
 
 ``` r
-ieugwasr::api_status()
-```
-
-    API: public: http://gwas-api.mrcieu.ac.uk/
-
-    $`API version`
-    [1] "3.8.7"
-
-    $Access
-    [1] "public"
-
-    $`Neo4j status`
-    [1] "Available"
-
-    $`ElasticSearch status`
-    [1] "Available"
-
-    $`LD reference panel`
-    [1] "Available"
-
-    $`1000 genomes annotation VCF`
-    [1] "Available"
-
-    $`PLINK executable`
-    [1] "Available"
-
-    $Cromwell
-    [1] "Available"
-
-    $`Total associations`
-    [1] 245791104737
-
-    $`Total complete datasets`
-    [1] 42481
-
-    $`Total public datasets`
-    [1] 42346
-
-    attr(,"class")
-    [1] "ApiStatus"
-
-``` r
+#ieugwasr::api_status()
 ao <- TwoSampleMR::available_outcomes()
 ```
 
-    Server code: 502; Server is possibly experiencing traffic, trying again...
-
-    Server code: 502; Server is possibly experiencing traffic, trying again...
-
-    Retry succeeded!
+    API: public: http://gwas-api.mrcieu.ac.uk/
 
 ``` r
 cr_ind <- grepl("creatinine", ao$trait, ignore.case = TRUE) 
@@ -137,15 +92,13 @@ ckd <- TwoSampleMR::extract_outcome_data(
 
     Extracting data for 10 SNP(s) from 4 GWAS(s)
 
-    Server code: 502; Server is possibly experiencing traffic, trying again...
-    Server code: 502; Server is possibly experiencing traffic, trying again...
-    Server code: 502; Server is possibly experiencing traffic, trying again...
-
-    Retry succeeded!
-
     Finding proxies for 6 SNPs in outcome ebi-a-GCST003374
 
     Extracting data for 6 SNP(s) from 1 GWAS(s)
+
+    Server code: 502; Server is possibly experiencing traffic, trying again...
+
+    Retry succeeded!
 
     Finding proxies for 6 SNPs in outcome ieu-a-1102
 
@@ -155,25 +108,25 @@ ckd <- TwoSampleMR::extract_outcome_data(
 dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
 ```
 
-    Harmonising exposure (oRsx5I) and Chronic kidney disease || id:ebi-a-GCST003374 (ebi-a-GCST003374)
+    Harmonising exposure (Ftu7t7) and Chronic kidney disease || id:ebi-a-GCST003374 (ebi-a-GCST003374)
 
-    Harmonising exposure (oRsx5I) and Chronic kidney disease || id:ebi-a-GCST008026 (ebi-a-GCST008026)
+    Harmonising exposure (Ftu7t7) and Chronic kidney disease || id:ebi-a-GCST008026 (ebi-a-GCST008026)
 
-    Harmonising exposure (oRsx5I) and Chronic kidney disease || id:finn-b-N14_CHRONKIDNEYDIS (finn-b-N14_CHRONKIDNEYDIS)
+    Harmonising exposure (Ftu7t7) and Chronic kidney disease || id:finn-b-N14_CHRONKIDNEYDIS (finn-b-N14_CHRONKIDNEYDIS)
 
-    Harmonising exposure (oRsx5I) and Chronic kidney disease || id:ieu-a-1102 (ieu-a-1102)
+    Harmonising exposure (Ftu7t7) and Chronic kidney disease || id:ieu-a-1102 (ieu-a-1102)
 
 ``` r
 res <- TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw")) 
 ```
 
-    Analysing 'oRsx5I' on 'ebi-a-GCST003374'
+    Analysing 'Ftu7t7' on 'ebi-a-GCST003374'
 
-    Analysing 'oRsx5I' on 'ebi-a-GCST008026'
+    Analysing 'Ftu7t7' on 'ebi-a-GCST008026'
 
-    Analysing 'oRsx5I' on 'finn-b-N14_CHRONKIDNEYDIS'
+    Analysing 'Ftu7t7' on 'finn-b-N14_CHRONKIDNEYDIS'
 
-    Analysing 'oRsx5I' on 'ieu-a-1102'
+    Analysing 'Ftu7t7' on 'ieu-a-1102'
 
 ``` r
 res %>%
@@ -185,14 +138,14 @@ res %>%
 
     |id.exposure |id.outcome                |outcome                                                          |exposure |method                    | nsnp|          b|        se|      pval|
     |:-----------|:-------------------------|:----------------------------------------------------------------|:--------|:-------------------------|----:|----------:|---------:|---------:|
-    |oRsx5I      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |MR Egger                  |    6|  0.2017325| 0.1831650| 0.3325532|
-    |oRsx5I      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |Inverse variance weighted |    6| -0.0174781| 0.0330773| 0.5972200|
-    |oRsx5I      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |MR Egger                  |   10|  0.3480330| 0.1562425| 0.0565154|
-    |oRsx5I      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |Inverse variance weighted |   10|  0.0110253| 0.0339760| 0.7455584|
-    |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |MR Egger                  |   10| -0.1442641| 0.1433502| 0.3437007|
-    |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |Inverse variance weighted |   10| -0.0672683| 0.0327985| 0.0402714|
-    |oRsx5I      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |MR Egger                  |    6|  0.2017325| 0.1831650| 0.3325532|
-    |oRsx5I      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |Inverse variance weighted |    6| -0.0174781| 0.0330773| 0.5972200|
+    |Ftu7t7      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |MR Egger                  |    6|  0.2017325| 0.1831650| 0.3325532|
+    |Ftu7t7      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |Inverse variance weighted |    6| -0.0174781| 0.0330773| 0.5972200|
+    |Ftu7t7      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |MR Egger                  |   10|  0.3480330| 0.1562425| 0.0565154|
+    |Ftu7t7      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |Inverse variance weighted |   10|  0.0110253| 0.0339760| 0.7455584|
+    |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |MR Egger                  |   10| -0.1442641| 0.1433502| 0.3437007|
+    |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |Inverse variance weighted |   10| -0.0672683| 0.0327985| 0.0402714|
+    |Ftu7t7      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |MR Egger                  |    6|  0.2015762| 0.1833087| 0.3332176|
+    |Ftu7t7      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |Inverse variance weighted |    6| -0.0174349| 0.0330881| 0.5982461|
 
 ``` r
 TwoSampleMR::mr_heterogeneity(dat) %>%
@@ -204,14 +157,14 @@ TwoSampleMR::mr_heterogeneity(dat) %>%
 
     |id.exposure |id.outcome                |outcome                                                          |exposure |method                    |         Q| Q_df|    Q_pval|
     |:-----------|:-------------------------|:----------------------------------------------------------------|:--------|:-------------------------|---------:|----:|---------:|
-    |oRsx5I      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |MR Egger                  |  7.393542|    4| 0.1164963|
-    |oRsx5I      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |Inverse variance weighted | 10.122259|    5| 0.0718443|
-    |oRsx5I      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |MR Egger                  |  2.645165|    8| 0.9546177|
-    |oRsx5I      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |Inverse variance weighted |  7.528531|    9| 0.5822647|
-    |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |MR Egger                  |  5.726122|    8| 0.6778792|
-    |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |Inverse variance weighted |  6.030554|    9| 0.7368565|
-    |oRsx5I      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |MR Egger                  |  7.393542|    4| 0.1164963|
-    |oRsx5I      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |Inverse variance weighted | 10.122259|    5| 0.0718443|
+    |Ftu7t7      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |MR Egger                  |  7.393542|    4| 0.1164963|
+    |Ftu7t7      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |Inverse variance weighted | 10.122259|    5| 0.0718443|
+    |Ftu7t7      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |MR Egger                  |  2.645165|    8| 0.9546177|
+    |Ftu7t7      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |Inverse variance weighted |  7.528531|    9| 0.5822647|
+    |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |MR Egger                  |  5.726122|    8| 0.6778792|
+    |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |Inverse variance weighted |  6.030554|    9| 0.7368565|
+    |Ftu7t7      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |MR Egger                  |  7.405151|    4| 0.1159652|
+    |Ftu7t7      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |Inverse variance weighted | 10.128906|    5| 0.0716641|
 
 ``` r
 TwoSampleMR::mr_pleiotropy_test(dat) %>%
@@ -223,10 +176,10 @@ TwoSampleMR::mr_pleiotropy_test(dat) %>%
 
     |id.exposure |id.outcome                |outcome                                                          |exposure | egger_intercept|        se|      pval|
     |:-----------|:-------------------------|:----------------------------------------------------------------|:--------|---------------:|---------:|---------:|
-    |oRsx5I      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |      -0.0647748| 0.0533117| 0.2911724|
-    |oRsx5I      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |      -0.0983777| 0.0445181| 0.0580961|
-    |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |       0.0230972| 0.0418615| 0.5961892|
-    |oRsx5I      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |      -0.0647748| 0.0533117| 0.2911724|
+    |Ftu7t7      |ebi-a-GCST003374          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |exposure |      -0.0647748| 0.0533117| 0.2911724|
+    |Ftu7t7      |ebi-a-GCST008026          |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |exposure |      -0.0983777| 0.0445181| 0.0580961|
+    |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |exposure |       0.0230972| 0.0418615| 0.5961892|
+    |Ftu7t7      |ieu-a-1102                |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |exposure |      -0.0647158| 0.0533536| 0.2918767|
 
 ``` r
 res_ss <- TwoSampleMR::mr_singlesnp(dat) 
@@ -239,46 +192,46 @@ res_ss %>%
 
     |exposure |outcome                                                          |id.exposure |id.outcome                | samplesize|SNP                             |          b|        se|         p|
     |:--------|:----------------------------------------------------------------|:-----------|:-------------------------|----------:|:-------------------------------|----------:|---------:|---------:|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs11172113                      | -0.0995537| 0.0514933| 0.0531951|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs199454                        |  0.0239567| 0.0695518| 0.7305121|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs2590784                       | -0.1214029| 0.0719424| 0.0915072|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs2681492                       |  0.1089994| 0.0558971| 0.0511761|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs7301566                       | -0.0092879| 0.0580495| 0.8728811|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs9349379                       | -0.0184471| 0.0468062| 0.6934942|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|All - Inverse variance weighted | -0.0174781| 0.0330773| 0.5972200|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|All - MR Egger                  |  0.2017325| 0.1831650| 0.3325532|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs11172113                      |  0.0074449| 0.0837721| 0.9291845|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs1777335                       | -0.1351660| 0.1135643| 0.2339617|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs199454                        | -0.0291522| 0.0918443| 0.7509330|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs2590784                       | -0.0552936| 0.1059829| 0.6018639|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs2681492                       |  0.1025542| 0.0901750| 0.2554210|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs71526759                      |  0.3488411| 0.1886251| 0.0644018|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs72802873                      |  0.0278438| 0.1733218| 0.8723708|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs7301566                       | -0.0867016| 0.1237345| 0.4834860|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs9349379                       |  0.0612715| 0.0788037| 0.4368518|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs9508309                       | -0.0070755| 0.1891716| 0.9701642|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|All - Inverse variance weighted |  0.0110253| 0.0339760| 0.7455584|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|All - MR Egger                  |  0.3480330| 0.1562425| 0.0565154|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs11172113                      | -0.1060762| 0.0827326| 0.1997873|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs1777335                       |  0.0060776| 0.1126695| 0.9569814|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs199454                        |  0.1584235| 0.1255796| 0.2071149|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs2590784                       | -0.1452338| 0.1155576| 0.2088227|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs2681492                       |  0.0564561| 0.1246506| 0.6506101|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs71526759                      | -0.0966857| 0.1417143| 0.4950758|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs72802873                      | -0.0942749| 0.1379809| 0.4944514|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs7301566                       | -0.0704334| 0.0928793| 0.4482515|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs9349379                       | -0.1112335| 0.0652533| 0.0882613|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs9508309                       | -0.1278798| 0.1429048| 0.3708620|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|All - Inverse variance weighted | -0.0672683| 0.0327985| 0.0402714|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|All - MR Egger                  | -0.1442641| 0.1433502| 0.3437007|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs11172113                      | -0.0995537| 0.0514933| 0.0531951|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs199454                        |  0.0239567| 0.0695518| 0.7305121|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs2590784                       | -0.1214029| 0.0719424| 0.0915072|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs2681492                       |  0.1089994| 0.0558971| 0.0511761|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs7301566                       | -0.0092879| 0.0580495| 0.8728811|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs9349379                       | -0.0184471| 0.0468062| 0.6934942|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|All - Inverse variance weighted | -0.0174781| 0.0330773| 0.5972200|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|All - MR Egger                  |  0.2017325| 0.1831650| 0.3325532|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs11172113                      | -0.0995537| 0.0514933| 0.0531951|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs199454                        |  0.0239567| 0.0695518| 0.7305121|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs2590784                       | -0.1214029| 0.0719424| 0.0915072|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs2681492                       |  0.1089994| 0.0558971| 0.0511761|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs7301566                       | -0.0092879| 0.0580495| 0.8728811|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs9349379                       | -0.0184471| 0.0468062| 0.6934942|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|All - Inverse variance weighted | -0.0174781| 0.0330773| 0.5972200|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|All - MR Egger                  |  0.2017325| 0.1831650| 0.3325532|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs11172113                      |  0.0074449| 0.0837721| 0.9291845|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs1777335                       | -0.1351660| 0.1135643| 0.2339617|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs199454                        | -0.0291522| 0.0918443| 0.7509330|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs2590784                       | -0.0552936| 0.1059829| 0.6018639|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs2681492                       |  0.1025542| 0.0901750| 0.2554210|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs71526759                      |  0.3488411| 0.1886251| 0.0644018|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs72802873                      |  0.0278438| 0.1733218| 0.8723708|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs7301566                       | -0.0867016| 0.1237345| 0.4834860|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs9349379                       |  0.0612715| 0.0788037| 0.4368518|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs9508309                       | -0.0070755| 0.1891716| 0.9701642|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|All - Inverse variance weighted |  0.0110253| 0.0339760| 0.7455584|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|All - MR Egger                  |  0.3480330| 0.1562425| 0.0565154|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs11172113                      | -0.1060762| 0.0827326| 0.1997873|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs1777335                       |  0.0060776| 0.1126695| 0.9569814|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs199454                        |  0.1584235| 0.1255796| 0.2071149|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs2590784                       | -0.1452338| 0.1155576| 0.2088227|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs2681492                       |  0.0564561| 0.1246506| 0.6506101|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs71526759                      | -0.0966857| 0.1417143| 0.4950758|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs72802873                      | -0.0942749| 0.1379809| 0.4944514|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs7301566                       | -0.0704334| 0.0928793| 0.4482515|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs9349379                       | -0.1112335| 0.0652533| 0.0882613|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs9508309                       | -0.1278798| 0.1429048| 0.3708620|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|All - Inverse variance weighted | -0.0672683| 0.0327985| 0.0402714|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|All - MR Egger                  | -0.1442641| 0.1433502| 0.3437007|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs11172113                      | -0.0995537| 0.0514933| 0.0531951|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs199454                        |  0.0243431| 0.0695518| 0.7263387|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs2590784                       | -0.1214029| 0.0719424| 0.0915072|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs2681492                       |  0.1089994| 0.0558971| 0.0511761|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs7301566                       | -0.0092879| 0.0580495| 0.8728811|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs9349379                       | -0.0184471| 0.0468062| 0.6934942|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|All - Inverse variance weighted | -0.0174349| 0.0330881| 0.5982461|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|All - MR Egger                  |  0.2015762| 0.1833087| 0.3332176|
 
 ``` r
 loo <- TwoSampleMR::mr_leaveoneout(dat) 
@@ -291,42 +244,42 @@ loo %>%
 
     |exposure |outcome                                                          |id.exposure |id.outcome                | samplesize|SNP        |          b|        se|         p|
     |:--------|:----------------------------------------------------------------|:-----------|:-------------------------|----------:|:----------|----------:|---------:|---------:|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs11172113 |  0.0035332| 0.0342964| 0.9179469|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs199454   | -0.0226895| 0.0384561| 0.5551839|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs2590784  | -0.0053611| 0.0342866| 0.8757482|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs2681492  | -0.0439305| 0.0255632| 0.0857047|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs7301566  | -0.0190426| 0.0403120| 0.6366558|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|rs9349379  | -0.0171608| 0.0426073| 0.6871206|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |oRsx5I      |ebi-a-GCST003374          |     117165|All        | -0.0174781| 0.0330773| 0.5972200|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs11172113 |  0.0117302| 0.0371704| 0.7523229|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs1777335  |  0.0253969| 0.0356069| 0.4756862|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs199454   |  0.0173952| 0.0365703| 0.6343131|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs2590784  |  0.0186217| 0.0358691| 0.6036523|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs2681492  | -0.0041182| 0.0366792| 0.9106044|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs71526759 | -0.0003027| 0.0345410| 0.9930089|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs72802873 |  0.0103532| 0.0346483| 0.7650871|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs7301566  |  0.0189946| 0.0353342| 0.5908737|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs9349379  | -0.0004476| 0.0376557| 0.9905165|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|rs9508309  |  0.0116286| 0.0345376| 0.7363476|
-    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |oRsx5I      |ebi-a-GCST008026          |       2872|All        |  0.0110253| 0.0339760| 0.7455584|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs11172113 | -0.0600317| 0.0357259| 0.0928909|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs1777335  | -0.0740592| 0.0342833| 0.0307562|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs199454   | -0.0837906| 0.0339779| 0.0136619|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs2590784  | -0.0604372| 0.0342052| 0.0772451|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs2681492  | -0.0764714| 0.0339965| 0.0244877|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs71526759 | -0.0656034| 0.0337139| 0.0516686|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs72802873 | -0.0656510| 0.0337664| 0.0518628|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs7301566  | -0.0668174| 0.0350571| 0.0566559|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs9349379  | -0.0524061| 0.0379394| 0.1671831|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs9508309  | -0.0638980| 0.0336981| 0.0579350|
-    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |oRsx5I      |finn-b-N14_CHRONKIDNEYDIS |         NA|All        | -0.0672683| 0.0327985| 0.0402714|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs11172113 |  0.0035332| 0.0342964| 0.9179469|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs199454   | -0.0226895| 0.0384561| 0.5551839|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs2590784  | -0.0053611| 0.0342866| 0.8757482|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs2681492  | -0.0439305| 0.0255632| 0.0857047|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs7301566  | -0.0190426| 0.0403120| 0.6366558|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|rs9349379  | -0.0171608| 0.0426073| 0.6871206|
-    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |oRsx5I      |ieu-a-1102                |     118143|All        | -0.0174781| 0.0330773| 0.5972200|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs11172113 |  0.0035332| 0.0342964| 0.9179469|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs199454   | -0.0226895| 0.0384561| 0.5551839|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs2590784  | -0.0053611| 0.0342866| 0.8757482|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs2681492  | -0.0439305| 0.0255632| 0.0857047|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs7301566  | -0.0190426| 0.0403120| 0.6366558|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|rs9349379  | -0.0171608| 0.0426073| 0.6871206|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST003374          |Ftu7t7      |ebi-a-GCST003374          |     117165|All        | -0.0174781| 0.0330773| 0.5972200|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs11172113 |  0.0117302| 0.0371704| 0.7523229|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs1777335  |  0.0253969| 0.0356069| 0.4756862|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs199454   |  0.0173952| 0.0365703| 0.6343131|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs2590784  |  0.0186217| 0.0358691| 0.6036523|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs2681492  | -0.0041182| 0.0366792| 0.9106044|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs71526759 | -0.0003027| 0.0345410| 0.9930089|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs72802873 |  0.0103532| 0.0346483| 0.7650871|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs7301566  |  0.0189946| 0.0353342| 0.5908737|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs9349379  | -0.0004476| 0.0376557| 0.9905165|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|rs9508309  |  0.0116286| 0.0345376| 0.7363476|
+    |exposure |Chronic kidney disease &#124;&#124; id:ebi-a-GCST008026          |Ftu7t7      |ebi-a-GCST008026          |       2872|All        |  0.0110253| 0.0339760| 0.7455584|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs11172113 | -0.0600317| 0.0357259| 0.0928909|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs1777335  | -0.0740592| 0.0342833| 0.0307562|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs199454   | -0.0837906| 0.0339779| 0.0136619|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs2590784  | -0.0604372| 0.0342052| 0.0772451|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs2681492  | -0.0764714| 0.0339965| 0.0244877|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs71526759 | -0.0656034| 0.0337139| 0.0516686|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs72802873 | -0.0656510| 0.0337664| 0.0518628|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs7301566  | -0.0668174| 0.0350571| 0.0566559|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs9349379  | -0.0524061| 0.0379394| 0.1671831|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|rs9508309  | -0.0638980| 0.0336981| 0.0579350|
+    |exposure |Chronic kidney disease &#124;&#124; id:finn-b-N14_CHRONKIDNEYDIS |Ftu7t7      |finn-b-N14_CHRONKIDNEYDIS |         NA|All        | -0.0672683| 0.0327985| 0.0402714|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs11172113 |  0.0035874| 0.0343046| 0.9167119|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs199454   | -0.0226895| 0.0384561| 0.5551839|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs2590784  | -0.0053129| 0.0342969| 0.8768933|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs2681492  | -0.0438783| 0.0255632| 0.0860775|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs7301566  | -0.0189911| 0.0403257| 0.6376811|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|rs9349379  | -0.0171035| 0.0426212| 0.6882066|
+    |exposure |Chronic kidney disease &#124;&#124; id:ieu-a-1102                |Ftu7t7      |ieu-a-1102                |     118143|All        | -0.0174349| 0.0330881| 0.5982461|
 
 ``` r
 pp <- TwoSampleMR::mr_scatter_plot(res, dat)
@@ -416,18 +369,28 @@ for (index in seq_along(p4)){
 
 ``` r
 # MR RAPS
-fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) 
+fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) %>%
+    dplyr::filter(`P-value` < 10^-5) 
 fmd_filt <- fmd %>%
     dplyr::filter(SNP %in% fmd_lead_snps$rsID)
 ckd <- TwoSampleMR::extract_outcome_data(
     snps = fmd_filt$SNP,
-    outcomes = ckd_outcomes$id
+    outcomes = ckd_outcomes$id[3] # use only the third gwas for CKD!
 )
 dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
 
-TwoSampleMR::mr(dat, method_list = c("mr_raps")) %>%
-    knitr::kable() %>%
-    print()
+#TwoSampleMR::mr(dat, method_list = c("mr_raps")) %>%
+#    knitr::kable() %>%
+#    print()
+res_raps <- mr.raps::mr.raps.mle(b_exp = dat$beta.exposure, 
+                    b_out = dat$beta.outcome,
+                    se_exp = dat$se.exposure,
+                    se_out = dat$se.outcome,
+                    over.dispersion = FALSE,
+                    loss.function = "huber",
+                    diagnostics = TRUE
+                    )
+print(res_raps)
 ```
 
 ``` r
@@ -490,6 +453,7 @@ sessioninfo::session_info()
      labeling      0.4.2   2020-10-20 [2] CRAN (R 4.0.3)
      lattice       0.21-8  2023-04-05 [1] CRAN (R 4.2.3)
      lifecycle     1.0.3   2022-10-07 [1] CRAN (R 4.2.2)
+     lubridate     1.9.2   2023-02-10 [1] CRAN (R 4.2.3)
      magrittr    * 2.0.3   2022-03-30 [1] CRAN (R 4.2.0)
      Matrix        1.5-4   2023-04-04 [1] CRAN (R 4.2.3)
      mr.raps       0.4.1   2023-04-18 [1] Github (qingyuanzhao/mr.raps@2a23d84)
@@ -514,6 +478,7 @@ sessioninfo::session_info()
      survival      3.5-5   2023-03-12 [1] CRAN (R 4.2.3)
      tibble        3.2.1   2023-03-20 [1] CRAN (R 4.2.3)
      tidyselect    1.2.0   2022-10-10 [1] CRAN (R 4.2.2)
+     timechange    0.2.0   2023-01-11 [1] CRAN (R 4.2.2)
      TwoSampleMR   0.5.6   2023-04-13 [1] Github (MRCIEU/TwoSampleMR@f856a15)
      utf8          1.2.3   2023-01-31 [1] CRAN (R 4.2.3)
      vctrs         0.6.1   2023-03-22 [1] CRAN (R 4.2.3)

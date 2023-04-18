@@ -1,7 +1,7 @@
 ---
 title: "Creatinine & Cystatin C & CKD as possible consequences of FMD"
 author: "Fred Boehm"
-date: "2023-04-18"
+date: "`r lubridate::now()`"
 format: gfm
 ---
 
@@ -38,7 +38,7 @@ fmd_filt <- fmd %>%
 ```
 
 ```{r}
-ieugwasr::api_status()
+#ieugwasr::api_status()
 ao <- TwoSampleMR::available_outcomes()
 cr_ind <- grepl("creatinine", ao$trait, ignore.case = TRUE) 
 ki_ind <- grepl("kidney", ao$trait, ignore.case = TRUE) 
@@ -115,18 +115,31 @@ for (index in seq_along(p4)){
 
 ```{r, eval = FALSE}
 # MR RAPS
-fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) 
+fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) %>%
+    dplyr::filter(`P-value` < 10^-5) 
 fmd_filt <- fmd %>%
     dplyr::filter(SNP %in% fmd_lead_snps$rsID)
 ckd <- TwoSampleMR::extract_outcome_data(
     snps = fmd_filt$SNP,
-    outcomes = ckd_outcomes$id
+    outcomes = ckd_outcomes$id[3] # use only the third gwas for CKD!
 )
 dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
 
-TwoSampleMR::mr(dat, method_list = c("mr_raps")) %>%
-    knitr::kable() %>%
-    print()
+#TwoSampleMR::mr(dat, method_list = c("mr_raps")) %>%
+#    knitr::kable() %>%
+#    print()
+res_raps <- mr.raps::mr.raps.mle(b_exp = dat$beta.exposure, 
+                    b_out = dat$beta.outcome,
+                    se_exp = dat$se.exposure,
+                    se_out = dat$se.outcome,
+                    over.dispersion = FALSE,
+                    loss.function = "huber",
+                    diagnostics = TRUE
+                    )
+print(res_raps)
+```
+
+```{r}
 ```
 
 ```{r}
