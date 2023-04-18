@@ -73,7 +73,7 @@ for (threshold in c(10 ^ -6, 10 ^ -5)){
         cat("### MR for ", names(out), " outcomes\n")
         oo <- TwoSampleMR::extract_outcome_data(
             snps = fmd_filt$SNP,
-            outcomes = out[[1]]$id
+            outcomes = out$id
         )
         dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = oo)
         res <- TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw")) 
