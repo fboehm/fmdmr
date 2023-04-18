@@ -125,3 +125,14 @@ for (threshold in c(10 ^ -6, 10 ^ -5)){
 ```{r}
 sessioninfo::session_info()
 ```
+
+
+
+```{r}
+# git commit info
+git2r::repository(here::here()) %>%
+    git2r::commits() %>%
+    dplyr::slice(1) %>%
+    knitr::kable() %>%
+    knitr::knit_print()
+```
