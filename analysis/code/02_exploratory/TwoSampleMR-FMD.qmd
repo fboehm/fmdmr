@@ -23,16 +23,16 @@ ckd_outcomes <- ao[ki_ind, ] %>%
     dplyr::filter(stringr::str_detect(string = trait, pattern = "Chronic"))
 ckd_outcomes %>%
     knitr::kable() %>%
-    print()
+    knitr::knit_print()
 cyc_outcomes %>%
     knitr::kable() %>%
-    print()
+    knitr::knit_print()
 # creatinine
 cre_outcomes <- ao[cr_ind, ] %>%
     dplyr::filter(!(stringr::str_detect(string = trait, pattern = "urine")) & !(stringr::str_detect(string = trait, pattern = "Urinary")))
 cre_outcomes %>% 
     knitr::kable() %>%
-    print()
+    knitr::knit_print()
 outcomes <- list(creatinine = cre_outcomes, cystatin = cyc_outcomes, ckd = ckd_outcomes)
 ```
 
@@ -69,8 +69,9 @@ for (threshold in c(10 ^ -6, 10 ^ -5)){
         dplyr::filter(SNP %in% fmd_lead_snps$rsID)
     cat("## MR for ", threshold, " threshold\n")
     # loop over outcomes object
-    for (out in outcomes){
-        cat("### MR for ", names(out), " outcomes\n")
+    for (i in seq_along(outcomes)){
+        cat("### MR for ", names(outcomes)[i], " outcomes\n")
+        out <- outcomes[[i]]
         oo <- TwoSampleMR::extract_outcome_data(
             snps = fmd_filt$SNP,
             outcomes = out$id
@@ -78,23 +79,23 @@ for (threshold in c(10 ^ -6, 10 ^ -5)){
         dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = oo)
         res <- TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw")) 
         res %>%
-            knitr::kable(caption = paste0("MR Egger and MR IVW for ", names(out))) %>%
-            print()
+            knitr::kable(caption = paste0("MR Egger and MR IVW for ", names(outcomes)[i])) %>%
+            knitr::knit_print()
         TwoSampleMR::mr_heterogeneity(dat) %>%
-            knitr::kable(caption = paste0("Heterogeneity test for ", names(out))) %>%
-            print()
+            knitr::kable(caption = paste0("Heterogeneity test for ", names(outcomes)[i])) %>%
+            knitr::knit_print()
         TwoSampleMR::mr_pleiotropy_test(dat) %>%
-            knitr::kable(caption = paste0("Pleiotropy test for ", names(out))) %>%
-            print()
+            knitr::kable(caption = paste0("Pleiotropy test for ", names(outcomes)[i])) %>%
+            knitr::knit_print()
         res_ss <- TwoSampleMR::mr_singlesnp(dat) 
         res_ss %>%
-            knitr::kable(caption = paste0("Single SNP analysis for ", names(out))) %>%
-            print()
+            knitr::kable(caption = paste0("Single SNP analysis for ", names(outcomes)[i])) %>%
+            knitr::knit_print()
         loo <- TwoSampleMR::mr_leaveoneout(dat) 
         loo %>%
-            knitr::kable(caption = paste0("Leave one out analysis for ", names(out))) %>%
-            print()
-        cat("### Plots for ", names(out), " outcomes\n")
+            knitr::kable(caption = paste0("Leave one out analysis for ", names(outcomes)[i])) %>%
+            knitr::knit_print()
+        cat("### Plots for ", names(outcomes)[i], " outcomes\n")
         pp <- TwoSampleMR::mr_scatter_plot(res, dat)
         for (index in seq_along(pp)){
             print(pp[[index]])
@@ -129,7 +130,7 @@ dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
 
 #TwoSampleMR::mr(dat, method_list = c("mr_raps")) %>%
 #    knitr::kable() %>%
-#    print()
+#    knitr::knit_print()
 res_raps <- mr.raps::mr.raps.mle(b_exp = dat$beta.exposure, 
                     b_out = dat$beta.outcome,
                     se_exp = dat$se.exposure,
