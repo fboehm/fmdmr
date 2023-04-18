@@ -1,0 +1,151 @@
+---
+title: "Creatinine & Cystatin C & CKD as possible consequences of FMD"
+author: "Fred Boehm"
+date: "2023-04-18"
+format: gfm
+---
+
+
+```{r}
+library(magrittr)
+```
+
+
+```{r}
+fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
+fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
+                                        sep = "\t",
+                                        snp_col = "SNP",
+                                        beta_col = "BETA",
+                                        effect_allele_col = "EA",
+                                        other_allele_col = "OA",
+                                        eaf_col = "EAF",
+                                        se_col = "SE",
+                                        pval_col = "p_value",
+                                        chr_col = "chromosome",
+                                        pos_col = "base_pair_location",
+                                        ncase_col = "N_cases",
+                                        ncontrol_col = "N_ctrls"
+                                        )
+
+#fmd <- vroom::vroom(fmd_file) %>%
+#    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
+fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") 
+fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) %>%
+    dplyr::filter(`P-value` < 10^-6) 
+fmd_filt <- fmd %>%
+    dplyr::filter(SNP %in% fmd_lead_snps$rsID)
+```
+
+```{r}
+ieugwasr::api_status()
+ao <- TwoSampleMR::available_outcomes()
+cr_ind <- grepl("creatinine", ao$trait, ignore.case = TRUE) 
+ki_ind <- grepl("kidney", ao$trait, ignore.case = TRUE) 
+cc_ind <- grepl("cystatin", ao$trait, ignore.case = TRUE)
+ao[cc_ind, ]
+# get ckd outcomes
+ckd_outcomes <- ao[ki_ind, ] %>%
+    dplyr::filter(stringr::str_detect(string = trait, pattern = "Chronic"))
+ckd <- TwoSampleMR::extract_outcome_data(
+    snps = fmd_filt$SNP,
+    outcomes = ckd_outcomes$id
+)
+dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
+res <- TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw")) 
+res %>%
+    knitr::kable() %>%
+    print()
+```
+
+```{r}
+TwoSampleMR::mr_heterogeneity(dat) %>%
+    knitr::kable() %>%
+    print()
+```
+
+
+```{r}
+TwoSampleMR::mr_pleiotropy_test(dat) %>%
+    knitr::kable() %>%
+    print()
+```
+
+```{r}
+res_ss <- TwoSampleMR::mr_singlesnp(dat) 
+res_ss %>%
+    knitr::kable() %>%
+    print()
+```
+
+```{r}
+loo <- TwoSampleMR::mr_leaveoneout(dat) 
+loo %>%
+    knitr::kable() %>%
+    print()
+```
+
+```{r}
+pp <- TwoSampleMR::mr_scatter_plot(res, dat)
+for (index in seq_along(pp)){
+    print(pp[[index]])
+}
+```
+
+```{r}
+p2 <- TwoSampleMR::mr_forest_plot(res_ss)
+for (index in seq_along(p2)){
+    print(p2[[index]])
+}
+```
+
+```{r}
+p3 <- TwoSampleMR::mr_leaveoneout_plot(loo)
+for (index in seq_along(p3)){
+    print(p3[[index]])
+}
+```
+
+```{r}
+p4 <- TwoSampleMR::mr_funnel_plot(res_ss)
+for (index in seq_along(p4)){ 
+    print(p4[[index]])
+}
+```
+
+```{r, eval = FALSE}
+# MR RAPS
+fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) 
+fmd_filt <- fmd %>%
+    dplyr::filter(SNP %in% fmd_lead_snps$rsID)
+ckd <- TwoSampleMR::extract_outcome_data(
+    snps = fmd_filt$SNP,
+    outcomes = ckd_outcomes$id
+)
+dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
+
+TwoSampleMR::mr(dat, method_list = c("mr_raps")) %>%
+    knitr::kable() %>%
+    print()
+```
+
+```{r}
+
+```
+
+
+
+
+```{r, eval = FALSE}
+TwoSampleMR::mr_report(dat, 
+    output_path = here::here("analysis", "results"),
+    output_type = "md",
+    author = "Fred Boehm",
+    study = "Two Sample MR"
+)
+```
+
+
+```{r}
+sessioninfo::session_info()
+```

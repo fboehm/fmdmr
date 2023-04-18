@@ -1,5 +1,5 @@
 ---
-title: "UKB creatinine & Cystatin C as possible consequences of FMD"
+title: "Creatinine & Cystatin C & CKD as possible consequences of FMD"
 format: gfm
 ---
 
@@ -29,7 +29,10 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
 #fmd <- vroom::vroom(fmd_file) %>%
 #    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
 fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") 
-
+fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) %>%
+    dplyr::filter(`P-value` < 10^-6) 
+fmd_filt <- fmd %>%
+    dplyr::filter(SNP %in% fmd_lead_snps$rsID)
 ```
 
 ```{r}
@@ -39,8 +42,15 @@ cr_ind <- grepl("creatinine", ao$trait, ignore.case = TRUE)
 ki_ind <- grepl("kidney", ao$trait, ignore.case = TRUE) 
 cc_ind <- grepl("cystatin", ao$trait, ignore.case = TRUE)
 ao[cc_ind, ]
-ao[ki_ind, ]
-
+# get ckd outcomes
+ckd_outcomes <- ao[ki_ind, ] %>%
+    dplyr::filter(stringr::str_detect(string = trait, pattern = "Chronic"))
+ckd <- TwoSampleMR::extract_outcome_data(
+    snps = fmd_filt$SNP,
+    outcomes = ckd_outcomes$id
+)
+dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
+TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw"))
 ```
 
 
