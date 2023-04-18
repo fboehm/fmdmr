@@ -70,7 +70,7 @@ for (threshold in c(10 ^ -6, 10 ^ -5)){
     cat("## MR for ", threshold, " threshold\n")
     # loop over outcomes object
     for (i in seq_along(outcomes)){
-        cat("### MR for ", names(outcomes)[i], " outcomes\n")
+        cat("### MR for ", names(outcomes)[i], " outcomes and ", threshold, "threshold \n")
         out <- outcomes[[i]]
         oo <- TwoSampleMR::extract_outcome_data(
             snps = fmd_filt$SNP,
@@ -80,21 +80,21 @@ for (threshold in c(10 ^ -6, 10 ^ -5)){
         res <- TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw")) 
         res %>%
             knitr::kable(caption = paste0("MR Egger and MR IVW for ", names(outcomes)[i])) %>%
-            knitr::knit_print()
+            print()
         TwoSampleMR::mr_heterogeneity(dat) %>%
             knitr::kable(caption = paste0("Heterogeneity test for ", names(outcomes)[i])) %>%
-            knitr::knit_print()
+            print()
         TwoSampleMR::mr_pleiotropy_test(dat) %>%
             knitr::kable(caption = paste0("Pleiotropy test for ", names(outcomes)[i])) %>%
-            knitr::knit_print()
+            print()
         res_ss <- TwoSampleMR::mr_singlesnp(dat) 
         res_ss %>%
             knitr::kable(caption = paste0("Single SNP analysis for ", names(outcomes)[i])) %>%
-            knitr::knit_print()
+            print()
         loo <- TwoSampleMR::mr_leaveoneout(dat) 
         loo %>%
             knitr::kable(caption = paste0("Leave one out analysis for ", names(outcomes)[i])) %>%
-            knitr::knit_print()
+            print()
         cat("### Plots for ", names(outcomes)[i], " outcomes\n")
         pp <- TwoSampleMR::mr_scatter_plot(res, dat)
         for (index in seq_along(pp)){
@@ -130,9 +130,7 @@ sessioninfo::session_info()
 
 ```{r}
 # git commit info
-git2r::repository(here::here()) %>%
-    git2r::commits() %>%
-    dplyr::slice(1) %>%
-    knitr::kable() %>%
-    knitr::knit_print()
+gr <- git2r::repository(here::here()) %>%
+    git2r::commits()
+gr[[1]] 
 ```
