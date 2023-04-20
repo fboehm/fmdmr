@@ -40,7 +40,7 @@ outcomes <- list(creatinine = cre_outcomes, cystatin = cyc_outcomes, ckd = ckd_o
 for (index in seq_along(outcomes)){
     tr_name <- names(outcomes)[index]
     outcomes[[index]] %>%
-        vroom::vroom_write(here::here("analysis", "data", "mrcieu", paste0(tr_name, "_outcomes.tsv")), delim = "\t")
+        vroom::vroom_write(here::here("analysis", "data", "mrcieu", paste0(tr_name, "_outcomes.tsv")), delim = "\t", col_names = FALSE)
 }
 ```
 
