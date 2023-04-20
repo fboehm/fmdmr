@@ -122,13 +122,8 @@ for (threshold in c(10 ^ -6, 10 ^ -5)){
 
 
 
-```{r}
+```{r, session_info}
 sessioninfo::session_info()
-```
-
-
-
-```{r}
 # git commit info
 gr <- git2r::repository(here::here()) %>%
     git2r::commits()
