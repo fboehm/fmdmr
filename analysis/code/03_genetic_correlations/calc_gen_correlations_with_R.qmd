@@ -24,29 +24,41 @@ vcf_dir <- here::here("analysis", "data", "mrcieu")
 files <- list.files(vcf_dir, 
             pattern = "vcf.gz", 
             full.names = TRUE)
-outcome <- files[1] %>%
-    VariantAnnotation::readVcf() %>%
-    gwasglue::gwasvcf_to_TwoSampleMR(type = "outcome")
-fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
-fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
-                                        sep = "\t",
-                                        snp_col = "SNP",
-                                        beta_col = "BETA",
-                                        effect_allele_col = "EA",
-                                        other_allele_col = "OA",
-                                        eaf_col = "EAF",
-                                        se_col = "SE",
-                                        pval_col = "p_value",
-                                        chr_col = "chromosome",
-                                        pos_col = "base_pair_location",
-                                        ncase_col = "N_cases",
-                                        ncontrol_col = "N_ctrls"
-                                        )
-tictoc::tic()
-dat <- TwoSampleMR::harmonise_data(exposure = fmd, outcome = outcome)
-tictoc::toc()
+new_file_dir <- here::here("analysis", "data", "mrcieu_for_munge_sumstats") 
+if (!dir.exists(new_file_dir)) {
+    dir.create(new_file_dir)
+}
+for (file in files){
+    new_file <- file %>%
+        basename() %>%
+        tools::file_path_sans_ext() %>%
+        tools::file_path_sans_ext()
+
+    file %>%
+        VariantAnnotation::readVcf() %>%
+        gwasglue::gwasvcf_to_TwoSampleMR(type = "outcome") %>%
+        vroom::vroom_write(file = file.path(new_file_dir, new_file))
+}
+#fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
+#fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
+#                                        sep = "\t",
+#                                        snp_col = "SNP",
+#                                        beta_col = "BETA",
+#                                        effect_allele_col = "EA",
+#                                        other_allele_col = "OA",
+#                                        eaf_col = "EAF",
+#                                        se_col = "SE",
+#                                        pval_col = "p_value",
+#                                        chr_col = "chromosome",
+#                                        pos_col = "base_pair_location",
+#                                        ncase_col = "N_cases",
+#                                        ncontrol_col = "N_ctrls"
+#                                        )
+##tictoc::tic()
+#dat <- TwoSampleMR::harmonise_data(exposure = fmd, outcome = outcome)
+#tictoc::toc()
 # 
-fmdmr::ldsc_rg2()
+#fmdmr::ldsc_rg2()
 
 ```
 
