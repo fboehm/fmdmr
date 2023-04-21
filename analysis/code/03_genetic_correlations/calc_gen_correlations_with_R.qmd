@@ -37,7 +37,7 @@ for (file in files){
     file %>%
         VariantAnnotation::readVcf() %>%
         gwasglue::gwasvcf_to_TwoSampleMR(type = "outcome") %>%
-        vroom::vroom_write(file = file.path(new_file_dir, new_file))
+        vroom::vroom_write(file = file.path(new_file_dir, paste0(new_file, ".tsv")))
 }
 #fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
 #fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
