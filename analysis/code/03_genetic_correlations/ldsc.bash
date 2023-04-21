@@ -61,7 +61,14 @@ eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
 #
 #Note that munge_sumstats.py interprets A1 as the reference allele and that the A1 column in the .sumstats file format refers to the reference allele.
 
-conda activate ldsc
+# NEED TO RUN THIS BEFORE USING ldsc:
+
+# conda activate ldsc
+
+## THEN, after this script, run:
+
+# conda deactivate 
+
 # call munge_sumstats.py
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
 PATH_TO_GWAS_DOWNLOADS=~/research/fmdmr/analysis/data/mrcieu/
@@ -114,7 +121,6 @@ for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
     done
 done
 
-conda deactivate
 
 
 
