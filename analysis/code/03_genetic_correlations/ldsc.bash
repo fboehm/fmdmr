@@ -4,8 +4,13 @@
 # we'll download ld scores for Europeans
 
 ldsc_dir=~/research/fmdmr/analysis/data/ldsc/
-wget https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 -P ${ldsc_dir}
-tar -jxvf ${ldsc_dir}eur_w_ld_chr.tar.bz2
+mkdir -p ${ldsc_dir}
+eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
+
+#if [ -d "$eur_dir" ]; then
+#    wget https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 -P ${ldsc_dir}
+#    tar -jxvf ${ldsc_dir}eur_w_ld_chr.tar.bz2
+#fi
 # This will create a new directory in your current working directory named eur_w_ld_chr/. 
 #### FORMAT GWAS FILES
 #We strongly recommend that you use the script munge_sumstats.py included in this github repository in order to convert summary statistics into the ldsc format, because this script checks for a lot of annoying gotchas that have gotten us in trouble before.
@@ -60,13 +65,53 @@ fi
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
 PATH_TO_GWAS_DOWNLOADS=~/research/fmdmr/analysis/data/mrcieu/
 
-for file in ${PATH_TO_GWAS_DOWNLOADS}/*; do
+for file in ${PATH_TO_GWAS_DOWNLOADS}*; do
     if [[ ${file} == *.vcf.gz ]]; then
+        filestem=$(basename "$file" .vcf.gz)
+        echo ${filestem}
         # munge here!
-        
+        ${MUNGE_SUMSTATS} \
+            --sumstats ${file} \
+            --out ${ldsc_dir}${filestem} \
+            --merge-alleles ${ldsc_dir}w_hm3.snplist
     fi 
 done
-${MUNGE_SUMSTATS} \
+##### Munge fmd files
+
+fmd_sumstats_dir=~/research/fmdmr/analysis/data/ldsc_fmd/
+mkdir -p ${fmd_sumstats_dir}
+FMD_FILES=( ~/research/fmdmr/analysis/data/fmd/GCST90026612_buildGRCh37.tsv ~/research/fmdmr/analysis/data/fmd_meta_gwas/meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab )
+for fmdfile in ${FMD_FILES[@]}; do
+    fmdfilestem=$(basename "$fmdfile" .tsv .tab)
+    echo ${fmdfilestem}
+    ${MUNGE_SUMSTATS} \
+        --sumstats ${fmdfile} \
+        --out ${fmd_sumstats_dir}${fmdfilestem} \
+        --merge-alleles ${ldsc_dir}w_hm3.snplist
+done
+
+
+##### LD SCORE REGRESSION to get genetic correlations
+LDSC=~/ldsc/ldsc.py
+ldsc_genetic_corr_dir=~/research/fmdmr/analysis/data/ldsc_genetic_correlations/
+mkdir -p ${ldsc_genetic_corr_dir}
+
+for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
+    fmdstem=$(basename "$fmd_sumstats_file" .sumstats.gz)
+    echo ${fmdstem}
+    for file in ${ldsc_dir}*; do
+        if [[ ${file} == *.sumstats.gz ]]; then
+            filestem=$(basename "$file" .sumstats.gz)
+            echo ${filestem}
+            ${LDSC} \
+                --rg ${ldsc_dir}${file},${fmd_sumstats_file} \
+                --ref-ld-chr ${eur_dir} \
+                --w-ld-chr ${eur_dir} \
+                --out ${ldsc_genetic_corr_dir}${filestem}_${fmdstem}
+        fi 
+    done
+done
+
 
 
 
