@@ -1,0 +1,62 @@
+---
+title: "Calculating genetic correlations between traits"
+format: gfm
+date: today
+author: "Fred Boehm"
+---
+
+```{r}
+library(magrittr)
+```
+
+Here is a vignette for reading vcf files:
+
+https://mrcieu.github.io/gwasvcf/articles/guide.html
+
+
+```{r}
+gwasvcf::set_bcftools("/usr/local/bin/bcftools")
+gwasvcf::set_plink("/usr/cluster/bin/plink")
+```
+
+```{r}
+vcf_dir <- here::here("analysis", "data", "mrcieu")
+files <- list.files(vcf_dir, 
+            pattern = "vcf.gz", 
+            full.names = TRUE)
+outcome <- files[1] %>%
+    VariantAnnotation::readVcf() %>%
+    gwasglue::gwasvcf_to_TwoSampleMR(type = "outcome")
+fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
+fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
+                                        sep = "\t",
+                                        snp_col = "SNP",
+                                        beta_col = "BETA",
+                                        effect_allele_col = "EA",
+                                        other_allele_col = "OA",
+                                        eaf_col = "EAF",
+                                        se_col = "SE",
+                                        pval_col = "p_value",
+                                        chr_col = "chromosome",
+                                        pos_col = "base_pair_location",
+                                        ncase_col = "N_cases",
+                                        ncontrol_col = "N_ctrls"
+                                        )
+
+
+```
+
+
+
+
+
+## Session info
+
+```{r, session_info}
+sessioninfo::session_info()
+# git commit info
+gr <- git2r::repository(here::here()) %>%
+    git2r::commits()
+gr[[1]] 
+```
+
