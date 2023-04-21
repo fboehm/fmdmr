@@ -73,7 +73,7 @@ for file in ${PATH_TO_GWAS_DOWNLOADS}*; do
         ${MUNGE_SUMSTATS} \
             --sumstats ${file} \
             --out ${ldsc_dir}${filestem} \
-            --merge-alleles ${ldsc_dir}w_hm3.snplist
+            --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
     fi 
 done
 ##### Munge fmd files
@@ -82,12 +82,13 @@ fmd_sumstats_dir=~/research/fmdmr/analysis/data/ldsc_fmd/
 mkdir -p ${fmd_sumstats_dir}
 FMD_FILES=( ~/research/fmdmr/analysis/data/fmd/GCST90026612_buildGRCh37.tsv ~/research/fmdmr/analysis/data/fmd_meta_gwas/meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab )
 for fmdfile in ${FMD_FILES[@]}; do
-    fmdfilestem=$(basename "$fmdfile" .tsv .tab)
+    fmdfilestem=$(basename "$fmdfile" .tsv )
+    fmdfilestem=$(basename "$fmdfilestem" .tab )
     echo ${fmdfilestem}
     ${MUNGE_SUMSTATS} \
         --sumstats ${fmdfile} \
         --out ${fmd_sumstats_dir}${fmdfilestem} \
-        --merge-alleles ${ldsc_dir}w_hm3.snplist
+        --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
 done
 
 
