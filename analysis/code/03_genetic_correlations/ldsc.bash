@@ -39,10 +39,10 @@ eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
 
 # It is a good idea to check that the alleles listed in your summary statistics files match the alleles listed in the data used to estimate LD Scores. Sometimes a small number of alleles won't match; this usually indicates mis-labeled SNPs. This is accomplished using the --merge-alleles flag which takes as its argument a file with a list of SNPs and alleles. You can download the required alleles file with the following command (or by manually following the download link if your machine does not have the wget utility):
 
-if [[ ! -f ${ldsc_dir}w_hm3.snplist ]]; then
-    wget https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2 -P ${ldsc_dir}
-    bunzip2 ${ldsc_dir}w_hm3.snplist.bz2
-fi
+#if [[ ! -f ${ldsc_dir}w_hm3.snplist ]]; then
+#    wget https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2 -P ${ldsc_dir}
+#    bunzip2 ${ldsc_dir}w_hm3.snplist.bz2
+#fi
 
 # To convert the summary statistics, type the commands
 
