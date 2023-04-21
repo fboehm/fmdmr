@@ -42,7 +42,11 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         ncase_col = "N_cases",
                                         ncontrol_col = "N_ctrls"
                                         )
-
+tictoc::tic()
+dat <- TwoSampleMR::harmonise_data(exposure = fmd, outcome = outcome)
+tictoc::toc()
+# 
+fmdmr::ldsc_rg2()
 
 ```
 
