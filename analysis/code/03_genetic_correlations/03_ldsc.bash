@@ -18,9 +18,9 @@ ldsc_genetic_corr_dir=~/research/fmdmr/analysis/data/ldsc_genetic_correlations/
 mkdir -p ${ldsc_genetic_corr_dir}
 ldsc_dir=~/research/fmdmr/analysis/data/ldsc/
 eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
+source ~/.bashrc # prep for using conda. Is this needed?
 
 let k=0 # counter
-
 
 for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
     fmdstem=$(basename "$fmd_sumstats_file" .sumstats.gz)
