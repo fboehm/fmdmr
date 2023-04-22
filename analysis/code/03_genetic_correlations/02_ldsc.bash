@@ -78,8 +78,8 @@ eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
 
 # conda deactivate 
 
-source ~/.bashrc # prep for conda activate command
-conda activate ldsc
+source ~/.bashrc # prep for using conda. Is this needed?
+#conda activate ldsc
 
 
 # call munge_sumstats.py
@@ -91,7 +91,7 @@ for file in ${PATH_TO_GWAS_FILES}*; do
         filestem=$(basename "$file" .tsv.gz)
         echo ${filestem}
         # munge here!
-        ${MUNGE_SUMSTATS} \
+        conda run -n ldsc python ${MUNGE_SUMSTATS} \
             --sumstats ${file} \
             --out ${ldsc_dir}${filestem} \
             --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
@@ -106,7 +106,7 @@ for fmdfile in ${FMD_FILES[@]}; do
     fmdfilestem=$(basename "$fmdfile" .tsv )
     fmdfilestem=$(basename "$fmdfilestem" .tab )
     echo ${fmdfilestem}
-    ${MUNGE_SUMSTATS} \
+    conda run -n ldsc python ${MUNGE_SUMSTATS} \
         --sumstats ${fmdfile} \
         --out ${fmd_sumstats_dir}${fmdfilestem} \
         --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
@@ -127,7 +127,7 @@ for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
         if [[ ${file} == *.sumstats.gz ]]; then
             filestem=$(basename "$file" .sumstats.gz)
             echo ${filestem}
-            ${LDSC} \
+            conda run -n ldsc python ${LDSC} \
                 --rg ${ldsc_dir}${file},${fmd_sumstats_file} \
                 --ref-ld-chr ${eur_dir} \
                 --w-ld-chr ${eur_dir} \
@@ -136,7 +136,6 @@ for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
     done
 done
 
-conda deactivate
 
 
 
