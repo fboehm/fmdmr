@@ -4,9 +4,9 @@
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=munge_sumstats
 #SBATCH --mem=64G
-#SBATCH --cpus-per-task=1
-#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_sumstats.out
-#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_sumstats.err
+#SBATCH --array=1-39
+#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_sumstats_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_sumstats_%a.err
 
 
 # https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation
@@ -85,36 +85,22 @@ source ~/.bashrc # prep for using conda. Is this needed?
 # call munge_sumstats.py
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
 PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/mrcieu_for_munge_sumstats/
+let k=0 # counter
 
-for file in ${PATH_TO_GWAS_FILES}*; do
-    if [[ ${file} == *.tsv.gz ]]; then
-        filestem=$(basename "$file" .tsv.gz)
-        echo ${filestem}
-        # munge here!
+FILENAME_ARRAY=( $(ls ${PATH_TO_GWAS_FILES}*.tsv.gz) )
+
+let k=0
+
+for file in ${FILENAME_ARRAY[@]}; do
+    ${k}=${k}+1
+    filestem=$(basename "$file" .tsv.gz)
+    echo ${filestem}
+    # munge here!
+    if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
         conda run -n ldsc python ${MUNGE_SUMSTATS} \
             --sumstats ${file} \
             --out ${ldsc_dir}${filestem} \
             --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
-    fi 
+    fi
 done
-##### Munge fmd files
-
-fmd_sumstats_dir=~/research/fmdmr/analysis/data/ldsc_fmd/
-mkdir -p ${fmd_sumstats_dir}
-FMD_FILES=( ~/research/fmdmr/analysis/data/fmd/GCST90026612_buildGRCh37.tsv ~/research/fmdmr/analysis/data/fmd_meta_gwas/meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab )
-for fmdfile in ${FMD_FILES[@]}; do
-    fmdfilestem=$(basename "$fmdfile" .tsv )
-    fmdfilestem=$(basename "$fmdfilestem" .tab )
-    echo ${fmdfilestem}
-    conda run -n ldsc python ${MUNGE_SUMSTATS} \
-        --sumstats ${fmdfile} \
-        --out ${fmd_sumstats_dir}${fmdfilestem} \
-        --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
-done
-
-
-
-
-
-
 
