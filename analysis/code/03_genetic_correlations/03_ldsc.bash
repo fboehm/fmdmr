@@ -29,7 +29,7 @@ for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
         if [[ ${file} == *.sumstats.gz ]]; then
             filestem=$(basename "$file" .sumstats.gz)
             echo ${filestem}
-            let ${k}=${k}+1
+            let k=${k}+1
             if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
                 conda run -n ldsc python ${LDSC} \
                     --rg ${ldsc_dir}${file},${fmd_sumstats_file} \

@@ -92,7 +92,7 @@ FILENAME_ARRAY=( $(ls ${PATH_TO_GWAS_FILES}*.tsv.gz) )
 let k=0
 
 for file in ${FILENAME_ARRAY[@]}; do
-    let ${k}=${k}+1
+    let k=${k}+1
     filestem=$(basename "$file" .tsv.gz)
     echo ${filestem}
     # munge here!
