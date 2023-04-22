@@ -78,11 +78,15 @@ eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
 
 # conda deactivate 
 
+source ~/.bashrc # prep for conda activate command
+conda activate ldsc
+
+
 # call munge_sumstats.py
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
 PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/mrcieu_for_munge_sumstats/
 
-for file in ${PATH_TO_GWAS_DOWNLOADS}*; do
+for file in ${PATH_TO_GWAS_FILES}*; do
     if [[ ${file} == *.tsv.gz ]]; then
         filestem=$(basename "$file" .tsv.gz)
         echo ${filestem}
@@ -115,8 +119,6 @@ ldsc_genetic_corr_dir=~/research/fmdmr/analysis/data/ldsc_genetic_correlations/
 mkdir -p ${ldsc_genetic_corr_dir}
 
 
-source ~/.bashrc # prep for conda activate command
-conda activate ldsc
 
 for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
     fmdstem=$(basename "$fmd_sumstats_file" .sumstats.gz)
