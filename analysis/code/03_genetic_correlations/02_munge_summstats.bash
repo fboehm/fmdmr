@@ -113,29 +113,6 @@ for fmdfile in ${FMD_FILES[@]}; do
 done
 
 
-##### LD SCORE REGRESSION to get genetic correlations
-LDSC=~/ldsc/ldsc.py
-ldsc_genetic_corr_dir=~/research/fmdmr/analysis/data/ldsc_genetic_correlations/
-mkdir -p ${ldsc_genetic_corr_dir}
-
-
-
-for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
-    fmdstem=$(basename "$fmd_sumstats_file" .sumstats.gz)
-    echo ${fmdstem}
-    for file in ${ldsc_dir}*; do
-        if [[ ${file} == *.sumstats.gz ]]; then
-            filestem=$(basename "$file" .sumstats.gz)
-            echo ${filestem}
-            conda run -n ldsc python ${LDSC} \
-                --rg ${ldsc_dir}${file},${fmd_sumstats_file} \
-                --ref-ld-chr ${eur_dir} \
-                --w-ld-chr ${eur_dir} \
-                --out ${ldsc_genetic_corr_dir}${filestem}_${fmdstem}
-        fi 
-    done
-done
-
 
 
 
