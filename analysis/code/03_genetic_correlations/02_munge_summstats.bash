@@ -94,9 +94,9 @@ let k=0
 for file in ${FILENAME_ARRAY[@]}; do
     let k=${k}+1
     filestem=$(basename "$file" .tsv.gz)
-    echo ${filestem}
     # munge here!
     if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
+        echo "munging ${filestem}"
         conda run -n ldsc python ${MUNGE_SUMSTATS} \
             --sumstats ${file} \
             --out ${ldsc_dir}${filestem} \
