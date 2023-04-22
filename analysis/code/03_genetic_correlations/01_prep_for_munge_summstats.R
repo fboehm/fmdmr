@@ -25,14 +25,21 @@ new_file <- file %>%
     basename() %>%
     tools::file_path_sans_ext() %>%
     tools::file_path_sans_ext()
-# convert to TwoSampleMR format & write as tsv.gz
+# convert to tibble & write as tsv.gz
+# note that we use column names that work with munge_summstats.py from ldsc
 file %>%
     VariantAnnotation::readVcf() %>%
-    gwasglue::gwasvcf_to_TwoSampleMR(type = "outcome") %>%
-    dplyr::rename_with(.fn = function(x){
-                                stringr::str_remove(x, ".outcome")                                        
-                                }, 
-                       .cols = tidyselect::contains(".outcome")
-                       ) %>%
+    gwasvcf::vcf_to_tibble() %>%
+    dplyr::rename(chromosome = seqnames,
+                  position = start,
+                  ref_allele = REF,
+                  alt_allele = ALT,
+                  beta = ES,
+                  se = SE,
+                  n = SS,
+                  EAF= AF,
+                  INFO = SI) %>%
+    dplyr::mutate(pvalue = 10 ^ -LP) %>%
+    dplyr::select(-c(end, width, paramRangeID, EZ, NC, ID, id, LP, FILTER)) %>%
     vroom::vroom_write(file = file.path(new_file_dir, paste0(new_file, ".tsv.gz")))
 
