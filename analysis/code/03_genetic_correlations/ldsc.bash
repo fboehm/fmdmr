@@ -1,5 +1,14 @@
 #!/bin/bash
 
+#SBATCH --partition=mulan,main
+#SBATCH --time=1-00:00:00
+#SBATCH --job-name=ldsc
+#SBATCH --mem=64G
+#SBATCH --cpus-per-task=1
+#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/ldsc.out
+#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/ldsc.err
+
+
 # https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation
 # we'll download ld scores for Europeans
 
@@ -71,11 +80,11 @@ eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
 
 # call munge_sumstats.py
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
-PATH_TO_GWAS_DOWNLOADS=~/research/fmdmr/analysis/data/mrcieu/
+PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/mrcieu_for_munge_sumstats/
 
 for file in ${PATH_TO_GWAS_DOWNLOADS}*; do
-    if [[ ${file} == *.vcf.gz ]]; then
-        filestem=$(basename "$file" .vcf.gz)
+    if [[ ${file} == *.tsv.gz ]]; then
+        filestem=$(basename "$file" .tsv.gz)
         echo ${filestem}
         # munge here!
         ${MUNGE_SUMSTATS} \
@@ -105,6 +114,10 @@ LDSC=~/ldsc/ldsc.py
 ldsc_genetic_corr_dir=~/research/fmdmr/analysis/data/ldsc_genetic_correlations/
 mkdir -p ${ldsc_genetic_corr_dir}
 
+
+source ~/.bashrc # prep for conda activate command
+conda activate ldsc
+
 for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
     fmdstem=$(basename "$fmd_sumstats_file" .sumstats.gz)
     echo ${fmdstem}
@@ -121,6 +134,7 @@ for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
     done
 done
 
+conda deactivate
 
 
 
