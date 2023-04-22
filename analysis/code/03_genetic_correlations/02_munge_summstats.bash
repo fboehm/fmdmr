@@ -4,7 +4,7 @@
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=munge_sumstats
 #SBATCH --mem=64G
-#SBATCH --array=1-39
+#SBATCH --array=1-39%15
 #SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_sumstats_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_sumstats_%a.err
 
