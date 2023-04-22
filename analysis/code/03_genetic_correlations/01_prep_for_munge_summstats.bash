@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=1-00:00:00
+#SBATCH --time=1:00:00
 #SBATCH --job-name=prep_for_munge_summstats
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=8
+#SBATCH --array=39
 #SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/prep_for_munge_summstats_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/prep_for_munge_summstats_%a.err
 
