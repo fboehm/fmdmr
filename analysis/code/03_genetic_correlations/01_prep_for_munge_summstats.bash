@@ -24,6 +24,7 @@ echo $CODE_DIR
 PROJECT_DIR="$(dirname "$CODE_DIR")"
 echo $PROJECT_DIR
 
+ulimit -s unlimited
 
 let k=0
 
