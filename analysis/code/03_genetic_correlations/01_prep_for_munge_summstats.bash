@@ -26,10 +26,12 @@ echo $PROJECT_DIR
 
 ulimit -s unlimited
 
+let k=0
 
 for file_num in `seq 1 39`; do
-    if [ ${file_num} -eq ${SLURM_ARRAY_TASK_ID} ]; then
-        echo "Processing file number ${file_num}"
-        Rscript ${SCRIPT_DIR}/01_prep_for_munge_summstats.R ${file_num} 
+    let k=${k}+1
+    if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
+        echo "Processing file number ${k}"
+        Rscript ${SCRIPT_DIR}/01_prep_for_munge_summstats.R ${k} 
     fi
 done

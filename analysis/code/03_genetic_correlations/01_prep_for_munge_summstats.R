@@ -40,6 +40,6 @@ file %>%
                   EAF= AF,
                   INFO = SI) %>%
     dplyr::mutate(pvalue = 10 ^ -LP) %>%
-    dplyr::select(-c(end, width, paramRangeID, EZ, NC, ID, id, LP, FILTER)) %>%
+    dplyr::select(-c(end, width, paramRangeID, EZ, NC, ID, id, LP, FILTER, strand, QUAL)) %>%
     vroom::vroom_write(file = file.path(new_file_dir, paste0(new_file, ".tsv.gz")))
 
