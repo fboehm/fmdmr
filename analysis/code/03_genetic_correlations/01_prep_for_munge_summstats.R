@@ -32,8 +32,8 @@ file %>%
     gwasvcf::vcf_to_tibble() %>%
     dplyr::rename(chromosome = seqnames,
                   position = start,
-                  ref_allele = REF,
-                  alt_allele = ALT,
+                  a1 = REF,
+                  a2 = ALT,
                   beta = ES,
                   se = SE,
                   n = SS,
