@@ -5,7 +5,7 @@
 #SBATCH --job-name=prep_for_munge_summstats
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-39
+#SBATCH --array=1-39%10
 #SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/prep_for_munge_summstats_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/prep_for_munge_summstats_%a.err
 
