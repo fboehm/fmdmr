@@ -29,5 +29,10 @@ new_file <- file %>%
 file %>%
     VariantAnnotation::readVcf() %>%
     gwasglue::gwasvcf_to_TwoSampleMR(type = "outcome") %>%
+    dplyr::rename_with(.fn = function(x){
+                                stringr::str_remove(x, ".outcome")                                        
+                                }, 
+                       .cols = tidyselect::contains(".outcome")
+                       ) %>%
     vroom::vroom_write(file = file.path(new_file_dir, paste0(new_file, ".tsv.gz")))
 
