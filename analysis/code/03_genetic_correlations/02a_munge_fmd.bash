@@ -2,18 +2,16 @@
 
 #SBATCH --partition=mulan,main
 #SBATCH --time=1-00:00:00
-#SBATCH --job-name=munge_sumstats
+#SBATCH --job-name=munge_fmd
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=1
-#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_sumstats.out
-#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_sumstats.err
+#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_fmd.out
+#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_fmd.err
 
 
 # https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation
 # we'll download ld scores for Europeans
 
-ldsc_dir=~/research/fmdmr/analysis/data/ldsc/
-mkdir -p ${ldsc_dir}
 eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
 
 #if [ -d "$eur_dir" ]; then
@@ -80,23 +78,11 @@ eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
 
 source ~/.bashrc # prep for using conda. Is this needed?
 #conda activate ldsc
+ldsc_dir=~/research/fmdmr/analysis/data/ldsc/
 
 
 # call munge_sumstats.py
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
-PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/mrcieu_for_munge_sumstats/
-
-for file in ${PATH_TO_GWAS_FILES}*; do
-    if [[ ${file} == *.tsv.gz ]]; then
-        filestem=$(basename "$file" .tsv.gz)
-        echo ${filestem}
-        # munge here!
-        conda run -n ldsc python ${MUNGE_SUMSTATS} \
-            --sumstats ${file} \
-            --out ${ldsc_dir}${filestem} \
-            --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
-    fi 
-done
 ##### Munge fmd files
 
 fmd_sumstats_dir=~/research/fmdmr/analysis/data/ldsc_fmd/
@@ -106,8 +92,20 @@ for fmdfile in ${FMD_FILES[@]}; do
     fmdfilestem=$(basename "$fmdfile" .tsv )
     fmdfilestem=$(basename "$fmdfilestem" .tab )
     echo ${fmdfilestem}
+    if [ fmdfile==~/research/fmdmr/analysis/data/fmd/GCST90026612_buildGRCh37.tsv ]; then
+        let N=6738
+        A1=EA
+        A2=OA
+    else
+        let N=6932
+        A1=REF
+        A2=ALT
+    fi
     conda run -n ldsc python ${MUNGE_SUMSTATS} \
         --sumstats ${fmdfile} \
+        --N ${N} \
+        --a1 ${A1} \
+        --a2 ${A2} \
         --out ${fmd_sumstats_dir}${fmdfilestem} \
         --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
 done
