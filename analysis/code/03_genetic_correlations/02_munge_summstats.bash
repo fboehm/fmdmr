@@ -84,7 +84,7 @@ source ~/.bashrc # prep for using conda. Is this needed?
 
 # call munge_sumstats.py
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
-PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/mrcieu_for_munge_sumstats/
+PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/fmd_for_munge_sumstats/
 let k=0 # counter
 
 FILENAME_ARRAY=( $(ls ${PATH_TO_GWAS_FILES}*.tsv.gz) )

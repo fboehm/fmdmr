@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=1-00:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --job-name=munge_fmd
 #SBATCH --mem=64G
-#SBATCH --cpus-per-task=1
-#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_fmd.out
-#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_fmd.err
+#SBATCH --array=1-2
+#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_fmd_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/munge_fmd_%a.err
 
 
 # https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation
@@ -85,29 +85,24 @@ ldsc_dir=~/research/fmdmr/analysis/data/ldsc/
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
 ##### Munge fmd files
 
+let k=0
+
 fmd_sumstats_dir=~/research/fmdmr/analysis/data/ldsc_fmd/
 mkdir -p ${fmd_sumstats_dir}
-FMD_FILES=( ~/research/fmdmr/analysis/data/fmd/GCST90026612_buildGRCh37.tsv ~/research/fmdmr/analysis/data/fmd_meta_gwas/meta_analyse_FMD_FUMA_FR_MAYO_DEFINE_POL_MGI_FEIRI_HRC_all_2020-08-12.tab )
-for fmdfile in ${FMD_FILES[@]}; do
-    fmdfilestem=$(basename "$fmdfile" .tsv )
-    fmdfilestem=$(basename "$fmdfilestem" .tab )
-    echo ${fmdfilestem}
-    if [ fmdfile==~/research/fmdmr/analysis/data/fmd/GCST90026612_buildGRCh37.tsv ]; then
-        let N=6738
-        A1=EA
-        A2=OA
-    else
-        let N=6932
-        A1=REF
-        A2=ALT
+PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/fmd_for_munge_sumstats/
+FILENAME_ARRAY=( $(ls ${PATH_TO_GWAS_FILES}*.tsv.gz) )
+
+for fmdfile in ${FILENAME_ARRAY[@]}; do
+    let k=${k}+1
+    fmdfilestem=$(basename "$fmdfile" .tsv.gz )
+    
+    if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
+        echo "munging ${fmdfilestem}"
+        conda run -n ldsc python ${MUNGE_SUMSTATS} \
+            --sumstats ${fmdfile} \
+            --out ${fmd_sumstats_dir}${fmdfilestem} \
+            --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
     fi
-    conda run -n ldsc python ${MUNGE_SUMSTATS} \
-        --sumstats ${fmdfile} \
-        --N ${N} \
-        --a1 ${A1} \
-        --a2 ${A2} \
-        --out ${fmd_sumstats_dir}${fmdfilestem} \
-        --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
 done
 
 
