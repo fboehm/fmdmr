@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=1-00:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --job-name=munge_sumstats
 #SBATCH --mem=64G
 #SBATCH --array=1-39%15
@@ -96,11 +96,13 @@ for file in ${FILENAME_ARRAY[@]}; do
     filestem=$(basename "$file" .tsv.gz)
     # munge here!
     if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
-        echo "munging ${filestem}"
-        conda run -n ldsc python ${MUNGE_SUMSTATS} \
-            --sumstats ${file} \
-            --out ${ldsc_dir}${filestem} \
-            --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
+        if [[ ! -f ${ldsc_dir}${filestem}.sumstats.gz ]]; then
+            echo "munging ${filestem}"
+            conda run -n ldsc python ${MUNGE_SUMSTATS} \
+                --sumstats ${file} \
+                --out ${ldsc_dir}${filestem} \
+                --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
+        fi
     fi
 done
 
