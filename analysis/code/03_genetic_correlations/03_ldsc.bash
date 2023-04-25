@@ -21,7 +21,6 @@ eur_dir=~/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/
 source ~/.bashrc # prep for using conda. Is this needed?
 fmd_sumstats_dir=~/research/fmdmr/analysis/data/ldsc_fmd/
 
-
 let k=0 # counter
 
 for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do

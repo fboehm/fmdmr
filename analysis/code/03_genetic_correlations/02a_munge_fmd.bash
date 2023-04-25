@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=2-00:00:00
+#SBATCH --time=4-00:00:00
 #SBATCH --job-name=munge_fmd
 #SBATCH --mem=64G
 #SBATCH --array=1-2
@@ -95,13 +95,17 @@ FILENAME_ARRAY=( $(ls ${PATH_TO_GWAS_FILES}*.tsv.gz) )
 for fmdfile in ${FILENAME_ARRAY[@]}; do
     let k=${k}+1
     fmdfilestem=$(basename "$fmdfile" .tsv.gz )
-    
+    output=${fmd_sumstats_dir}${fmdfilestem}.sumstats.gz 
     if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
-        echo "munging ${fmdfilestem}"
-        conda run -n ldsc python ${MUNGE_SUMSTATS} \
-            --sumstats ${fmdfile} \
-            --out ${fmd_sumstats_dir}${fmdfilestem} \
-            --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
+        if [ -f ${output} ]; then
+            echo "skipping ${fmdfilestem}"
+        else
+            echo "munging ${fmdfilestem}"
+            conda run -n ldsc python ${MUNGE_SUMSTATS} \
+                --sumstats ${fmdfile} \
+                --out ${fmd_sumstats_dir}${fmdfilestem} \
+                --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
+        fi
     fi
 done
 
