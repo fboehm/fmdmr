@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=2-00:00:00
+#SBATCH --time=4-00:00:00
 #SBATCH --job-name=munge_sumstats
 #SBATCH --mem=64G
 #SBATCH --array=1-39%15

@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=1-00:00:00
+#SBATCH --time=10:00:00
 #SBATCH --job-name=ldsc
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-13
+#SBATCH --array=1-14
 #SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/ldsc_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/ldsc_%a.err
 
@@ -30,7 +30,7 @@ for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
             filestem=$(basename "$file" .sumstats.gz)
             let k=${k}+1
             if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
-                echo "file is ${file} and fmd_sumstats_file is ${fmd_sumstats_file}\n"
+                #echo "file is ${file} and fmd_sumstats_file is ${fmd_sumstats_file}\n"
                 conda run -n ldsc python ${LDSC} \
                     --rg ${file},${fmd_sumstats_file} \
                     --ref-ld-chr ${eur_dir} \
