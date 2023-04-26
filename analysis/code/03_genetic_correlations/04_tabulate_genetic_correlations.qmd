@@ -49,3 +49,14 @@ df_tsv %>%
     dplyr::relocate(c(X2, rg, se, z, p, X12, X10)) %>%
     gt::gt()
 ```
+
+
+## Session Info
+
+```{r, session_info}
+sessioninfo::session_info()
+# git commit info
+gr <- git2r::repository(here::here()) %>%
+    git2r::commits()
+gr[[1]] 
+```
