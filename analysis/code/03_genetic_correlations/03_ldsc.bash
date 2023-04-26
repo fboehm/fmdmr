@@ -3,9 +3,9 @@
 #SBATCH --partition=mulan,main
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=ldsc
-#SBATCH --mem=64G
+#SBATCH --mem=32G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-78%20
+#SBATCH --array=1-13
 #SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/ldsc_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/ldsc_%a.err
 
