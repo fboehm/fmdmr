@@ -25,13 +25,12 @@ let k=0 # counter
 
 for fmd_sumstats_file in ${fmd_sumstats_dir}*.sumstats.gz; do
     fmdstem=$(basename "$fmd_sumstats_file" .sumstats.gz)
-    echo ${fmdstem}
     for file in ${ldsc_dir}*; do
         if [[ ${file} == *.sumstats.gz ]]; then
             filestem=$(basename "$file" .sumstats.gz)
-            echo "file is ${file} and fmd_sumstats_file is ${fmd_sumstats_file}\n"
             let k=${k}+1
             if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
+                echo "file is ${file} and fmd_sumstats_file is ${fmd_sumstats_file}\n"
                 conda run -n ldsc python ${LDSC} \
                     --rg ${file},${fmd_sumstats_file} \
                     --ref-ld-chr ${eur_dir} \
