@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=10:00:00
+#SBATCH --time=1:00:00
 #SBATCH --job-name=ldsc
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=1
