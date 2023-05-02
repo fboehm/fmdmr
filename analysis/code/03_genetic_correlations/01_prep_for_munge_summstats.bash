@@ -5,9 +5,9 @@
 #SBATCH --job-name=prep_for_munge_summstats
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-39%10
-#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/prep_for_munge_summstats_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/prep_for_munge_summstats_%a.err
+#SBATCH --array=1
+#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/prep_for_munge_summstats_9_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/prep_for_munge_summstats_9_%a.err
 
 
 if [ -n $SLURM_JOB_ID ] ; then
@@ -26,12 +26,10 @@ echo $PROJECT_DIR
 
 ulimit -s unlimited
 
-let k=0
-
-for file_num in `seq 1 39`; do
-    let k=${k}+1
-    if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
-        echo "Processing file number ${k}"
-        Rscript ${SCRIPT_DIR}/01_prep_for_munge_summstats.R ${k} 
-    fi
-done
+let file_num=9
+#for file_num in `seq 1 9`; do
+#    if [[ ${file_num} -eq ${SLURM_ARRAY_TASK_ID} ]]; then
+        echo "Processing file number ${file_num}"
+        Rscript ${SCRIPT_DIR}/01_prep_for_munge_summstats.R ${file_num} 
+#    fi
+#done
