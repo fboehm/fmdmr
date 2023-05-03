@@ -18,13 +18,13 @@ mkdir -p ${ldsc_dir}
 # call munge_sumstats.py
 MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
 PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/ukb_for_munge_sumstats/
-FILENAME_ARRAY=( $(ls ${PATH_TO_GWAS_FILES}*.tsv.bgz) )
+FILENAME_ARRAY=( $(ls ${PATH_TO_GWAS_FILES}*.tsv.gz) )
 
 let k=0
 
 for file in ${FILENAME_ARRAY[@]}; do
     let k=${k}+1
-    filestem=$(basename "$file" .tsv.bgz)
+    filestem=$(basename "$file" .tsv.gz)
     # munge here!
     if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
         if [[ ! -f ${ldsc_dir}${filestem}.sumstats.gz ]]; then
