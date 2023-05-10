@@ -26,37 +26,12 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         ncontrol_col = "N_ctrls"
                                         )
 
-#fmd <- vroom::vroom(fmd_file) %>%
-#    dplyr::mutate(chr_pos = paste0("chr", chromosome, ":", base_pair_location))
-fmd_lead_snps_file <- here::here("analysis", "data", "fmd", "41467_2021_26174_MOESM4_ESM.xlsx") 
-fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 2) %>%
-    dplyr::filter(`P-value` < 10^-6) 
-fmd_filt <- fmd %>%
-    dplyr::filter(SNP %in% fmd_lead_snps$rsID)
-```
-
-```{r}
-ieugwasr::api_status()
-ao <- TwoSampleMR::available_outcomes()
-cr_ind <- grepl("creatinine", ao$trait, ignore.case = TRUE) 
-ki_ind <- grepl("kidney", ao$trait, ignore.case = TRUE) 
-cc_ind <- grepl("cystatin", ao$trait, ignore.case = TRUE)
-ao[cc_ind, ]
-# get ckd outcomes
-ckd_outcomes <- ao[ki_ind, ] %>%
-    dplyr::filter(stringr::str_detect(string = trait, pattern = "Chronic"))
-ckd <- TwoSampleMR::extract_outcome_data(
-    snps = fmd_filt$SNP,
-    outcomes = ckd_outcomes$id
-)
-dat <- TwoSampleMR::harmonise_data(exposure_dat = fmd_filt, outcome_dat = ckd)
-TwoSampleMR::mr(dat, method_list = c("mr_egger_regression", "mr_ivw"))
 ```
 
 
 
 ```{r, results = "asis"}
-files <- list.files(here::here("analysis", "data", "ukb"), pattern = "both_sexes", full.names = TRUE)
+files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
 # GRCh37 is used here!
 for (file in files) {
@@ -137,4 +112,8 @@ for (file in files) {
 
 ```{r}
 sessioninfo::session_info()
+# git commit info
+gr <- git2r::repository(here::here()) %>%
+    git2r::commits()
+gr[[1]] 
 ```
