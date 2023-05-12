@@ -1,72 +1,15 @@
 Creatinine & Cystatin C & CKD as possible consequences of FMD
 ================
 
-``` r
-library(magrittr)
-```
-
-``` r
-fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
-fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
-                                        sep = "\t",
-                                        snp_col = "SNP",
-                                        beta_col = "BETA",
-                                        effect_allele_col = "EA",
-                                        other_allele_col = "OA",
-                                        eaf_col = "EAF",
-                                        se_col = "SE",
-                                        pval_col = "p_value",
-                                        chr_col = "chromosome",
-                                        pos_col = "base_pair_location",
-                                        ncase_col = "N_cases",
-                                        ncontrol_col = "N_ctrls"
-                                        )
-```
-
     No phenotype name specified, defaulting to 'exposure'.
 
     Generating sample size from ncase and ncontrol
-
-``` r
-pvalue_thresholds <- c(1e-8, 1e-7, 1e-6)
-```
-
-``` r
-for (pvalue_threshold in pvalue_thresholds){
-    fmd2 <- fmd %>% 
-        dplyr::filter(pval.exposure < pvalue_threshold) %>%
-        TwoSampleMR::clump_data()
-    files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
-    for (file in files){
-        pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
-        pre_dat <- pre_dat %>%
-            dplyr::filter((chr %in% fmd2$chr.exposure) & (pos %in% fmd2$pos.exposure))
-        pre2 <- pre_dat %>%
-            dplyr::left_join(fmd2 %>% dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) %>%
-            dplyr::select(- snp) %>%
-            TwoSampleMR::format_data(type = "outcome", 
-                                    effect_allele_col = "A1", 
-                                    other_allele_col = "A2",
-                                    pval_col = "pvalue",
-                                    samplesize_col = "n"       
-                                    )
-        dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
-        result <- TwoSampleMR::mr(dat_harm) 
-        # omit method that gives error
-        cat("## ", file, "\n")
-        cat("### pvalue threshold: ", pvalue_threshold, "\n")
-        print(knitr::kable(result))
-        pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
-        print(pp[[1]])
-    }
-}
-```
 
     API: public: http://gwas-api.mrcieu.ac.uk/
 
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping JbKImT, 7 variants, using EUR population reference
+    Clumping k9ycpa, 7 variants, using EUR population reference
 
     Removing 4 of 7 variants due to LD with other variants or absence from LD reference panel
 
@@ -75,9 +18,9 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (Lv6AIG)
+    Harmonising exposure (k9ycpa) and outcome (f9960g)
 
-    Analysing 'JbKImT' on 'Lv6AIG'
+    Analysing 'k9ycpa' on 'f9960g'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30700_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
@@ -85,20 +28,29 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | Lv6AIG     | outcome | exposure | MR Egger                  |    3 |  0.0452620 | 0.0834409 | 0.6835853 |
-| JbKImT      | Lv6AIG     | outcome | exposure | Weighted median           |    3 | -0.0063779 | 0.0081710 | 0.4350643 |
-| JbKImT      | Lv6AIG     | outcome | exposure | Inverse variance weighted |    3 | -0.0116360 | 0.0101951 | 0.2537287 |
-| JbKImT      | Lv6AIG     | outcome | exposure | Simple mode               |    3 | -0.0029696 | 0.0098092 | 0.7906744 |
-| JbKImT      | Lv6AIG     | outcome | exposure | Weighted mode             |    3 | -0.0041515 | 0.0085692 | 0.6759191 |
+| k9ycpa      | f9960g     | outcome | exposure | MR Egger                  |    3 |  0.0452620 | 0.0834409 | 0.6835853 |
+| k9ycpa      | f9960g     | outcome | exposure | Weighted median           |    3 | -0.0063779 | 0.0078041 | 0.4137877 |
+| k9ycpa      | f9960g     | outcome | exposure | Inverse variance weighted |    3 | -0.0116360 | 0.0101951 | 0.2537287 |
+| k9ycpa      | f9960g     | outcome | exposure | Simple mode               |    3 | -0.0029696 | 0.0095193 | 0.7845911 |
+| k9ycpa      | f9960g     | outcome | exposure | Weighted mode             |    3 | -0.0041515 | 0.0080730 | 0.6582680 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |        Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|---------:|-----:|----------:|
+| k9ycpa      | f9960g     | outcome | exposure | MR Egger                  | 3.591777 |    1 | 0.0580661 |
+| k9ycpa      | f9960g     | outcome | exposure | Inverse variance weighted | 5.296403 |    2 | 0.0707784 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |       se |      pval |
+|:------------|:-----------|:--------|:---------|----------------:|---------:|----------:|
+| k9ycpa      | f9960g     | outcome | exposure |      -0.0176615 | 0.025637 | 0.6159646 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (Cwjln6)
+    Harmonising exposure (k9ycpa) and outcome (9LVE2t)
 
-    Analysing 'JbKImT' on 'Cwjln6'
+    Analysing 'k9ycpa' on '9LVE2t'
 
 <div class="cell-output-display">
 
@@ -112,20 +64,29 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | Cwjln6     | outcome | exposure | MR Egger                  |    3 |  0.1190633 | 0.0404611 | 0.2085469 |
-| JbKImT      | Cwjln6     | outcome | exposure | Weighted median           |    3 |  0.0017131 | 0.0076857 | 0.8236164 |
-| JbKImT      | Cwjln6     | outcome | exposure | Inverse variance weighted |    3 |  0.0016671 | 0.0119379 | 0.8889355 |
-| JbKImT      | Cwjln6     | outcome | exposure | Simple mode               |    3 | -0.0094901 | 0.0144798 | 0.5795178 |
-| JbKImT      | Cwjln6     | outcome | exposure | Weighted mode             |    3 |  0.0083734 | 0.0137425 | 0.6043186 |
+| k9ycpa      | 9LVE2t     | outcome | exposure | MR Egger                  |    3 |  0.1190633 | 0.0404611 | 0.2085469 |
+| k9ycpa      | 9LVE2t     | outcome | exposure | Weighted median           |    3 |  0.0017131 | 0.0076760 | 0.8233969 |
+| k9ycpa      | 9LVE2t     | outcome | exposure | Inverse variance weighted |    3 |  0.0016671 | 0.0119379 | 0.8889355 |
+| k9ycpa      | 9LVE2t     | outcome | exposure | Simple mode               |    3 | -0.0094901 | 0.0145717 | 0.5817055 |
+| k9ycpa      | 9LVE2t     | outcome | exposure | Weighted mode             |    3 |  0.0083734 | 0.0134339 | 0.5966924 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |         Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|----------:|-----:|----------:|
+| k9ycpa      | 9LVE2t     | outcome | exposure | MR Egger                  | 0.0065192 |    1 | 0.9356475 |
+| k9ycpa      | 9LVE2t     | outcome | exposure | Inverse variance weighted | 8.5989536 |    2 | 0.0135757 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |        se |      pval |
+|:------------|:-----------|:--------|:---------|----------------:|----------:|----------:|
+| k9ycpa      | 9LVE2t     | outcome | exposure |      -0.0364406 | 0.0124316 | 0.2092993 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (bqVvBe)
+    Harmonising exposure (k9ycpa) and outcome (0GP7ue)
 
-    Analysing 'JbKImT' on 'bqVvBe'
+    Analysing 'k9ycpa' on '0GP7ue'
 
 <div class="cell-output-display">
 
@@ -139,15 +100,24 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | bqVvBe     | outcome | exposure | MR Egger                  |    3 |  0.0033322 | 0.0022448 | 0.3774020 |
-| JbKImT      | bqVvBe     | outcome | exposure | Weighted median           |    3 |  0.0001662 | 0.0002750 | 0.5455868 |
-| JbKImT      | bqVvBe     | outcome | exposure | Inverse variance weighted |    3 | -0.0001231 | 0.0004176 | 0.7681797 |
-| JbKImT      | bqVvBe     | outcome | exposure | Simple mode               |    3 |  0.0001893 | 0.0003196 | 0.6137123 |
-| JbKImT      | bqVvBe     | outcome | exposure | Weighted mode             |    3 |  0.0002079 | 0.0002531 | 0.4977459 |
+| k9ycpa      | 0GP7ue     | outcome | exposure | MR Egger                  |    3 |  0.0033322 | 0.0022448 | 0.3774020 |
+| k9ycpa      | 0GP7ue     | outcome | exposure | Weighted median           |    3 |  0.0001662 | 0.0002721 | 0.5413082 |
+| k9ycpa      | 0GP7ue     | outcome | exposure | Inverse variance weighted |    3 | -0.0001231 | 0.0004176 | 0.7681797 |
+| k9ycpa      | 0GP7ue     | outcome | exposure | Simple mode               |    3 |  0.0001893 | 0.0003090 | 0.6024462 |
+| k9ycpa      | 0GP7ue     | outcome | exposure | Weighted mode             |    3 |  0.0002079 | 0.0002570 | 0.5034785 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |       Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|--------:|-----:|----------:|
+| k9ycpa      | 0GP7ue     | outcome | exposure | MR Egger                  | 2.28424 |    1 | 0.1306942 |
+| k9ycpa      | 0GP7ue     | outcome | exposure | Inverse variance weighted | 7.80838 |    2 | 0.0201573 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |        se |      pval |
+|:------------|:-----------|:--------|:---------|----------------:|----------:|----------:|
+| k9ycpa      | 0GP7ue     | outcome | exposure |      -0.0010726 | 0.0006897 | 0.3638075 |
 
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping JbKImT, 27 variants, using EUR population reference
+    Clumping k9ycpa, 27 variants, using EUR population reference
 
     Removing 23 of 27 variants due to LD with other variants or absence from LD reference panel
 
@@ -156,9 +126,9 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (ZmxyJm)
+    Harmonising exposure (k9ycpa) and outcome (8GIczE)
 
-    Analysing 'JbKImT' on 'ZmxyJm'
+    Analysing 'k9ycpa' on '8GIczE'
 
 <div class="cell-output-display">
 
@@ -172,20 +142,29 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | ZmxyJm     | outcome | exposure | MR Egger                  |    4 |  0.0496276 | 0.0532251 | 0.4495575 |
-| JbKImT      | ZmxyJm     | outcome | exposure | Weighted median           |    4 | -0.0041630 | 0.0067009 | 0.5344270 |
-| JbKImT      | ZmxyJm     | outcome | exposure | Inverse variance weighted |    4 | -0.0093667 | 0.0078296 | 0.2315698 |
-| JbKImT      | ZmxyJm     | outcome | exposure | Simple mode               |    4 | -0.0010033 | 0.0084914 | 0.9134091 |
-| JbKImT      | ZmxyJm     | outcome | exposure | Weighted mode             |    4 | -0.0027275 | 0.0075438 | 0.7416507 |
+| k9ycpa      | 8GIczE     | outcome | exposure | MR Egger                  |    4 |  0.0496276 | 0.0532251 | 0.4495575 |
+| k9ycpa      | 8GIczE     | outcome | exposure | Weighted median           |    4 | -0.0041630 | 0.0068188 | 0.5415160 |
+| k9ycpa      | 8GIczE     | outcome | exposure | Inverse variance weighted |    4 | -0.0093667 | 0.0078296 | 0.2315698 |
+| k9ycpa      | 8GIczE     | outcome | exposure | Simple mode               |    4 | -0.0010033 | 0.0084989 | 0.9134853 |
+| k9ycpa      | 8GIczE     | outcome | exposure | Weighted mode             |    4 | -0.0027275 | 0.0080105 | 0.7559372 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |        Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|---------:|-----:|----------:|
+| k9ycpa      | 8GIczE     | outcome | exposure | MR Egger                  | 3.641596 |    2 | 0.1618965 |
+| k9ycpa      | 8GIczE     | outcome | exposure | Inverse variance weighted | 5.924049 |    3 | 0.1153645 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |        se |     pval |
+|:------------|:-----------|:--------|:---------|----------------:|----------:|---------:|
+| k9ycpa      | 8GIczE     | outcome | exposure |      -0.0188337 | 0.0168215 | 0.379286 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (BrlJdP)
+    Harmonising exposure (k9ycpa) and outcome (hjsJwF)
 
-    Analysing 'JbKImT' on 'BrlJdP'
+    Analysing 'k9ycpa' on 'hjsJwF'
 
 <div class="cell-output-display">
 
@@ -199,20 +178,29 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | BrlJdP     | outcome | exposure | MR Egger                  |    4 |  0.0829785 | 0.0515057 | 0.2484739 |
-| JbKImT      | BrlJdP     | outcome | exposure | Weighted median           |    4 | -0.0057269 | 0.0080272 | 0.4755739 |
-| JbKImT      | BrlJdP     | outcome | exposure | Inverse variance weighted |    4 | -0.0008171 | 0.0091070 | 0.9285072 |
-| JbKImT      | BrlJdP     | outcome | exposure | Simple mode               |    4 | -0.0104251 | 0.0110598 | 0.4154182 |
-| JbKImT      | BrlJdP     | outcome | exposure | Weighted mode             |    4 | -0.0093331 | 0.0142681 | 0.5597031 |
+| k9ycpa      | hjsJwF     | outcome | exposure | MR Egger                  |    4 |  0.0829785 | 0.0515057 | 0.2484739 |
+| k9ycpa      | hjsJwF     | outcome | exposure | Weighted median           |    4 | -0.0057269 | 0.0076661 | 0.4550372 |
+| k9ycpa      | hjsJwF     | outcome | exposure | Inverse variance weighted |    4 | -0.0008171 | 0.0091070 | 0.9285072 |
+| k9ycpa      | hjsJwF     | outcome | exposure | Simple mode               |    4 | -0.0104251 | 0.0112744 | 0.4233369 |
+| k9ycpa      | hjsJwF     | outcome | exposure | Weighted mode             |    4 | -0.0093331 | 0.0149531 | 0.5767675 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |        Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|---------:|-----:|----------:|
+| k9ycpa      | hjsJwF     | outcome | exposure | MR Egger                  | 4.037562 |    2 | 0.1328173 |
+| k9ycpa      | hjsJwF     | outcome | exposure | Inverse variance weighted | 9.489793 |    3 | 0.0234402 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |        se |      pval |
+|:------------|:-----------|:--------|:---------|----------------:|----------:|----------:|
+| k9ycpa      | hjsJwF     | outcome | exposure |      -0.0267513 | 0.0162781 | 0.2420182 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (qEv7sX)
+    Harmonising exposure (k9ycpa) and outcome (gw7Cs1)
 
-    Analysing 'JbKImT' on 'qEv7sX'
+    Analysing 'k9ycpa' on 'gw7Cs1'
 
 <div class="cell-output-display">
 
@@ -226,15 +214,24 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | qEv7sX     | outcome | exposure | MR Egger                  |    4 |  0.0031264 | 0.0014522 | 0.1642015 |
-| JbKImT      | qEv7sX     | outcome | exposure | Weighted median           |    4 |  0.0001739 | 0.0002401 | 0.4688647 |
-| JbKImT      | qEv7sX     | outcome | exposure | Inverse variance weighted |    4 | -0.0000602 | 0.0003114 | 0.8466688 |
-| JbKImT      | qEv7sX     | outcome | exposure | Simple mode               |    4 |  0.0001761 | 0.0002577 | 0.5433693 |
-| JbKImT      | qEv7sX     | outcome | exposure | Weighted mode             |    4 |  0.0002056 | 0.0002495 | 0.4703928 |
+| k9ycpa      | gw7Cs1     | outcome | exposure | MR Egger                  |    4 |  0.0031264 | 0.0014522 | 0.1642015 |
+| k9ycpa      | gw7Cs1     | outcome | exposure | Weighted median           |    4 |  0.0001739 | 0.0002427 | 0.4736530 |
+| k9ycpa      | gw7Cs1     | outcome | exposure | Inverse variance weighted |    4 | -0.0000602 | 0.0003114 | 0.8466688 |
+| k9ycpa      | gw7Cs1     | outcome | exposure | Simple mode               |    4 |  0.0001761 | 0.0002698 | 0.5603644 |
+| k9ycpa      | gw7Cs1     | outcome | exposure | Weighted mode             |    4 |  0.0002056 | 0.0002331 | 0.4427067 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |        Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|---------:|-----:|----------:|
+| k9ycpa      | gw7Cs1     | outcome | exposure | MR Egger                  | 2.381616 |    2 | 0.3039755 |
+| k9ycpa      | gw7Cs1     | outcome | exposure | Inverse variance weighted | 8.232177 |    3 | 0.0414493 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |       se |      pval |
+|:------------|:-----------|:--------|:---------|----------------:|---------:|----------:|
+| k9ycpa      | gw7Cs1     | outcome | exposure |      -0.0010173 | 0.000459 | 0.1569732 |
 
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping JbKImT, 88 variants, using EUR population reference
+    Clumping k9ycpa, 88 variants, using EUR population reference
 
     Removing 78 of 88 variants due to LD with other variants or absence from LD reference panel
 
@@ -243,12 +240,12 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (VtacK9)
+    Harmonising exposure (k9ycpa) and outcome (UQIUQz)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing 'JbKImT' on 'VtacK9'
+    Analysing 'k9ycpa' on 'UQIUQz'
 
 <div class="cell-output-display">
 
@@ -262,23 +259,32 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | VtacK9     | outcome | exposure | MR Egger                  |    9 | -0.0077117 | 0.0370119 | 0.8408821 |
-| JbKImT      | VtacK9     | outcome | exposure | Weighted median           |    9 | -0.0054017 | 0.0061945 | 0.3832010 |
-| JbKImT      | VtacK9     | outcome | exposure | Inverse variance weighted |    9 | -0.0056231 | 0.0070805 | 0.4270969 |
-| JbKImT      | VtacK9     | outcome | exposure | Simple mode               |    9 | -0.0043119 | 0.0095861 | 0.6647882 |
-| JbKImT      | VtacK9     | outcome | exposure | Weighted mode             |    9 | -0.0043119 | 0.0079093 | 0.6005026 |
+| k9ycpa      | UQIUQz     | outcome | exposure | MR Egger                  |    9 | -0.0077117 | 0.0370119 | 0.8408821 |
+| k9ycpa      | UQIUQz     | outcome | exposure | Weighted median           |    9 | -0.0054017 | 0.0062392 | 0.3866175 |
+| k9ycpa      | UQIUQz     | outcome | exposure | Inverse variance weighted |    9 | -0.0056231 | 0.0070805 | 0.4270969 |
+| k9ycpa      | UQIUQz     | outcome | exposure | Simple mode               |    9 | -0.0043119 | 0.0094996 | 0.6619593 |
+| k9ycpa      | UQIUQz     | outcome | exposure | Weighted mode             |    9 | -0.0043119 | 0.0073669 | 0.5744776 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |        Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|---------:|-----:|----------:|
+| k9ycpa      | UQIUQz     | outcome | exposure | MR Egger                  | 21.18876 |    7 | 0.0035006 |
+| k9ycpa      | UQIUQz     | outcome | exposure | Inverse variance weighted | 21.19882 |    8 | 0.0066376 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |        se |      pval |
+|:------------|:-----------|:--------|:---------|----------------:|----------:|----------:|
+| k9ycpa      | UQIUQz     | outcome | exposure |       0.0006184 | 0.0107263 | 0.9556395 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (HVQ2vL)
+    Harmonising exposure (k9ycpa) and outcome (oOmOKK)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing 'JbKImT' on 'HVQ2vL'
+    Analysing 'k9ycpa' on 'oOmOKK'
 
 <div class="cell-output-display">
 
@@ -292,23 +298,32 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | HVQ2vL     | outcome | exposure | MR Egger                  |    9 |  0.0248932 | 0.0275548 | 0.3963324 |
-| JbKImT      | HVQ2vL     | outcome | exposure | Weighted median           |    9 | -0.0043895 | 0.0065126 | 0.5003141 |
-| JbKImT      | HVQ2vL     | outcome | exposure | Inverse variance weighted |    9 |  0.0021690 | 0.0055307 | 0.6949327 |
-| JbKImT      | HVQ2vL     | outcome | exposure | Simple mode               |    9 |  0.0169004 | 0.0135943 | 0.2489930 |
-| JbKImT      | HVQ2vL     | outcome | exposure | Weighted mode             |    9 |  0.0170935 | 0.0132351 | 0.2325819 |
+| k9ycpa      | oOmOKK     | outcome | exposure | MR Egger                  |    9 |  0.0248932 | 0.0275548 | 0.3963324 |
+| k9ycpa      | oOmOKK     | outcome | exposure | Weighted median           |    9 | -0.0043895 | 0.0061798 | 0.4775224 |
+| k9ycpa      | oOmOKK     | outcome | exposure | Inverse variance weighted |    9 |  0.0021690 | 0.0055307 | 0.6949327 |
+| k9ycpa      | oOmOKK     | outcome | exposure | Simple mode               |    9 |  0.0169004 | 0.0135925 | 0.2489346 |
+| k9ycpa      | oOmOKK     | outcome | exposure | Weighted mode             |    9 |  0.0170935 | 0.0131089 | 0.2285137 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |        Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|---------:|-----:|----------:|
+| k9ycpa      | oOmOKK     | outcome | exposure | MR Egger                  | 13.90388 |    7 | 0.0529176 |
+| k9ycpa      | oOmOKK     | outcome | exposure | Inverse variance weighted | 15.31372 |    8 | 0.0533249 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |        se |      pval |
+|:------------|:-----------|:--------|:---------|----------------:|----------:|----------:|
+| k9ycpa      | oOmOKK     | outcome | exposure |      -0.0067277 | 0.0079855 | 0.4273572 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (JbKImT) and outcome (7rrOD7)
+    Harmonising exposure (k9ycpa) and outcome (zlWA1U)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing 'JbKImT' on '7rrOD7'
+    Analysing 'k9ycpa' on 'zlWA1U'
 
 <div class="cell-output-display">
 
@@ -322,23 +337,26 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| JbKImT      | 7rrOD7     | outcome | exposure | MR Egger                  |    9 |  0.0015896 | 0.0007178 | 0.0623772 |
-| JbKImT      | 7rrOD7     | outcome | exposure | Weighted median           |    9 |  0.0001531 | 0.0002048 | 0.4547700 |
-| JbKImT      | 7rrOD7     | outcome | exposure | Inverse variance weighted |    9 | -0.0000879 | 0.0001707 | 0.6065618 |
-| JbKImT      | 7rrOD7     | outcome | exposure | Simple mode               |    9 |  0.0002152 | 0.0002745 | 0.4556184 |
-| JbKImT      | 7rrOD7     | outcome | exposure | Weighted mode             |    9 |  0.0002104 | 0.0002306 | 0.3882588 |
+| k9ycpa      | zlWA1U     | outcome | exposure | MR Egger                  |    9 |  0.0015896 | 0.0007178 | 0.0623772 |
+| k9ycpa      | zlWA1U     | outcome | exposure | Weighted median           |    9 |  0.0001531 | 0.0001909 | 0.4226793 |
+| k9ycpa      | zlWA1U     | outcome | exposure | Inverse variance weighted |    9 | -0.0000879 | 0.0001707 | 0.6065618 |
+| k9ycpa      | zlWA1U     | outcome | exposure | Simple mode               |    9 |  0.0002152 | 0.0002930 | 0.4835762 |
+| k9ycpa      | zlWA1U     | outcome | exposure | Weighted mode             |    9 |  0.0002104 | 0.0002417 | 0.4093837 |
+
+| id.exposure | id.outcome | outcome | exposure | method                    |         Q | Q_df |    Q_pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|----------:|-----:|----------:|
+| k9ycpa      | zlWA1U     | outcome | exposure | MR Egger                  |  5.126035 |    7 | 0.6445857 |
+| k9ycpa      | zlWA1U     | outcome | exposure | Inverse variance weighted | 10.826083 |    8 | 0.2117496 |
+
+| id.exposure | id.outcome | outcome | exposure | egger_intercept |       se |      pval |
+|:------------|:-----------|:--------|:---------|----------------:|---------:|----------:|
+| k9ycpa      | zlWA1U     | outcome | exposure |      -0.0004966 | 0.000208 | 0.0483477 |
 
 <div class="cell-output-display">
 
 ![](ukb_files/figure-commonmark/unnamed-chunk-3-9.png)
 
 </div>
-
-``` r
-# see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
-# GRCh37 is used here!
-#Neale lab denotes by beta the alt allele effect, ie, the increase in phenotype per increase in one alt allele.
-```
 
 ``` r
 sessioninfo::session_info()
@@ -440,4 +458,4 @@ gr <- git2r::repository(here::here()) %>%
 gr[[1]] 
 ```
 
-    [f989ceb] 2023-05-12: feat: rendered qmd after enclosing knitr kable calls in print() statements
+    [42c826e] 2023-05-12: feat: set echo = FALSE and added heterogeneity and pleiotropy test results
