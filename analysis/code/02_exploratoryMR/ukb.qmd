@@ -25,87 +25,44 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         ncase_col = "N_cases",
                                         ncontrol_col = "N_ctrls"
                                         )
-
+pvalue_threshold <- 1e-6
 ```
 
 
 
 ```{r, results = "asis"}
 files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
+file <- files[1]
+pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
+dat <- fmd %>% 
+    dplyr::filter(pval.exposure < pvalue_threshold) %>%
+    TwoSampleMR::clump_data() %>%
+    dplyr::mutate(chr_pos = paste0(chr.exposure, ":", pos.exposure)) %>%
+    dplyr::left_join(pre_dat, by = c("chr_pos" = "snp")) 
+dat2 <- dat %>%
+    tibble::as_tibble() %>%
+    dplyr::select(- c(chr_pos, chr, pos)) %>%
+    dplyr::rename(effect_allele.outcome = A1, 
+                    other_allele.outcome = A2, 
+                    beta.outcome =  beta, 
+                    se.outcome = se, 
+                    pval.outcome = pvalue, 
+                    n.outcome = n) %>%
+    dplyr::relocate(other_allele.exposure, 
+                    other_allele.outcome, 
+                    effect_allele.exposure, 
+                    effect_allele.outcome) 
+# now use dat2 with TwoSampleMR functions to get MR results
+
+
+
+
+
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
 # GRCh37 is used here!
-for (file in files) {
-    cat(file, "\n")
-    #pre_dat <- vroom::vroom(file)
-    TwoSampleMR::read_outcome_data(filename = file, 
-                                    snps = NULL,
-                                    sep = "\t",
-                                    snp_col = "variant",
-                                    beta_col = "beta",
-                                    se_col = "se",
-                                    eaf_col = "eaf",
-                                    effect_allele_col = "effect_allele",
-                                    other_allele_col = "other_allele",
-                                    pval_col = "pval",
-                                    units_col = "units",
-                                    samplesize_col = "n_complete_samples",
-                                    gene_col = "gene",
-                                    id_col = "id",
-                                    min_pval = 1e-200,
-                                    log_pval = FALSE
-                                    
-                                    )
-    fmd_lead_snps <- readxl::read_xlsx(fmd_lead_snps_file, skip = 1, col_names = TRUE) %>%
-    dplyr::filter(`P-value` < 10^-6) %>%
-    dplyr::mutate(chr_pos = paste0("chr", CHROM, ":", POS)) %>%
-    dplyr::rename(other_allele = 4, effect_allele = 5, gene = 6, pvalue = 10) %>%
-    dplyr::mutate(v1 = paste0(CHROM, ":", POS, ":", other_allele, ":", effect_allele)) %>%
-    dplyr::mutate(v2 = paste0(CHROM, ":", POS, ":", effect_allele, ":", other_allele)) %>%
-    dplyr::mutate(v1_in_dat = v1 %in% pre_dat$variant) %>%
-    dplyr::mutate(v2_in_dat = v2 %in% pre_dat$variant)
-
-    dat <- pre_dat %>%
-    # filter to chromosome values in fmd_lead_snps
-    #    dplyr::filter(stringr::str_starts(string = variant, pattern = "12") | 
-    #                  stringr::str_starts(string = variant, pattern = "6") |
-    #                  stringr::str_starts(string = variant, pattern = "5") |
-    #                  stringr::str_starts(string = variant, pattern = "8") | 
-    #                  stringr::str_starts(string = variant, pattern = "13") |
-    #                  stringr::str_starts(string = variant, pattern = "4") |
-    #                  stringr::str_starts(string = variant, pattern = "10") | 
-    #                  stringr::str_starts(string = variant, pattern = "17")
-    #                   ) %>%
-        dplyr::filter(variant %in% fmd_lead_snps$v1 | variant %in% fmd_lead_snps$v2) %>%
-        dplyr::mutate(chr = purrr::map_int(.x = variant, .f = function(x) {stringr::str_split(string = x, pattern = ":")[[1]][1] %>% as.integer})) %>%
-        dplyr::mutate(pos = purrr::map_int(.x = variant, .f = function(x) {stringr::str_split(string = x, pattern = ":")[[1]][2] %>% as.integer})) %>%
-        dplyr::mutate(ref = purrr::map_chr(.x = variant, .f = function(x) {stringr::str_split(string = x, pattern = ":")[[1]][3]})) %>%
-        dplyr::mutate(alt = purrr::map_chr(.x = variant, .f = function(x) {stringr::str_split(string = x, pattern = ":")[[1]][4]})) %>% 
-        dplyr::mutate(chr_pos = paste0("chr", chr, ":", pos)) %>%
-        dplyr::relocate(chr, pos, ref, alt, chr_pos)
-    fmd_lead_snps$chr_pos %in% dat$chr_pos
+#Neale lab denotes by beta the alt allele effect, ie, the increase in phenotype per increase in one alt allele.
 
 
-    #Neale lab denotes by beta the alt allele effect, ie, the increase in phenotype per increase in one alt allele.
-
-
-    #Are any of the snps shared between ukb and fmd?
-
-    (fmd$chr_pos %in% dat$chr_pos) %>% sum()
-    # both are on GRCh37
-    # join fmd_lead_snps and dat - where dat has data for only 10 snp
-    combined <- fmd_lead_snps %>% 
-        dplyr::rename_with(~ paste0("fmd_", .), .cols = c(- chr_pos, -v1, -v2, - v1_in_dat, - v2_in_dat)) %>%
-        dplyr::left_join(dat, by = "chr_pos")
-    combined %>%
-        dplyr::relocate(v1, v2, v1_in_dat, v2_in_dat, fmd_effect_allele, ref)
-    comb2 <- combined %>%
-        dplyr::mutate(harmonised_dat_effect_allele = ifelse(fmd_effect_allele == alt, alt, ref)) %>%
-        dplyr::mutate(harmonised_dat_effect = ifelse(fmd_effect_allele == alt, beta, -beta))
-    mr_in <- MendelianRandomization::mr_input(bx = comb2$fmd_BETA, bxse = comb2$fmd_SE, by = comb2$harmonised_dat_effect, byse = comb2$se)
-    mr_out <- MendelianRandomization::mr_allmethods(mr_in)
-    knitr::kable(mr_out@Values) %>% print()
-    MendelianRandomization::mr_plot(mr_in, interactive = FALSE) %>% print()
-}
 ```
 
 
