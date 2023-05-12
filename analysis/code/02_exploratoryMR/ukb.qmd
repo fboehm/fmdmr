@@ -4,12 +4,12 @@ format: gfm
 ---
 
 
-```{r}
+```{r, echo = FALSE}
 library(magrittr)
 ```
 
 
-```{r}
+```{r, echo = FALSE}
 fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
 fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         sep = "\t",
@@ -30,7 +30,7 @@ pvalue_thresholds <- c(1e-8, 1e-7, 1e-6)
 
 
 
-```{r, results = "asis"}
+```{r, results = "asis", echo = FALSE}
 for (pvalue_threshold in pvalue_thresholds){
     fmd2 <- fmd %>% 
         dplyr::filter(pval.exposure < pvalue_threshold) %>%
@@ -51,10 +51,14 @@ for (pvalue_threshold in pvalue_thresholds){
                                     )
         dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
         result <- TwoSampleMR::mr(dat_harm) 
+        result_het <- TwoSampleMR::mr_heterogeneity(dat = dat_harm)
+        result_pleiotropy <- TwoSampleMR::mr_pleiotropy_test(dat = dat_harm)
         # omit method that gives error
         cat("## ", file, "\n")
         cat("### pvalue threshold: ", pvalue_threshold, "\n")
         print(knitr::kable(result))
+        print(knitr::kable(result_het))
+        print(knitr::kable(result_pleiotropy))
         pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
         print(pp[[1]])
     }
