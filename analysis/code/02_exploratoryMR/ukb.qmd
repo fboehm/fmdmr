@@ -55,6 +55,8 @@ for (pvalue_threshold in pvalue_thresholds){
         cat("## ", file, "\n")
         cat("### pvalue threshold: ", pvalue_threshold, "\n")
         print(knitr::kable(result))
+        pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
+        print(pp[[1]])
     }
 }
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291

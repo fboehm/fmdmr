@@ -56,6 +56,8 @@ for (pvalue_threshold in pvalue_thresholds){
         cat("## ", file, "\n")
         cat("### pvalue threshold: ", pvalue_threshold, "\n")
         print(knitr::kable(result))
+        pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
+        print(pp[[1]])
     }
 }
 ```
@@ -64,7 +66,7 @@ for (pvalue_threshold in pvalue_thresholds){
 
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping tol8yC, 7 variants, using EUR population reference
+    Clumping JbKImT, 7 variants, using EUR population reference
 
     Removing 4 of 7 variants due to LD with other variants or absence from LD reference panel
 
@@ -73,9 +75,9 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (qVGcCp)
+    Harmonising exposure (JbKImT) and outcome (Lv6AIG)
 
-    Analysing 'tol8yC' on 'qVGcCp'
+    Analysing 'JbKImT' on 'Lv6AIG'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30700_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
@@ -83,20 +85,26 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | qVGcCp     | outcome | exposure | MR Egger                  |    3 |  0.0452620 | 0.0834409 | 0.6835853 |
-| tol8yC      | qVGcCp     | outcome | exposure | Weighted median           |    3 | -0.0063779 | 0.0081030 | 0.4312241 |
-| tol8yC      | qVGcCp     | outcome | exposure | Inverse variance weighted |    3 | -0.0116360 | 0.0101951 | 0.2537287 |
-| tol8yC      | qVGcCp     | outcome | exposure | Simple mode               |    3 | -0.0029696 | 0.0098869 | 0.7922474 |
-| tol8yC      | qVGcCp     | outcome | exposure | Weighted mode             |    3 | -0.0041515 | 0.0081245 | 0.6601819 |
+| JbKImT      | Lv6AIG     | outcome | exposure | MR Egger                  |    3 |  0.0452620 | 0.0834409 | 0.6835853 |
+| JbKImT      | Lv6AIG     | outcome | exposure | Weighted median           |    3 | -0.0063779 | 0.0081710 | 0.4350643 |
+| JbKImT      | Lv6AIG     | outcome | exposure | Inverse variance weighted |    3 | -0.0116360 | 0.0101951 | 0.2537287 |
+| JbKImT      | Lv6AIG     | outcome | exposure | Simple mode               |    3 | -0.0029696 | 0.0098092 | 0.7906744 |
+| JbKImT      | Lv6AIG     | outcome | exposure | Weighted mode             |    3 | -0.0041515 | 0.0085692 | 0.6759191 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (pKIvRa)
+    Harmonising exposure (JbKImT) and outcome (Cwjln6)
 
-    Analysing 'tol8yC' on 'pKIvRa'
+    Analysing 'JbKImT' on 'Cwjln6'
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-1.png)
+
+</div>
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30720_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
@@ -104,20 +112,26 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | pKIvRa     | outcome | exposure | MR Egger                  |    3 |  0.1190633 | 0.0404611 | 0.2085469 |
-| tol8yC      | pKIvRa     | outcome | exposure | Weighted median           |    3 |  0.0017131 | 0.0075644 | 0.8208358 |
-| tol8yC      | pKIvRa     | outcome | exposure | Inverse variance weighted |    3 |  0.0016671 | 0.0119379 | 0.8889355 |
-| tol8yC      | pKIvRa     | outcome | exposure | Simple mode               |    3 | -0.0094901 | 0.0136733 | 0.5594227 |
-| tol8yC      | pKIvRa     | outcome | exposure | Weighted mode             |    3 |  0.0083734 | 0.0126463 | 0.5759816 |
+| JbKImT      | Cwjln6     | outcome | exposure | MR Egger                  |    3 |  0.1190633 | 0.0404611 | 0.2085469 |
+| JbKImT      | Cwjln6     | outcome | exposure | Weighted median           |    3 |  0.0017131 | 0.0076857 | 0.8236164 |
+| JbKImT      | Cwjln6     | outcome | exposure | Inverse variance weighted |    3 |  0.0016671 | 0.0119379 | 0.8889355 |
+| JbKImT      | Cwjln6     | outcome | exposure | Simple mode               |    3 | -0.0094901 | 0.0144798 | 0.5795178 |
+| JbKImT      | Cwjln6     | outcome | exposure | Weighted mode             |    3 |  0.0083734 | 0.0137425 | 0.6043186 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (vdXmwg)
+    Harmonising exposure (JbKImT) and outcome (bqVvBe)
 
-    Analysing 'tol8yC' on 'vdXmwg'
+    Analysing 'JbKImT' on 'bqVvBe'
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-2.png)
+
+</div>
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/N18.gwas.imputed_v3.female.tsv.gz
 
@@ -125,15 +139,15 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | vdXmwg     | outcome | exposure | MR Egger                  |    3 |  0.0033322 | 0.0022448 | 0.3774020 |
-| tol8yC      | vdXmwg     | outcome | exposure | Weighted median           |    3 |  0.0001662 | 0.0002589 | 0.5207661 |
-| tol8yC      | vdXmwg     | outcome | exposure | Inverse variance weighted |    3 | -0.0001231 | 0.0004176 | 0.7681797 |
-| tol8yC      | vdXmwg     | outcome | exposure | Simple mode               |    3 |  0.0001893 | 0.0003278 | 0.6219760 |
-| tol8yC      | vdXmwg     | outcome | exposure | Weighted mode             |    3 |  0.0002079 | 0.0002481 | 0.4902259 |
+| JbKImT      | bqVvBe     | outcome | exposure | MR Egger                  |    3 |  0.0033322 | 0.0022448 | 0.3774020 |
+| JbKImT      | bqVvBe     | outcome | exposure | Weighted median           |    3 |  0.0001662 | 0.0002750 | 0.5455868 |
+| JbKImT      | bqVvBe     | outcome | exposure | Inverse variance weighted |    3 | -0.0001231 | 0.0004176 | 0.7681797 |
+| JbKImT      | bqVvBe     | outcome | exposure | Simple mode               |    3 |  0.0001893 | 0.0003196 | 0.6137123 |
+| JbKImT      | bqVvBe     | outcome | exposure | Weighted mode             |    3 |  0.0002079 | 0.0002531 | 0.4977459 |
 
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping tol8yC, 27 variants, using EUR population reference
+    Clumping JbKImT, 27 variants, using EUR population reference
 
     Removing 23 of 27 variants due to LD with other variants or absence from LD reference panel
 
@@ -142,9 +156,15 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (vxZg7e)
+    Harmonising exposure (JbKImT) and outcome (ZmxyJm)
 
-    Analysing 'tol8yC' on 'vxZg7e'
+    Analysing 'JbKImT' on 'ZmxyJm'
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-3.png)
+
+</div>
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30700_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
@@ -152,20 +172,26 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | vxZg7e     | outcome | exposure | MR Egger                  |    4 |  0.0496276 | 0.0532251 | 0.4495575 |
-| tol8yC      | vxZg7e     | outcome | exposure | Weighted median           |    4 | -0.0041630 | 0.0069698 | 0.5503117 |
-| tol8yC      | vxZg7e     | outcome | exposure | Inverse variance weighted |    4 | -0.0093667 | 0.0078296 | 0.2315698 |
-| tol8yC      | vxZg7e     | outcome | exposure | Simple mode               |    4 | -0.0010033 | 0.0084898 | 0.9133926 |
-| tol8yC      | vxZg7e     | outcome | exposure | Weighted mode             |    4 | -0.0027275 | 0.0080411 | 0.7568201 |
+| JbKImT      | ZmxyJm     | outcome | exposure | MR Egger                  |    4 |  0.0496276 | 0.0532251 | 0.4495575 |
+| JbKImT      | ZmxyJm     | outcome | exposure | Weighted median           |    4 | -0.0041630 | 0.0067009 | 0.5344270 |
+| JbKImT      | ZmxyJm     | outcome | exposure | Inverse variance weighted |    4 | -0.0093667 | 0.0078296 | 0.2315698 |
+| JbKImT      | ZmxyJm     | outcome | exposure | Simple mode               |    4 | -0.0010033 | 0.0084914 | 0.9134091 |
+| JbKImT      | ZmxyJm     | outcome | exposure | Weighted mode             |    4 | -0.0027275 | 0.0075438 | 0.7416507 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (UtP15c)
+    Harmonising exposure (JbKImT) and outcome (BrlJdP)
 
-    Analysing 'tol8yC' on 'UtP15c'
+    Analysing 'JbKImT' on 'BrlJdP'
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-4.png)
+
+</div>
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30720_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
@@ -173,20 +199,26 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | UtP15c     | outcome | exposure | MR Egger                  |    4 |  0.0829785 | 0.0515057 | 0.2484739 |
-| tol8yC      | UtP15c     | outcome | exposure | Weighted median           |    4 | -0.0057269 | 0.0079091 | 0.4690110 |
-| tol8yC      | UtP15c     | outcome | exposure | Inverse variance weighted |    4 | -0.0008171 | 0.0091070 | 0.9285072 |
-| tol8yC      | UtP15c     | outcome | exposure | Simple mode               |    4 | -0.0104251 | 0.0110174 | 0.4138360 |
-| tol8yC      | UtP15c     | outcome | exposure | Weighted mode             |    4 | -0.0093331 | 0.0142287 | 0.5586855 |
+| JbKImT      | BrlJdP     | outcome | exposure | MR Egger                  |    4 |  0.0829785 | 0.0515057 | 0.2484739 |
+| JbKImT      | BrlJdP     | outcome | exposure | Weighted median           |    4 | -0.0057269 | 0.0080272 | 0.4755739 |
+| JbKImT      | BrlJdP     | outcome | exposure | Inverse variance weighted |    4 | -0.0008171 | 0.0091070 | 0.9285072 |
+| JbKImT      | BrlJdP     | outcome | exposure | Simple mode               |    4 | -0.0104251 | 0.0110598 | 0.4154182 |
+| JbKImT      | BrlJdP     | outcome | exposure | Weighted mode             |    4 | -0.0093331 | 0.0142681 | 0.5597031 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (sLgx7Z)
+    Harmonising exposure (JbKImT) and outcome (qEv7sX)
 
-    Analysing 'tol8yC' on 'sLgx7Z'
+    Analysing 'JbKImT' on 'qEv7sX'
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-5.png)
+
+</div>
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/N18.gwas.imputed_v3.female.tsv.gz
 
@@ -194,15 +226,15 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | sLgx7Z     | outcome | exposure | MR Egger                  |    4 |  0.0031264 | 0.0014522 | 0.1642015 |
-| tol8yC      | sLgx7Z     | outcome | exposure | Weighted median           |    4 |  0.0001739 | 0.0002358 | 0.4607739 |
-| tol8yC      | sLgx7Z     | outcome | exposure | Inverse variance weighted |    4 | -0.0000602 | 0.0003114 | 0.8466688 |
-| tol8yC      | sLgx7Z     | outcome | exposure | Simple mode               |    4 |  0.0001761 | 0.0002683 | 0.5583650 |
-| tol8yC      | sLgx7Z     | outcome | exposure | Weighted mode             |    4 |  0.0002056 | 0.0002554 | 0.4797211 |
+| JbKImT      | qEv7sX     | outcome | exposure | MR Egger                  |    4 |  0.0031264 | 0.0014522 | 0.1642015 |
+| JbKImT      | qEv7sX     | outcome | exposure | Weighted median           |    4 |  0.0001739 | 0.0002401 | 0.4688647 |
+| JbKImT      | qEv7sX     | outcome | exposure | Inverse variance weighted |    4 | -0.0000602 | 0.0003114 | 0.8466688 |
+| JbKImT      | qEv7sX     | outcome | exposure | Simple mode               |    4 |  0.0001761 | 0.0002577 | 0.5433693 |
+| JbKImT      | qEv7sX     | outcome | exposure | Weighted mode             |    4 |  0.0002056 | 0.0002495 | 0.4703928 |
 
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping tol8yC, 88 variants, using EUR population reference
+    Clumping JbKImT, 88 variants, using EUR population reference
 
     Removing 78 of 88 variants due to LD with other variants or absence from LD reference panel
 
@@ -211,12 +243,18 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (mVCCdH)
+    Harmonising exposure (JbKImT) and outcome (VtacK9)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing 'tol8yC' on 'mVCCdH'
+    Analysing 'JbKImT' on 'VtacK9'
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-6.png)
+
+</div>
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30700_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
@@ -224,23 +262,29 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | mVCCdH     | outcome | exposure | MR Egger                  |    9 | -0.0077117 | 0.0370119 | 0.8408821 |
-| tol8yC      | mVCCdH     | outcome | exposure | Weighted median           |    9 | -0.0054017 | 0.0063538 | 0.3952400 |
-| tol8yC      | mVCCdH     | outcome | exposure | Inverse variance weighted |    9 | -0.0056231 | 0.0070805 | 0.4270969 |
-| tol8yC      | mVCCdH     | outcome | exposure | Simple mode               |    9 | -0.0043119 | 0.0094221 | 0.6593854 |
-| tol8yC      | mVCCdH     | outcome | exposure | Weighted mode             |    9 | -0.0043119 | 0.0077559 | 0.5934476 |
+| JbKImT      | VtacK9     | outcome | exposure | MR Egger                  |    9 | -0.0077117 | 0.0370119 | 0.8408821 |
+| JbKImT      | VtacK9     | outcome | exposure | Weighted median           |    9 | -0.0054017 | 0.0061945 | 0.3832010 |
+| JbKImT      | VtacK9     | outcome | exposure | Inverse variance weighted |    9 | -0.0056231 | 0.0070805 | 0.4270969 |
+| JbKImT      | VtacK9     | outcome | exposure | Simple mode               |    9 | -0.0043119 | 0.0095861 | 0.6647882 |
+| JbKImT      | VtacK9     | outcome | exposure | Weighted mode             |    9 | -0.0043119 | 0.0079093 | 0.6005026 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (hmOUkB)
+    Harmonising exposure (JbKImT) and outcome (HVQ2vL)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing 'tol8yC' on 'hmOUkB'
+    Analysing 'JbKImT' on 'HVQ2vL'
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-7.png)
+
+</div>
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30720_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
@@ -248,23 +292,29 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | hmOUkB     | outcome | exposure | MR Egger                  |    9 |  0.0248932 | 0.0275548 | 0.3963324 |
-| tol8yC      | hmOUkB     | outcome | exposure | Weighted median           |    9 | -0.0043895 | 0.0061043 | 0.4720895 |
-| tol8yC      | hmOUkB     | outcome | exposure | Inverse variance weighted |    9 |  0.0021690 | 0.0055307 | 0.6949327 |
-| tol8yC      | hmOUkB     | outcome | exposure | Simple mode               |    9 |  0.0169004 | 0.0128925 | 0.2262773 |
-| tol8yC      | hmOUkB     | outcome | exposure | Weighted mode             |    9 |  0.0170935 | 0.0133942 | 0.2376884 |
+| JbKImT      | HVQ2vL     | outcome | exposure | MR Egger                  |    9 |  0.0248932 | 0.0275548 | 0.3963324 |
+| JbKImT      | HVQ2vL     | outcome | exposure | Weighted median           |    9 | -0.0043895 | 0.0065126 | 0.5003141 |
+| JbKImT      | HVQ2vL     | outcome | exposure | Inverse variance weighted |    9 |  0.0021690 | 0.0055307 | 0.6949327 |
+| JbKImT      | HVQ2vL     | outcome | exposure | Simple mode               |    9 |  0.0169004 | 0.0135943 | 0.2489930 |
+| JbKImT      | HVQ2vL     | outcome | exposure | Weighted mode             |    9 |  0.0170935 | 0.0132351 | 0.2325819 |
 
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (tol8yC) and outcome (DWT0Fe)
+    Harmonising exposure (JbKImT) and outcome (7rrOD7)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing 'tol8yC' on 'DWT0Fe'
+    Analysing 'JbKImT' on '7rrOD7'
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-8.png)
+
+</div>
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/N18.gwas.imputed_v3.female.tsv.gz
 
@@ -272,11 +322,17 @@ for (pvalue_threshold in pvalue_thresholds){
 
 | id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
 |:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
-| tol8yC      | DWT0Fe     | outcome | exposure | MR Egger                  |    9 |  0.0015896 | 0.0007178 | 0.0623772 |
-| tol8yC      | DWT0Fe     | outcome | exposure | Weighted median           |    9 |  0.0001531 | 0.0002035 | 0.4519417 |
-| tol8yC      | DWT0Fe     | outcome | exposure | Inverse variance weighted |    9 | -0.0000879 | 0.0001707 | 0.6065618 |
-| tol8yC      | DWT0Fe     | outcome | exposure | Simple mode               |    9 |  0.0002152 | 0.0002730 | 0.4532546 |
-| tol8yC      | DWT0Fe     | outcome | exposure | Weighted mode             |    9 |  0.0002104 | 0.0002504 | 0.4252359 |
+| JbKImT      | 7rrOD7     | outcome | exposure | MR Egger                  |    9 |  0.0015896 | 0.0007178 | 0.0623772 |
+| JbKImT      | 7rrOD7     | outcome | exposure | Weighted median           |    9 |  0.0001531 | 0.0002048 | 0.4547700 |
+| JbKImT      | 7rrOD7     | outcome | exposure | Inverse variance weighted |    9 | -0.0000879 | 0.0001707 | 0.6065618 |
+| JbKImT      | 7rrOD7     | outcome | exposure | Simple mode               |    9 |  0.0002152 | 0.0002745 | 0.4556184 |
+| JbKImT      | 7rrOD7     | outcome | exposure | Weighted mode             |    9 |  0.0002104 | 0.0002306 | 0.3882588 |
+
+<div class="cell-output-display">
+
+![](ukb_files/figure-commonmark/unnamed-chunk-3-9.png)
+
+</div>
 
 ``` r
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
@@ -316,6 +372,7 @@ sessioninfo::session_info()
      dplyr         1.1.1   2023-03-22 [1] CRAN (R 4.2.3)
      evaluate      0.20    2023-01-17 [1] CRAN (R 4.2.2)
      fansi         1.0.4   2023-01-22 [1] CRAN (R 4.2.2)
+     farver        2.1.1   2022-07-06 [1] CRAN (R 4.2.3)
      fastmap       1.1.1   2023-02-24 [1] CRAN (R 4.2.3)
      foreach       1.5.2   2022-02-02 [2] CRAN (R 4.2.0)
      generics      0.1.3   2022-07-05 [1] CRAN (R 4.2.3)
@@ -333,6 +390,7 @@ sessioninfo::session_info()
      iterators     1.0.14  2022-02-05 [2] CRAN (R 4.2.0)
      jsonlite      1.8.4   2022-12-06 [1] CRAN (R 4.2.3)
      knitr         1.42    2023-01-25 [1] CRAN (R 4.2.3)
+     labeling      0.4.2   2020-10-20 [2] CRAN (R 4.0.3)
      lattice       0.21-8  2023-04-05 [1] CRAN (R 4.2.3)
      lifecycle     1.0.3   2022-10-07 [1] CRAN (R 4.2.2)
      magrittr    * 2.0.3   2022-03-30 [1] CRAN (R 4.2.0)
@@ -382,4 +440,4 @@ gr <- git2r::repository(here::here()) %>%
 gr[[1]] 
 ```
 
-    [5aab38c] 2023-05-12: feat: rendered qmd to gfm
+    [f989ceb] 2023-05-12: feat: rendered qmd after enclosing knitr kable calls in print() statements
