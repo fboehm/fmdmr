@@ -25,44 +25,40 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         ncase_col = "N_cases",
                                         ncontrol_col = "N_ctrls"
                                         )
-pvalue_threshold <- 1e-6
+pvalue_thresholds <- c(1e-8, 1e-7, 1e-6)
 ```
 
 
 
 ```{r, results = "asis"}
-files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
-file <- files[1]
-pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
-dat <- fmd %>% 
-    dplyr::filter(pval.exposure < pvalue_threshold) %>%
-    TwoSampleMR::clump_data() %>%
-    dplyr::mutate(chr_pos = paste0(chr.exposure, ":", pos.exposure)) %>%
-    dplyr::left_join(pre_dat, by = c("chr_pos" = "snp")) 
-dat2 <- dat %>%
-    tibble::as_tibble() %>%
-    dplyr::select(- c(chr_pos, chr, pos)) %>%
-    dplyr::rename(effect_allele.outcome = A1, 
-                    other_allele.outcome = A2, 
-                    beta.outcome =  beta, 
-                    se.outcome = se, 
-                    pval.outcome = pvalue, 
-                    n.outcome = n) %>%
-    dplyr::relocate(other_allele.exposure, 
-                    other_allele.outcome, 
-                    effect_allele.exposure, 
-                    effect_allele.outcome) 
-# now use dat2 with TwoSampleMR functions to get MR results
-
-
-
-
-
+for (pvalue_threshold in pvalue_thresholds){
+    fmd2 <- fmd %>% 
+        dplyr::filter(pval.exposure < pvalue_threshold) %>%
+        TwoSampleMR::clump_data()
+    files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
+    for (file in files){
+        pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
+        pre_dat <- pre_dat %>%
+            dplyr::filter((chr %in% fmd2$chr.exposure) & (pos %in% fmd2$pos.exposure))
+        pre2 <- pre_dat %>%
+            dplyr::left_join(fmd2 %>% dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) %>%
+            dplyr::select(- snp) %>%
+            TwoSampleMR::format_data(type = "outcome", 
+                                    effect_allele_col = "A1", 
+                                    other_allele_col = "A2",
+                                    pval_col = "pvalue",
+                                    samplesize_col = "n"       
+                                    )
+        dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
+        result <- TwoSampleMR::mr(dat_harm, method_list = TwoSampleMR::mr_method_list()$obj)
+        cat("## ", file, "\n")
+        cat("### pvalue threshold: ", pvalue_threshold, "\n")
+        knitr::knit_print(knitr::kable(result))
+    }
+}
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
 # GRCh37 is used here!
 #Neale lab denotes by beta the alt allele effect, ie, the increase in phenotype per increase in one alt allele.
-
-
 ```
 
 
