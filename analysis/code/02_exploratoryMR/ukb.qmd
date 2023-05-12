@@ -54,7 +54,7 @@ for (pvalue_threshold in pvalue_thresholds){
         # omit method that gives error
         cat("## ", file, "\n")
         cat("### pvalue threshold: ", pvalue_threshold, "\n")
-        knitr::knit_print(knitr::kable(result))
+        print(knitr::kable(result))
     }
 }
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291

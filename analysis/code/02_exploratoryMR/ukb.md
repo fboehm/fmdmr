@@ -55,7 +55,7 @@ for (pvalue_threshold in pvalue_thresholds){
         # omit method that gives error
         cat("## ", file, "\n")
         cat("### pvalue threshold: ", pvalue_threshold, "\n")
-        knitr::knit_print(knitr::kable(result))
+        print(knitr::kable(result))
     }
 }
 ```
@@ -64,7 +64,7 @@ for (pvalue_threshold in pvalue_thresholds){
 
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping 3U3qWI, 7 variants, using EUR population reference
+    Clumping tol8yC, 7 variants, using EUR population reference
 
     Removing 4 of 7 variants due to LD with other variants or absence from LD reference panel
 
@@ -73,43 +73,67 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (rTUcnL)
+    Harmonising exposure (tol8yC) and outcome (qVGcCp)
 
-    Analysing '3U3qWI' on 'rTUcnL'
+    Analysing 'tol8yC' on 'qVGcCp'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30700_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
 ### pvalue threshold: 1e-08
 
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | qVGcCp     | outcome | exposure | MR Egger                  |    3 |  0.0452620 | 0.0834409 | 0.6835853 |
+| tol8yC      | qVGcCp     | outcome | exposure | Weighted median           |    3 | -0.0063779 | 0.0081030 | 0.4312241 |
+| tol8yC      | qVGcCp     | outcome | exposure | Inverse variance weighted |    3 | -0.0116360 | 0.0101951 | 0.2537287 |
+| tol8yC      | qVGcCp     | outcome | exposure | Simple mode               |    3 | -0.0029696 | 0.0098869 | 0.7922474 |
+| tol8yC      | qVGcCp     | outcome | exposure | Weighted mode             |    3 | -0.0041515 | 0.0081245 | 0.6601819 |
+
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (5k2Wed)
+    Harmonising exposure (tol8yC) and outcome (pKIvRa)
 
-    Analysing '3U3qWI' on '5k2Wed'
+    Analysing 'tol8yC' on 'pKIvRa'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30720_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
 ### pvalue threshold: 1e-08
 
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | pKIvRa     | outcome | exposure | MR Egger                  |    3 |  0.1190633 | 0.0404611 | 0.2085469 |
+| tol8yC      | pKIvRa     | outcome | exposure | Weighted median           |    3 |  0.0017131 | 0.0075644 | 0.8208358 |
+| tol8yC      | pKIvRa     | outcome | exposure | Inverse variance weighted |    3 |  0.0016671 | 0.0119379 | 0.8889355 |
+| tol8yC      | pKIvRa     | outcome | exposure | Simple mode               |    3 | -0.0094901 | 0.0136733 | 0.5594227 |
+| tol8yC      | pKIvRa     | outcome | exposure | Weighted mode             |    3 |  0.0083734 | 0.0126463 | 0.5759816 |
+
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (f1VVrK)
+    Harmonising exposure (tol8yC) and outcome (vdXmwg)
 
-    Analysing '3U3qWI' on 'f1VVrK'
+    Analysing 'tol8yC' on 'vdXmwg'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/N18.gwas.imputed_v3.female.tsv.gz
 
 ### pvalue threshold: 1e-08
 
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | vdXmwg     | outcome | exposure | MR Egger                  |    3 |  0.0033322 | 0.0022448 | 0.3774020 |
+| tol8yC      | vdXmwg     | outcome | exposure | Weighted median           |    3 |  0.0001662 | 0.0002589 | 0.5207661 |
+| tol8yC      | vdXmwg     | outcome | exposure | Inverse variance weighted |    3 | -0.0001231 | 0.0004176 | 0.7681797 |
+| tol8yC      | vdXmwg     | outcome | exposure | Simple mode               |    3 |  0.0001893 | 0.0003278 | 0.6219760 |
+| tol8yC      | vdXmwg     | outcome | exposure | Weighted mode             |    3 |  0.0002079 | 0.0002481 | 0.4902259 |
+
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping 3U3qWI, 27 variants, using EUR population reference
+    Clumping tol8yC, 27 variants, using EUR population reference
 
     Removing 23 of 27 variants due to LD with other variants or absence from LD reference panel
 
@@ -118,43 +142,67 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (1TZbTL)
+    Harmonising exposure (tol8yC) and outcome (vxZg7e)
 
-    Analysing '3U3qWI' on '1TZbTL'
+    Analysing 'tol8yC' on 'vxZg7e'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30700_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
 ### pvalue threshold: 1e-07
 
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | vxZg7e     | outcome | exposure | MR Egger                  |    4 |  0.0496276 | 0.0532251 | 0.4495575 |
+| tol8yC      | vxZg7e     | outcome | exposure | Weighted median           |    4 | -0.0041630 | 0.0069698 | 0.5503117 |
+| tol8yC      | vxZg7e     | outcome | exposure | Inverse variance weighted |    4 | -0.0093667 | 0.0078296 | 0.2315698 |
+| tol8yC      | vxZg7e     | outcome | exposure | Simple mode               |    4 | -0.0010033 | 0.0084898 | 0.9133926 |
+| tol8yC      | vxZg7e     | outcome | exposure | Weighted mode             |    4 | -0.0027275 | 0.0080411 | 0.7568201 |
+
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (n3I8SG)
+    Harmonising exposure (tol8yC) and outcome (UtP15c)
 
-    Analysing '3U3qWI' on 'n3I8SG'
+    Analysing 'tol8yC' on 'UtP15c'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30720_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
 ### pvalue threshold: 1e-07
 
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | UtP15c     | outcome | exposure | MR Egger                  |    4 |  0.0829785 | 0.0515057 | 0.2484739 |
+| tol8yC      | UtP15c     | outcome | exposure | Weighted median           |    4 | -0.0057269 | 0.0079091 | 0.4690110 |
+| tol8yC      | UtP15c     | outcome | exposure | Inverse variance weighted |    4 | -0.0008171 | 0.0091070 | 0.9285072 |
+| tol8yC      | UtP15c     | outcome | exposure | Simple mode               |    4 | -0.0104251 | 0.0110174 | 0.4138360 |
+| tol8yC      | UtP15c     | outcome | exposure | Weighted mode             |    4 | -0.0093331 | 0.0142287 | 0.5586855 |
+
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (EVkNQa)
+    Harmonising exposure (tol8yC) and outcome (sLgx7Z)
 
-    Analysing '3U3qWI' on 'EVkNQa'
+    Analysing 'tol8yC' on 'sLgx7Z'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/N18.gwas.imputed_v3.female.tsv.gz
 
 ### pvalue threshold: 1e-07
 
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | sLgx7Z     | outcome | exposure | MR Egger                  |    4 |  0.0031264 | 0.0014522 | 0.1642015 |
+| tol8yC      | sLgx7Z     | outcome | exposure | Weighted median           |    4 |  0.0001739 | 0.0002358 | 0.4607739 |
+| tol8yC      | sLgx7Z     | outcome | exposure | Inverse variance weighted |    4 | -0.0000602 | 0.0003114 | 0.8466688 |
+| tol8yC      | sLgx7Z     | outcome | exposure | Simple mode               |    4 |  0.0001761 | 0.0002683 | 0.5583650 |
+| tol8yC      | sLgx7Z     | outcome | exposure | Weighted mode             |    4 |  0.0002056 | 0.0002554 | 0.4797211 |
+
     Please look at vignettes for options on running this locally if you need to run many instances of this command.
 
-    Clumping 3U3qWI, 88 variants, using EUR population reference
+    Clumping tol8yC, 88 variants, using EUR population reference
 
     Removing 78 of 88 variants due to LD with other variants or absence from LD reference panel
 
@@ -163,48 +211,72 @@ for (pvalue_threshold in pvalue_thresholds){
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (83ZFbA)
+    Harmonising exposure (tol8yC) and outcome (mVCCdH)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing '3U3qWI' on '83ZFbA'
+    Analysing 'tol8yC' on 'mVCCdH'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30700_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
 ### pvalue threshold: 1e-06
 
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | mVCCdH     | outcome | exposure | MR Egger                  |    9 | -0.0077117 | 0.0370119 | 0.8408821 |
+| tol8yC      | mVCCdH     | outcome | exposure | Weighted median           |    9 | -0.0054017 | 0.0063538 | 0.3952400 |
+| tol8yC      | mVCCdH     | outcome | exposure | Inverse variance weighted |    9 | -0.0056231 | 0.0070805 | 0.4270969 |
+| tol8yC      | mVCCdH     | outcome | exposure | Simple mode               |    9 | -0.0043119 | 0.0094221 | 0.6593854 |
+| tol8yC      | mVCCdH     | outcome | exposure | Weighted mode             |    9 | -0.0043119 | 0.0077559 | 0.5934476 |
+
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (7dqXEa)
+    Harmonising exposure (tol8yC) and outcome (hmOUkB)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing '3U3qWI' on '7dqXEa'
+    Analysing 'tol8yC' on 'hmOUkB'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/30720_irnt.gwas.imputed_v3.female.varorder.tsv.gz
 
 ### pvalue threshold: 1e-06
 
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | hmOUkB     | outcome | exposure | MR Egger                  |    9 |  0.0248932 | 0.0275548 | 0.3963324 |
+| tol8yC      | hmOUkB     | outcome | exposure | Weighted median           |    9 | -0.0043895 | 0.0061043 | 0.4720895 |
+| tol8yC      | hmOUkB     | outcome | exposure | Inverse variance weighted |    9 |  0.0021690 | 0.0055307 | 0.6949327 |
+| tol8yC      | hmOUkB     | outcome | exposure | Simple mode               |    9 |  0.0169004 | 0.0128925 | 0.2262773 |
+| tol8yC      | hmOUkB     | outcome | exposure | Weighted mode             |    9 |  0.0170935 | 0.0133942 | 0.2376884 |
+
     No phenotype name specified, defaulting to 'outcome'.
 
     Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
     eaf
 
-    Harmonising exposure (3U3qWI) and outcome (PPwNe8)
+    Harmonising exposure (tol8yC) and outcome (DWT0Fe)
 
     Removing the following SNPs for being palindromic with intermediate allele frequencies:
     rs72802873
 
-    Analysing '3U3qWI' on 'PPwNe8'
+    Analysing 'tol8yC' on 'DWT0Fe'
 
 ## /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_for_munge_sumstats/N18.gwas.imputed_v3.female.tsv.gz
 
 ### pvalue threshold: 1e-06
+
+| id.exposure | id.outcome | outcome | exposure | method                    | nsnp |          b |        se |      pval |
+|:------------|:-----------|:--------|:---------|:--------------------------|-----:|-----------:|----------:|----------:|
+| tol8yC      | DWT0Fe     | outcome | exposure | MR Egger                  |    9 |  0.0015896 | 0.0007178 | 0.0623772 |
+| tol8yC      | DWT0Fe     | outcome | exposure | Weighted median           |    9 |  0.0001531 | 0.0002035 | 0.4519417 |
+| tol8yC      | DWT0Fe     | outcome | exposure | Inverse variance weighted |    9 | -0.0000879 | 0.0001707 | 0.6065618 |
+| tol8yC      | DWT0Fe     | outcome | exposure | Simple mode               |    9 |  0.0002152 | 0.0002730 | 0.4532546 |
+| tol8yC      | DWT0Fe     | outcome | exposure | Weighted mode             |    9 |  0.0002104 | 0.0002504 | 0.4252359 |
 
 ``` r
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
@@ -310,4 +382,4 @@ gr <- git2r::repository(here::here()) %>%
 gr[[1]] 
 ```
 
-    [470ad54] 2023-05-12: fix: updated Neale lab UKB MR analysis to use female only gwas summary files
+    [5aab38c] 2023-05-12: feat: rendered qmd to gfm
