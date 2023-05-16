@@ -28,7 +28,7 @@ for file in ${FILENAME_ARRAY[@]}; do
     # munge here!
     if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
         if [[ ! -f ${ldsc_dir}${filestem}.sumstats.gz ]]; then
-            echo "munging ${filestem}"
+            echo "munging ${file}"
             conda run -n ldsc python ${MUNGE_SUMSTATS} \
                 --sumstats ${file} \
                 --out ${ldsc_dir}${filestem} \
