@@ -1,0 +1,52 @@
+#!/bin/bash
+
+#SBATCH --partition=mulan,main
+#SBATCH --time=5:00:00
+#SBATCH --job-name=wget
+#SBATCH --mem=2G
+#SBATCH --cpus-per-task=1
+#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/wget.out
+#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/wget.err
+
+
+
+download_dir=~/research/fmdmr/analysis/data/ukb_dm2_downloads/
+
+mkdir -p ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1223.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1223.gwas.imputed_v3.female.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1223.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1220.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1220.gwas.imputed_v3.female.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1220.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1221.gwas.imputed_v3.female.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/2443.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/2443.gwas.imputed_v3.female.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/2443.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/4041.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/4041.gwas.imputed_v3.female.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E11.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E11.gwas.imputed_v3.female.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E11.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2.gwas.imputed_v3.female.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2NOCOMP.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2NOCOMP.gwas.imputed_v3.female.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2NOCOMP.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2OPTH.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2OPTH.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2PERIPH.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DM2PERIPH.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}
+
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DMNASOPTH.gwas.imputed_v3.both_sexes.tsv.bgz -P ${download_dir}
+wget https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/E4_DMNASOPTH.gwas.imputed_v3.male.tsv.bgz -P ${download_dir}

@@ -1,0 +1,28 @@
+*********************************************************************
+* LD Score Regression (LDSC)
+* Version 1.0.0
+* (C) 2014-2015 Brendan Bulik-Sullivan and Hilary Finucane
+* Broad Institute of MIT and Harvard / MIT Department of Mathematics
+* GNU General Public License v3
+*********************************************************************
+Call: 
+./ldsc.py \
+--ref-ld-chr /net/mulan/home/fredboe/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/ \
+--rg /net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_dm2_downloads_for_ldsc/20002_1220.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1,/net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_dm2_downloads_for_ldsc/20002_1220.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1 \
+--rg-file  \
+--w-ld-chr /net/mulan/home/fredboe/research/fmdmr/analysis/data/ldsc/eur_w_ld_chr/ 
+
+Beginning analysis at Mon Jun  5 14:19:23 2023
+Traceback (most recent call last):
+  File "/net/mulan/home/fredboe/ldsc/ldsc_astheeggeggs/ldsc.py", line 631, in <module>
+    sumstats.estimate_rg(args, log)
+  File "/net/mulan/home/fredboe/ldsc/ldsc_astheeggeggs/ldscore/sumstats.py", line 326, in estimate_rg
+    rg_paths, rg_files = _parse_rg_file(args.rg)
+  File "/net/mulan/home/fredboe/ldsc/ldsc_astheeggeggs/ldscore/sumstats.py", line 506, in _parse_rg_file
+    rg_paths = _splitfile(rg_file)
+  File "/net/mulan/home/fredboe/ldsc/ldsc_astheeggeggs/ldscore/sumstats.py", line 50, in _splitfile
+    file = open(ffile, "r")
+IOError: [Errno 2] No such file or directory: '/net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_dm2_downloads_for_ldsc/20002_1220.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1,/net/mulan/home/fredboe/research/fmdmr/analysis/data/ukb_dm2_downloads_for_ldsc/20002_1220.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1'
+
+Analysis finished at Mon Jun  5 14:19:23 2023
+Total time elapsed: 0.02s

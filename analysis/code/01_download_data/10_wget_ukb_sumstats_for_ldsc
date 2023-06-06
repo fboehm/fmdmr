@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#SBATCH --partition=mulan,main
+#SBATCH --time=5:00:00
+#SBATCH --job-name=wget
+#SBATCH --mem=1G
+#SBATCH --cpus-per-task=1
+#SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/wget.out
+#SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/wget.err
+
+
+
+download_dir=~/research/fmdmr/analysis/data/ukb_dm2_downloads_for_ldsc/
+
+mkdir -p ${download_dir}
+
+wget https://www.dropbox.com/s/svaojchyg01aikw/2443.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/m8qdpl4qktyk00p/2986.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/j30o32z988ydttr/6148_1.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/cfdt2hasgqhjtui/6153_1.ldsc.imputed_v3.female.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/nvjsuucuul0tth0/6153_100.ldsc.imputed_v3.female.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/u6p02094qg4wea5/6153_2.ldsc.imputed_v3.female.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/mulymkqysmbec48/6153_3.ldsc.imputed_v3.female.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/zvh31zbpbe0k60x/6153_4.ldsc.imputed_v3.female.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/y79t07z2w2v37fg/6153_5.ldsc.imputed_v3.female.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/3h0anc4cbgmfrjk/6177_1.ldsc.imputed_v3.male.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/h36g76u7n8rec3b/6177_100.ldsc.imputed_v3.male.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/g7opz040hy1plo9/6177_2.ldsc.imputed_v3.male.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/7w2sjh9x4xsfq33/6177_3.ldsc.imputed_v3.male.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/gzpd746zj58mdku/20002_1220.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1 -P ${download_dir}
+wget https://www.dropbox.com/s/or6b2trs7dxpqjw/20002_1223.ldsc.imputed_v3.both_sexes.tsv.bgz?dl=1 -P ${download_dir}
+
+

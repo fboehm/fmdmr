@@ -82,12 +82,12 @@ ldsc_dir=~/research/fmdmr/analysis/data/ldsc/
 
 
 # call munge_sumstats.py
-MUNGE_SUMSTATS=~/ldsc/munge_sumstats.py
+MUNGE_SUMSTATS=~/ldsc/ldsc_astheeggeggs/munge_sumstats.py
 ##### Munge fmd files
 
 let k=0
 
-fmd_sumstats_dir=~/research/fmdmr/analysis/data/ldsc_fmd/
+fmd_sumstats_dir=~/research/fmdmr/analysis/data/ldsc_fmd_egg/
 mkdir -p ${fmd_sumstats_dir}
 PATH_TO_GWAS_FILES=~/research/fmdmr/analysis/data/fmd_for_munge_sumstats/
 FILENAME_ARRAY=( $(ls ${PATH_TO_GWAS_FILES}*.tsv.gz) )
@@ -101,7 +101,7 @@ for fmdfile in ${FILENAME_ARRAY[@]}; do
             echo "skipping ${fmdfilestem}"
         else
             echo "munging ${fmdfilestem}"
-            conda run -n ldsc python ${MUNGE_SUMSTATS} \
+            conda run -n ldsc_egg3 python ${MUNGE_SUMSTATS} \
                 --sumstats ${fmdfile} \
                 --out ${fmd_sumstats_dir}${fmdfilestem} \
                 --merge-alleles ${ldsc_dir}LDSCORE_w_hm3.snplist
