@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 RESULTS_DIR=~/research/fmdmr/analysis/data/ldsc_genetic_correlations_diabetes_fmd/
 OUT_FILE=~/research/fmdmr/analysis/results/ldsc_genetic_correlations_diabetes_fmd.txt
