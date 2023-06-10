@@ -1,0 +1,46 @@
+---
+title: "Organizing ldsc results for genetic correlations of FMD with UKB diabetes traits"
+format: gfm
+---
+
+
+First, we read in the text file that contains the results for genetic correlations. Recall that 
+I created this text file by parsing the output of `ldsc`. 
+I'll read the file into an R session and give the tibble the appropriate column names.
+
+
+```{r}
+results_file <- here::here("analysis", "results", "ldsc_genetic_correlations_fmd.txt")
+cnames <- c("phenotype1_file", 
+            "phenotype2_file", 
+            "rg", 
+            "se", 
+            "z", 
+            "p", 
+            "h2_obs",
+            "h2_obs_se",
+            "h2_int",
+            "h2_int_se",  "gcov_int",  "gcov_int_se"
+            )
+results <- results_file |>
+    vroom::vroom(col_names = cnames) 
+r2 <- results |>
+    dplyr::arrange(p) |>
+    dplyr::mutate(phenotype2 = "mFMD") |>
+    dplyr::mutate(phenotype1_file_without_path = basename(phenotype1_file)) |>
+    dplyr::relocate(phenotype1_file_without_path) |>
+    dplyr::mutate(period_count = stringr::str_count(phenotype1_file_without_path, "\\.")) |>
+    dplyr::relocate(period_count) |>
+    dplyr::mutate(v2_present = stringr::str_detect(string = phenotype1_file_without_path, 
+                                                    pattern = ".v2")) |> 
+    dplyr::mutate(phenotype1_file_without_path_v2 = stringr::str_remove(string = phenotype1_file_without_path, 
+                                                                        pattern = ".v2")) |>
+    tidyr::separate_wider_delim(col = phenotype1_file_without_path_v2, 
+                                names = c("phenotype1_pre", "ldsc", "imputed", "sex", "ending1", "ending2"),
+                                delim = ".", 
+                                cols_remove = FALSE) |>
+    dplyr::select(- ending1, - ending2, - ldsc, - imputed) |>
+    dplyr::mutate(phenotype1_id = basename(phenotype1_pre)) |>
+    dplyr::relocate(phenotype1_id)
+    # read google sheet manifest document and join to r2
+```
