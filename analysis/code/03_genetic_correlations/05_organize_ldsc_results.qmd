@@ -43,4 +43,13 @@ r2 <- results |>
     dplyr::mutate(phenotype1_id = basename(phenotype1_pre)) |>
     dplyr::relocate(phenotype1_id)
     # read google sheet manifest document and join to r2
+manifest_file <- here::here("analysis", "data", "manifest.csv") 
+manifest <- vroom::vroom(manifest_file)
+# need to left_join by phenotype1_id = phenotype & sex = sex
+output_file <- here::here("analysis", "results", "ldsc_genetic_correlations_fmd_sorted.csv")
+r2 |>
+    dplyr::left_join(manifest, by = dplyr::join_by(phenotype1_id == phenotype, sex, v2_present == is_v2)) |> 
+    dplyr::relocate(rg, p, description, sex) |>
+    vroom::vroom_write(output_file)
+
 ```
