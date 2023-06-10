@@ -5,8 +5,6 @@ ukb_gwas
 stanzick*
 data
 *_grch37.txt
-
 kettunen*
-
-
 /.luarc.json
+.httr-oauth
