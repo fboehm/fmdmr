@@ -1,0 +1,29 @@
+---
+title: "Download sum stats files from Neale lab Dropbox via urls in Google sheet"
+format: gfm
+---
+
+The Google sheet url is: https://docs.google.com/spreadsheets/d/1EmwlCYYqkoVKqAS71nNDKoN18PyKwysYUppKTSMvKiM/edit#gid=1890445696
+
+I want to do the sheet reading without "authorization". THus, I'll load the package, then use the function `gs4_deauth()` before calling `read_sheet`:
+
+
+```{r}
+library(googlesheets4)
+gs4_deauth()
+manifest_dat <- read_sheet("https://docs.google.com/spreadsheets/d/1EmwlCYYqkoVKqAS71nNDKoN18PyKwysYUppKTSMvKiM/edit#gid=1890445696")
+```
+
+```{r}
+download_dir <- here::here("analysis", "data", "sumstats_nealelab")
+if (!dir.exists(download_dir)) {
+  dir.create(download_dir)
+}
+download.file(url = manifest_dat$ldsc_sumstat_dropbox[1], 
+              destfile = file.path(download_dir, manifest_dat$ldsc_sumstat_file[1])
+)
+```
+
+```{r}
+rdrop2::drop_auth()
+```
