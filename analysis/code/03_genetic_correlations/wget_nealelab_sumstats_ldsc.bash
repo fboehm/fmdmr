@@ -13,6 +13,8 @@ CSV_FILE=${DATA_DIR}manifest.csv
 OUT_DIR=${DATA_DIR}sumstats_nealelab/
 echo "OUT_DIR: ${OUT_DIR}"
 # Define the output directory
+echo "SLURM_ARRAY_TASK_ID: ${SLURM_ARRAY_TASK_ID}"
+
 
 # Determine columns to get by name/number
 # Read the column names from the first row of the CSV file
@@ -44,7 +46,7 @@ ldsc_index=$(get_column_index "ldsc_sumstat_file" "$CSV_FILE")
 echo "ldsc_index: $ldsc_index"
 
 # If the ldsc_sumstats_file column was found, extract the field from line number 5
-if (ldsc_index >= 0); then
+if ($ldsc_index >= 0); then
     ldsc_value=$(get_column_value "$ldsc_index" "$CSV_FILE" ${SLURM_ARRAY_TASK_ID})
     echo "ldsc_value from line ${SLURM_ARRAY_TASK_ID}: $ldsc_value"
 else
@@ -59,7 +61,7 @@ ldsc_index=$(get_column_index "ldsc_sumstat_dropbox" "$CSV_FILE")
 echo "ldsc_index: $ldsc_index"
 
 # If the ldsc_sumstats_file column was found, extract the field from line number 5
-if (ldsc_index >= 0); then
+if ($ldsc_index >= 0); then
     ldsc_value=$(get_column_value "$ldsc_index" "$CSV_FILE" ${SLURM_ARRAY_TASK_ID})
     echo "ldsc_value from line ${SLURM_ARRAY_TASK_ID}: $ldsc_value"
 else
@@ -78,7 +80,11 @@ if [ ! -d "$OUT_DIR" ]; then
 fi
 
 if [ ! -f "${outfile}" ]; then
-    wget_command="wget -O ${outfile} ${ldsc_sumstat_dropbox}"
-    echo "wget_command is: $wget_command"
-    eval "$wget_command"
+    if [ ! -z "${ldsc_sumstat_dropbox}" ]; then
+        wget_command="wget -O ${outfile} ${ldsc_sumstat_dropbox}"
+        echo "wget_command is: $wget_command"
+        eval "$wget_command"
+    else 
+        echo "ldsc_sumstat_dropbox is empty"
+    fi
 fi
