@@ -1,0 +1,35 @@
+---
+title: "Quality Control"
+format: gfm
+date: 2023-06-14
+---
+
+It looks like my initial attempts to download the munged
+summary statistics, ie, those for direct input to ldsc, 
+were not all successful. I need to understand why that is.
+
+For example, more than 12,000 rows are in the google sheet from
+the Neale Lab; however, I acquired only ~9000 summary statistics files
+despite trying to download all ~12000. 
+
+Second, the ldsc jobs that I submitted, ie, for the downloaded files,
+sometimes failed. I would like to know why. It may be that the download 
+from dropbox was corrupted... but nearly 3000 ldsc jobs failed. 
+Did they all fail for the same reason?
+
+
+## Action plan
+
+First, I'll read the manifest.csv file into an R session and determine the number of unique 
+files to be downloaded. I previously assumed that it was one per row, so just more than 12000.
+
+```{r}
+manifest_file <- here::here("analysis", "data", "manifest.csv")
+mani <- vroom::vroom(manifest_file)
+mani |> 
+    dplyr::select(ldsc_sumstat_dropbox) |>
+    duplicated() |>
+    sum()
+mani |>
+    dplyr::relocate(dplyr::starts_with("ldsc")) 
+```
