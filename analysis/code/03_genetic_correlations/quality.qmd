@@ -32,4 +32,8 @@ mani |>
     sum()
 mani |>
     dplyr::relocate(dplyr::starts_with("ldsc")) 
+mani |> 
+    dplyr::select(ldsc_sumstat_dropbox, ldsc_sumstat_file) |>
+    dplyr::filter(!is.na(ldsc_sumstat_file)) |>
+    vroom::vroom_write(here::here("analysis", "data", "manifest2.csv"), delim = ",")
 ```

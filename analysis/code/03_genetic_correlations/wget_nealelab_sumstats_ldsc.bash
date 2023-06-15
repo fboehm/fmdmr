@@ -3,14 +3,14 @@
 #SBATCH --job-name=wget_nealelab_sumstats_ldsc
 #SBATCH --output=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/wget_nealelab_sumstats_ldsc_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/fmdmr/analysis/cluster_outputs/wget_nealelab_sumstats_ldsc_%a.err
-#SBATCH --time=14:00:00
+#SBATCH --time=35:00
 #SBATCH --mem=200MB
 #SBATCH --partition=mulan
-#SBATCH --array=2
+#SBATCH --array=1-12099%400
 
 DATA_DIR=~/research/fmdmr/analysis/data/
-CSV_FILE=${DATA_DIR}manifest.csv
-OUT_DIR=${DATA_DIR}sumstats_nealelab/
+CSV_FILE=${DATA_DIR}manifest2.csv
+OUT_DIR=${DATA_DIR}sumstats_nealelab2/
 echo "OUT_DIR: ${OUT_DIR}"
 # Define the output directory
 echo "SLURM_ARRAY_TASK_ID: ${SLURM_ARRAY_TASK_ID}"
@@ -42,49 +42,35 @@ get_column_value() {
 }
 
 # determine column index for ldsc_sumstats_file
-ldsc_index=$(get_column_index "ldsc_sumstat_file" "$CSV_FILE")
-echo "ldsc_index: $ldsc_index"
+ldsc_sf_index=$(get_column_index "ldsc_sumstat_file" "$CSV_FILE")
+echo "ldsc_sf_index: $ldsc_sf_index"
 
 # If the ldsc_sumstats_file column was found, extract the field from line number 5
-if ($ldsc_index >= 0); then
-    ldsc_value=$(get_column_value "$ldsc_index" "$CSV_FILE" ${SLURM_ARRAY_TASK_ID})
-    echo "ldsc_value from line ${SLURM_ARRAY_TASK_ID}: $ldsc_value"
-else
-    echo "ldsc_sumstat_file column not found in the CSV file, $CSV_FILE"
-fi
-ldsc_sumstat_file=$ldsc_value
-echo "ldsc_sumstat_file: $ldsc_sumstat_file"
+ldsc_sf_value=$(get_column_value "$ldsc_sf_index" "$CSV_FILE" ${SLURM_ARRAY_TASK_ID})
+echo "ldsc_sf_value from line ${SLURM_ARRAY_TASK_ID}: $ldsc_sf_value"
 
 ######
 # determine column index for ldsc_sumstat_dropbox
-ldsc_index=$(get_column_index "ldsc_sumstat_dropbox" "$CSV_FILE")
-echo "ldsc_index: $ldsc_index"
+ldsc_sd_index=$(get_column_index "ldsc_sumstat_dropbox" "$CSV_FILE")
+echo "ldsc_sd_index: $ldsc_sd_index"
 
 # If the ldsc_sumstats_file column was found, extract the field from line number 5
-if ($ldsc_index >= 0); then
-    ldsc_value=$(get_column_value "$ldsc_index" "$CSV_FILE" ${SLURM_ARRAY_TASK_ID})
-    echo "ldsc_value from line ${SLURM_ARRAY_TASK_ID}: $ldsc_value"
-else
-    echo "ldsc_sumstat_dropbox column not found in the CSV file, $CSV_FILE"
-fi
-ldsc_sumstat_dropbox=$ldsc_value
-echo "ldsc_sumstat_dropbox: $ldsc_sumstat_dropbox"
+ldsc_sd_value=$(get_column_value "$ldsc_sd_index" "$CSV_FILE" ${SLURM_ARRAY_TASK_ID})
+echo "ldsc_sd_value from line ${SLURM_ARRAY_TASK_ID}: $ldsc_sd_value"
 
-outfile=${OUT_DIR}${ldsc_sumstat_file}
+outfile=${OUT_DIR}${ldsc_sf_value}
 echo "outfile: $outfile"
 # Read the command from the "command" column in the CSV file based on the array task ID
 #wget_command=$(awk -F',' -v line=${SLURM_ARRAY_TASK_ID} 'NR==line{print $8}' ${CSV_FILE})
 #echo "wget_command is: $wget_command"
-if [ ! -d "$OUT_DIR" ]; then
-  mkdir $OUT_DIR
-fi
+mkdir -p $OUT_DIR
 
 if [ ! -f "${outfile}" ]; then
-    if [ ! -z "${ldsc_sumstat_dropbox}" ]; then
-        wget_command="wget -O ${outfile} ${ldsc_sumstat_dropbox}"
+    if [ ! -z "${ldsc_sd_value}" ]; then
+        wget_command="wget -O ${outfile} ${ldsc_sd_value}"
         echo "wget_command is: $wget_command"
         eval "$wget_command"
     else 
-        echo "ldsc_sumstat_dropbox is empty"
+        echo "ldsc_sd_value is empty"
     fi
 fi
