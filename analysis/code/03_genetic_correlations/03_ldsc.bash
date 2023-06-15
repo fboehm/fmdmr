@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=30:00
+#SBATCH --time=3:00:00
 #SBATCH --job-name=ldsc
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
@@ -35,14 +35,17 @@ let k=0 # counter
             #filestem=$(basename "$file" .sumstats.gz)
             filestem=$(basename "$file" .tsv.gz)
             filestem=$(basename "$filestem" .tsv.bgz)
+            outfile=${ldsc_genetic_corr_dir}${filestem}_${fmdstem}
             let k=${k}+1
             if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
                 #echo "file is ${file} and fmd_sumstats_file is ${fmd_sumstats_file}\n"
-                conda run -n ldsc python ${LDSC} \
-                    --rg ${file},${fmd_sumstats_file} \
-                    --ref-ld-chr ${eur_dir} \
-                    --w-ld-chr ${eur_dir} \
-                    --out ${ldsc_genetic_corr_dir}${filestem}_${fmdstem} 
+                if [ ! -f ${outfile}.log ]; then
+                    conda run -n ldsc python ${LDSC} \
+                        --rg ${file},${fmd_sumstats_file} \
+                        --ref-ld-chr ${eur_dir} \
+                        --w-ld-chr ${eur_dir} \
+                        --out ${outfile} 
+                fi    
             fi
         fi 
     done

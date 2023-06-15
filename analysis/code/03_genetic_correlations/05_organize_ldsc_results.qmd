@@ -4,6 +4,10 @@ format: gfm
 ---
 
 
+
+
+
+
 First, we read in the text file that contains the results for genetic correlations. Recall that 
 I created this text file by parsing the output of `ldsc`. 
 I'll read the file into an R session and give the tibble the appropriate column names.
@@ -23,7 +27,11 @@ cnames <- c("phenotype1_file",
             "h2_int_se",  "gcov_int",  "gcov_int_se"
             )
 results <- results_file |>
-    vroom::vroom(col_names = cnames) 
+    vroom::vroom(col_names = cnames, skip_empty_rows = FALSE, trim_ws = FALSE)
+```
+
+
+```{r}    
 r2 <- results |>
     dplyr::arrange(p) |>
     dplyr::mutate(phenotype2 = "mFMD") |>

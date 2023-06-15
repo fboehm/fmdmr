@@ -1,0 +1,45 @@
+---
+title: "check line numbers for log files"
+format: gfm
+---
+
+# check line numbers for log files
+
+I fear that some of the ldsc jobs failed, and that is why i now have NA values in my correlation tibble.
+
+I used `wc -l` to create a text file that contains one row per log file with the first column being the 
+number of lines in the log file and the second column being the name of the log file.
+
+Let's read that in and see how many log files have different numbers of lines.
+
+```{r}
+dat <- readr::read_table(here::here("analysis", "results", "ldsc_genetic_correlations_fmd_wc-outputs.txt"), 
+                         col_names = c("n_lines", "file_name")) |>
+        dplyr::filter(n_lines < 100) |>
+        dplyr::mutate(job_number = 1:12098)
+```
+
+I manually examined the log files with different numbers of lines and found that the ones with 67 lines
+have two warning lines added to the usual 65 lines of output. 
+here, the warnings, in at least some files, say that the 
+h2 value for the trait is out of bounds.
+
+Peculiarly, some of the jobs with fewer than 65 lines have output reporting that they failed to 
+calculate the h2 for FMD! It's unclear why this would fail in some cases but not in most cases.
+
+I think that I'll delete the log files with fewer than 65 lines and re-run the jobs.
+
+```{r}
+dat |>
+    dplyr::filter(n_lines < 65) |>
+    dplyr::mutate(file_name = here::here("analysis", "data", "ldsc_genetic_correlations_fmd2", file_name)) |>
+    dplyr::pull(file_name) |>
+    purrr::map(~file.remove(.x))
+```
+
+
+
+
+
+```{r}
+```
