@@ -17,6 +17,8 @@ LDSC=~/ldsc/ldsc_bulik/ldsc.py
 data_dir=~/research/fmdmr/analysis/data/
 ldsc_genetic_corr_dir=${data_dir}ldsc_genetic_correlations_fmd2/
 mkdir -p ${ldsc_genetic_corr_dir}
+outdir=${data_dir}ldsc_genetic_correlations_fmd3/
+mkdir -p ${outdir}
 ldsc_dir=${data_dir}ldsc/
 eur_dir=${ldsc_dir}eur_w_ld_chr/
 source ~/.bashrc # prep for using conda. Is this needed?
@@ -35,16 +37,19 @@ let k=0 # counter
             #filestem=$(basename "$file" .sumstats.gz)
             filestem=$(basename "$file" .tsv.gz)
             filestem=$(basename "$filestem" .tsv.bgz)
-            outfile=${ldsc_genetic_corr_dir}${filestem}_${fmdstem}
+            outfile_stem=${ldsc_genetic_corr_dir}${filestem}_${fmdstem} #full file path
+            outfile=${outfile_stem}.log
+            outfile_stem_forreal=${outdir}${filestem}_${fmdstem}
+            echo " outfile is: ${outfile} \n" >> foo.bar
             let k=${k}+1
             if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
                 #echo "file is ${file} and fmd_sumstats_file is ${fmd_sumstats_file}\n"
-                if [ ! -f ${outfile}.log ]; then
+                if [ ! -f $outfile ]; then
                     conda run -n ldsc python ${LDSC} \
                         --rg ${file},${fmd_sumstats_file} \
                         --ref-ld-chr ${eur_dir} \
                         --w-ld-chr ${eur_dir} \
-                        --out ${outfile} 
+                        --out ${outfile_stem_forreal} 
                 fi    
             fi
         fi 
