@@ -58,12 +58,20 @@ r2 <- results |>
     dplyr::relocate(phenotype1_id)
     # read google sheet manifest document and join to r2
 manifest_file <- here::here("analysis", "data", "manifest.csv") 
-manifest <- vroom::vroom(manifest_file)
+manifest <- vroom::vroom(manifest_file) |>
+    # define new variable for dilution_factor_present
+    dplyr::mutate(dilution_factor_present = stringr::str_detect(string = ldsc_sumstat_file, pattern = ".dilution_factor")) |>
+    dplyr::relocate(dilution_factor_present, dilute, ldsc_sumstat_file) |>
+    dplyr::arrange(dilute)
+manifest$dilution_factor_present |> 
+    table()
+# manually inspect file names to see if dilute 
 # need to left_join by phenotype1_id = phenotype & sex = sex
 output_file <- here::here("analysis", "results", "ldsc_genetic_correlations_fmd_sorted.csv")
 out <- r2 |>
     dplyr::inner_join(manifest, by = dplyr::join_by(phenotype1_id == phenotype, 
                                                     sex, 
+                                                    dilution_factor_present,
                                                     v2_present == is_v2)) |> 
     dplyr::relocate(rg, p, description, sex) |>
     dplyr::arrange(p)
