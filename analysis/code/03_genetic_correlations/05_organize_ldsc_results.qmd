@@ -33,6 +33,7 @@ results <- results_file |>
 
 ```{r}    
 r2 <- results |>
+    dplyr::filter(!is.na(phenotype1_file)) |>
     dplyr::arrange(p) |>
     dplyr::mutate(phenotype2 = "mFMD") |>
     dplyr::mutate(phenotype1_file_without_path = basename(phenotype1_file)) |>
@@ -43,7 +44,12 @@ r2 <- results |>
                                                     pattern = ".v2")) |> 
     dplyr::mutate(phenotype1_file_without_path_v2 = stringr::str_remove(string = phenotype1_file_without_path, 
                                                                         pattern = ".v2")) |>
-    tidyr::separate_wider_delim(col = phenotype1_file_without_path_v2, 
+    dplyr::mutate(period_count_v2 = stringr::str_count(phenotype1_file_without_path_v2, "\\.")) |>
+    dplyr::mutate(dilution_factor_present = stringr::str_detect(string = phenotype1_file_without_path_v2, 
+                                                                pattern = "dilution_factor")) |>
+    dplyr::mutate(phenotype1_file_without_path_v3 = stringr::str_remove(string = phenotype1_file_without_path_v2, 
+                                                                        pattern = ".dilution_factor")) |>
+    tidyr::separate_wider_delim(col = phenotype1_file_without_path_v3, 
                                 names = c("phenotype1_pre", "ldsc", "imputed", "sex", "ending1", "ending2"),
                                 delim = ".", 
                                 cols_remove = FALSE) |>
@@ -55,9 +61,12 @@ manifest_file <- here::here("analysis", "data", "manifest.csv")
 manifest <- vroom::vroom(manifest_file)
 # need to left_join by phenotype1_id = phenotype & sex = sex
 output_file <- here::here("analysis", "results", "ldsc_genetic_correlations_fmd_sorted.csv")
-r2 |>
-    dplyr::left_join(manifest, by = dplyr::join_by(phenotype1_id == phenotype, sex, v2_present == is_v2)) |> 
+out <- r2 |>
+    dplyr::inner_join(manifest, by = dplyr::join_by(phenotype1_id == phenotype, 
+                                                    sex, 
+                                                    v2_present == is_v2)) |> 
     dplyr::relocate(rg, p, description, sex) |>
+    dplyr::arrange(p)
+out |>
     vroom::vroom_write(output_file)
-
 ```
