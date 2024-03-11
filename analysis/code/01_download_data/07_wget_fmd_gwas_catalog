@@ -1,6 +1,9 @@
 
+mydir=../../data/fmd/
+fmd_dir_remote=http://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90026001-GCST90027000/GCST90026612/
 
-wget http://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90026001-GCST90027000/GCST90026612/GCST90026612_buildGRCh37.tsv -P ~/research/fmd-MR/data/fmd/
-wget http://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90026001-GCST90027000/GCST90026612/md5sum.txt -P ~/research/fmd-MR/data/fmd/
-wget http://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90026001-GCST90027000/GCST90026612/README.txt -P ~/research/fmd-MR/data/fmd/
+wget ${fmd_dir_remote}GCST90026612_buildGRCh37.tsv -P ${mydir}
+wget ${fmd_dir_remote}GCST90026612/GCST90026612_buildGRCh37.tsv-meta.yaml -P ${mydir}
+wget ${fmd_dir_remote}md5sum.txt -P ${mydir}
+wget ${fmd_dir_remote}README.txt -P ${mydir}
 
