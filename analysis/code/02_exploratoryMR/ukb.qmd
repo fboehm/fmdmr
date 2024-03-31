@@ -4,6 +4,35 @@ format: gfm
 ---
 
 
+## Todo 
+
+Manually check which SNPs are in LD with other lead SNPs ***and*** which SNPs are not in hte reference panel. 
+
+Note that we get this message printed in the output file:
+
+
+```
+Please look at vignettes for options on running this locally if you need to run many instances of this command.
+
+Clumping k9ycpa, 27 variants, using EUR population reference
+
+Removing 23 of 27 variants due to LD with other variants or absence from LD reference panel
+
+No phenotype name specified, defaulting to 'outcome'.
+
+Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
+eaf
+
+Harmonising exposure (k9ycpa) and outcome (8GIczE)
+
+Analysing 'k9ycpa' on '8GIczE'
+```
+
+**it says that 23 snps were removed, but doesn't say why for each - just that, together, they either were in LD or were not in the reference panel. Maybe we need to use another reference panel????**
+
+
+
+
 ```{r, echo = FALSE}
 library(magrittr)
 ```
