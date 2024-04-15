@@ -50,13 +50,15 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         pos_col = "base_pair_location",
                                         ncase_col = "N_cases",
                                         ncontrol_col = "N_ctrls"
-                                        )
-```
+                                        ) |>
+        tibble::as_tibble()
+    ```
 
 
 ```{r, results = "asis", echo = FALSE}
 fmd2 <- fmd |> 
-    TwoSampleMR::extract_instruments()
+    TwoSampleMR::extract_instruments() |>
+    tibble::as_tibble()
 files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
 for (file in files){
     pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
