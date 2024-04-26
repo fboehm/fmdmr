@@ -1,0 +1,106 @@
+---
+title: "CKD as a possible consequence of FMD"
+format: gfm
+---
+
+
+## Todo 
+
+Manually check which SNPs are in LD with other lead SNPs ***and*** which SNPs are not in hte reference panel. 
+
+Note that we get this message printed in the output file:
+
+
+```
+Please look at vignettes for options on running this locally if you need to run many instances of this command.
+
+Clumping k9ycpa, 27 variants, using EUR population reference
+
+Removing 23 of 27 variants due to LD with other variants or absence from LD reference panel
+
+No phenotype name specified, defaulting to 'outcome'.
+
+Warning in TwoSampleMR::format_data(., type = "outcome", effect_allele_col = "A1", : The following columns are not present but are helpful for harmonisation
+eaf
+
+Harmonising exposure (k9ycpa) and outcome (8GIczE)
+
+Analysing 'k9ycpa' on '8GIczE'
+```
+
+**it says that 23 snps were removed, but doesn't say why for each - just that, together, they either were in LD or were not in the reference panel. Maybe we need to use another reference panel????**
+
+
+
+
+```{r, echo = FALSE}
+library(magrittr)
+```
+
+
+```{r, echo = FALSE}
+fmd_file <- here::here("analysis", "data", "fmd", "GCST90026612_buildGRCh37.tsv")
+fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
+                                        sep = "\t",
+                                        snp_col = "SNP",
+                                        beta_col = "BETA",
+                                        effect_allele_col = "EA",
+                                        other_allele_col = "OA",
+                                        eaf_col = "EAF",
+                                        se_col = "SE",
+                                        pval_col = "p_value",
+                                        chr_col = "chromosome",
+                                        pos_col = "base_pair_location",
+                                        ncase_col = "N_cases",
+                                        ncontrol_col = "N_ctrls"
+                                        )
+pvalue_threshold <- 1e-8
+```
+
+
+
+```{r, results = "asis", echo = FALSE}
+fmd2 <- fmd %>% 
+    dplyr::filter(pval.exposure < pvalue_threshold) %>%
+    TwoSampleMR::clump_data()
+files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
+file <- files[3] # check this!
+pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
+pre_dat <- pre_dat %>%
+    dplyr::filter((chr %in% fmd2$chr.exposure) & (pos %in% fmd2$pos.exposure))
+pre2 <- pre_dat %>%
+    dplyr::left_join(fmd2 %>% dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) %>%
+    dplyr::select(- snp) %>%
+    TwoSampleMR::format_data(type = "outcome", 
+                            effect_allele_col = "A1", 
+                            other_allele_col = "A2",
+                            pval_col = "pvalue",
+                            samplesize_col = "n"       
+                            )
+dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
+result <- TwoSampleMR::mr(dat_harm) 
+result_het <- TwoSampleMR::mr_heterogeneity(dat = dat_harm)
+result_pleiotropy <- TwoSampleMR::mr_pleiotropy_test(dat = dat_harm)
+# omit method that gives error
+cat("## ", file, "\n")
+cat("### pvalue threshold: ", pvalue_threshold, "\n")
+print(knitr::kable(result))
+print(knitr::kable(result_het))
+print(knitr::kable(result_pleiotropy))
+pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
+print(pp[[1]])
+
+# see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
+# GRCh37 is used here!
+#Neale lab denotes by beta the alt allele effect, ie, the increase in phenotype per increase in one alt allele.
+```
+
+
+
+```{r}
+sessioninfo::session_info()
+# git commit info
+gr <- git2r::repository(here::here()) %>%
+    git2r::commits()
+gr[[1]] 
+```
