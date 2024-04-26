@@ -33,9 +33,6 @@ Analysing 'k9ycpa' on '8GIczE'
 
 
 
-```{r, echo = FALSE}
-library(magrittr)
-```
 
 
 ```{r, echo = FALSE}
@@ -53,44 +50,41 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         pos_col = "base_pair_location",
                                         ncase_col = "N_cases",
                                         ncontrol_col = "N_ctrls"
-                                        )
-pvalue_thresholds <- c(1e-8, 1e-7, 1e-6)
-```
-
+                                        ) |>
+        tibble::as_tibble()
+    ```
 
 
 ```{r, results = "asis", echo = FALSE}
-for (pvalue_threshold in pvalue_thresholds){
-    fmd2 <- fmd %>% 
-        dplyr::filter(pval.exposure < pvalue_threshold) %>%
-        TwoSampleMR::clump_data()
-    files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
-    for (file in files){
-        pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
-        pre_dat <- pre_dat %>%
-            dplyr::filter((chr %in% fmd2$chr.exposure) & (pos %in% fmd2$pos.exposure))
-        pre2 <- pre_dat %>%
-            dplyr::left_join(fmd2 %>% dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) %>%
-            dplyr::select(- snp) %>%
-            TwoSampleMR::format_data(type = "outcome", 
-                                    effect_allele_col = "A1", 
-                                    other_allele_col = "A2",
-                                    pval_col = "pvalue",
-                                    samplesize_col = "n"       
-                                    )
-        dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
-        result <- TwoSampleMR::mr(dat_harm) 
-        result_het <- TwoSampleMR::mr_heterogeneity(dat = dat_harm)
-        result_pleiotropy <- TwoSampleMR::mr_pleiotropy_test(dat = dat_harm)
-        # omit method that gives error
-        cat("## ", file, "\n")
-        cat("### pvalue threshold: ", pvalue_threshold, "\n")
-        print(knitr::kable(result))
-        print(knitr::kable(result_het))
-        print(knitr::kable(result_pleiotropy))
-        pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
-        print(pp[[1]])
-    }
+fmd2 <- fmd |> 
+    TwoSampleMR::extract_instruments() |>
+    tibble::as_tibble()
+files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
+for (file in files){
+    pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
+    pre_dat <- pre_dat |>
+        dplyr::filter((chr %in% fmd2$chr.exposure) & (pos %in% fmd2$pos.exposure))
+    pre2 <- pre_dat |>
+        dplyr::left_join(fmd2 |> dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) |>
+        dplyr::select(- snp) |>
+        TwoSampleMR::format_data(type = "outcome", 
+                                effect_allele_col = "A1", 
+                                other_allele_col = "A2",
+                                pval_col = "pvalue",
+                                samplesize_col = "n"       
+                                )
+    dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
+    result <- TwoSampleMR::mr(dat_harm) 
+    result_het <- TwoSampleMR::mr_heterogeneity(dat = dat_harm)
+    result_pleiotropy <- TwoSampleMR::mr_pleiotropy_test(dat = dat_harm)
+    # omit method that gives error
+    cat("## ", file, "\n")
+    cat("### pvalue threshold: ", pvalue_threshold, "\n")
+    print(knitr::kable(result))
+    print(knitr::kable(result_het))
+    print(knitr::kable(result_pleiotropy))
+    pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
+    print(pp[[1]])
 }
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
 # GRCh37 is used here!
@@ -102,7 +96,7 @@ for (pvalue_threshold in pvalue_thresholds){
 ```{r}
 sessioninfo::session_info()
 # git commit info
-gr <- git2r::repository(here::here()) %>%
+gr <- git2r::repository(here::here()) |>
     git2r::commits()
 gr[[1]] 
 ```
