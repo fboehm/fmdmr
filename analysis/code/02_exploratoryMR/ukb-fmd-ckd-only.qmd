@@ -33,9 +33,6 @@ Analysing 'k9ycpa' on '8GIczE'
 
 
 
-```{r, echo = FALSE}
-library(magrittr)
-```
 
 
 ```{r, echo = FALSE}
@@ -53,24 +50,35 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         pos_col = "base_pair_location",
                                         ncase_col = "N_cases",
                                         ncontrol_col = "N_ctrls"
-                                        )
+                                        ) |> 
+        tibble::as_tibble()
 pvalue_threshold <- 1e-8
 ```
 
 
+```{r}
+library(magrittr) # needed for TwoSampleMR functions to work properly!!! ie, they set up the package without exporting magrittr pipe, I think
+```
+
 
 ```{r, results = "asis", echo = FALSE}
-fmd2 <- fmd %>% 
-    dplyr::filter(pval.exposure < pvalue_threshold) %>%
-    TwoSampleMR::clump_data()
+fmd2pre <- fmd |> 
+    dplyr::filter(pval.exposure < pvalue_threshold) 
+# check if the mrcieu database has the snps of interest iwth ieugwasr::ld_reflookup
+fmd2pre$SNP |>
+    ieugwasr::ld_reflookup()
+# all 7 snps are in the database!
+
+fmd2 <- fmd2pre |>
+    TwoSampleMR::clump_data(clump_kb = 10)
 files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
 file <- files[3] # check this!
 pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
-pre_dat <- pre_dat %>%
+pre_dat <- pre_dat |>
     dplyr::filter((chr %in% fmd2$chr.exposure) & (pos %in% fmd2$pos.exposure))
-pre2 <- pre_dat %>%
-    dplyr::left_join(fmd2 %>% dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) %>%
-    dplyr::select(- snp) %>%
+pre2 <- pre_dat |>
+    dplyr::left_join(fmd2 |> dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) |>
+    dplyr::select(- snp) |>
     TwoSampleMR::format_data(type = "outcome", 
                             effect_allele_col = "A1", 
                             other_allele_col = "A2",
@@ -100,7 +108,7 @@ print(pp[[1]])
 ```{r}
 sessioninfo::session_info()
 # git commit info
-gr <- git2r::repository(here::here()) %>%
+gr <- git2r::repository(here::here()) |>
     git2r::commits()
 gr[[1]] 
 ```

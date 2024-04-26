@@ -31,6 +31,12 @@ Analysing 'k9ycpa' on '8GIczE'
 **it says that 23 snps were removed, but doesn't say why for each - just that, together, they either were in LD or were not in the reference panel. Maybe we need to use another reference panel????**
 
 
+```{r}
+# read full results file from neale lab 
+file <- here::here("analysis", "data", "ukb", "N18.gwas.imputed_v3.female.tsv.bgz")
+full <- file |> vroom::vroom()
+# 194174 subjects for female only file
+```
 
 
 
@@ -52,7 +58,7 @@ fmd <- TwoSampleMR::read_exposure_data(filename = fmd_file,
                                         ncontrol_col = "N_ctrls"
                                         ) |>
         tibble::as_tibble()
-    ```
+```
 
 
 ```{r, results = "asis", echo = FALSE}
@@ -60,32 +66,33 @@ fmd2 <- fmd |>
     TwoSampleMR::extract_instruments() |>
     tibble::as_tibble()
 files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
-for (file in files){
-    pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
-    pre_dat <- pre_dat |>
-        dplyr::filter((chr %in% fmd2$chr.exposure) & (pos %in% fmd2$pos.exposure))
-    pre2 <- pre_dat |>
-        dplyr::left_join(fmd2 |> dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) |>
-        dplyr::select(- snp) |>
-        TwoSampleMR::format_data(type = "outcome", 
-                                effect_allele_col = "A1", 
-                                other_allele_col = "A2",
-                                pval_col = "pvalue",
-                                samplesize_col = "n"       
-                                )
-    dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
-    result <- TwoSampleMR::mr(dat_harm) 
-    result_het <- TwoSampleMR::mr_heterogeneity(dat = dat_harm)
-    result_pleiotropy <- TwoSampleMR::mr_pleiotropy_test(dat = dat_harm)
-    # omit method that gives error
-    cat("## ", file, "\n")
-    cat("### pvalue threshold: ", pvalue_threshold, "\n")
-    print(knitr::kable(result))
-    print(knitr::kable(result_het))
-    print(knitr::kable(result_pleiotropy))
-    pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
-    print(pp[[1]])
-}
+#for (file in files){
+file <- files[3]
+pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
+pre_dat <- pre_dat |>
+    dplyr::filter((chr %in% fmd2$chr.exposure) & (pos %in% fmd2$pos.exposure))
+pre2 <- pre_dat |>
+    dplyr::left_join(fmd2 |> dplyr::select(chr.exposure, pos.exposure, SNP), by = c("chr" = "chr.exposure", "pos" = "pos.exposure")) |>
+    dplyr::select(- snp) |>
+    TwoSampleMR::format_data(type = "outcome", 
+                            effect_allele_col = "A1", 
+                            other_allele_col = "A2",
+                            pval_col = "pvalue",
+                            samplesize_col = "n"       
+                            )
+dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
+result <- TwoSampleMR::mr(dat_harm) 
+result_het <- TwoSampleMR::mr_heterogeneity(dat = dat_harm)
+result_pleiotropy <- TwoSampleMR::mr_pleiotropy_test(dat = dat_harm)
+# omit method that gives error
+cat("## ", file, "\n")
+cat("### pvalue threshold: ", pvalue_threshold, "\n")
+print(knitr::kable(result))
+print(knitr::kable(result_het))
+print(knitr::kable(result_pleiotropy))
+pp <- TwoSampleMR::mr_scatter_plot(mr_results = result, dat = dat_harm)
+print(pp[[1]])
+#}
 # see neale lab documentation: https://docs.google.com/spreadsheets/d/1kvPoupSzsSFBNSztMzl04xMoSC3Kcx3CrjVf4yBmESU/edit#gid=227859291
 # GRCh37 is used here!
 #Neale lab denotes by beta the alt allele effect, ie, the increase in phenotype per increase in one alt allele.
