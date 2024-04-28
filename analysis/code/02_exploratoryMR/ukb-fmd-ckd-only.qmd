@@ -84,6 +84,9 @@ dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
 mydir <- here::here("analysis", "data", "analysis_intermediates") 
 mydir |> fs::dir_create()
 saveRDS(dat_harm, file.path(mydir, "fmd_ckd_dat_harm.rds"))
+### read RDS file
+
+dat_harm <- readRDS(file.path(mydir, "fmd_ckd_dat_harm.rds")) |> tibble::as_tibble()
 result <- TwoSampleMR::mr(dat_harm) 
 result_het <- TwoSampleMR::mr_heterogeneity(dat = dat_harm)
 result_pleiotropy <- TwoSampleMR::mr_pleiotropy_test(dat = dat_harm)
