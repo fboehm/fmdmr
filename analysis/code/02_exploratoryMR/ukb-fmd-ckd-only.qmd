@@ -4,11 +4,6 @@ format: gfm
 ---
 
 
-## Todo 
-
-Manually check which SNPs are in LD with other lead SNPs ***and*** which SNPs are not in hte reference panel. 
-
-Note that we get this message printed in the output file:
 
 
 ```
@@ -70,7 +65,7 @@ fmd2pre$SNP |>
 # all 7 snps are in the database!
 
 fmd2 <- fmd2pre |>
-    TwoSampleMR::clump_data(clump_kb = 10)
+    TwoSampleMR::clump_data()
 files <- list.files(here::here("analysis", "data", "ukb_for_munge_sumstats"), pattern = "female", full.names = TRUE)
 file <- files[3] # check this!
 pre_dat <- vroom::vroom(file, col_types = "ciiccdddi")
@@ -86,6 +81,9 @@ pre2 <- pre_dat |>
                             samplesize_col = "n"       
                             )
 dat_harm <- TwoSampleMR::harmonise_data(exposure_dat = fmd2, outcome_dat = pre2)
+mydir <- here::here("analysis", "data", "analysis_intermediates") 
+mydir |> fs::dir_create()
+saveRDS(dat_harm, file.path(mydir, "fmd_ckd_dat_harm.rds"))
 result <- TwoSampleMR::mr(dat_harm) 
 result_het <- TwoSampleMR::mr_heterogeneity(dat = dat_harm)
 result_pleiotropy <- TwoSampleMR::mr_pleiotropy_test(dat = dat_harm)
