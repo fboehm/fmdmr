@@ -1,0 +1,48 @@
+---
+title: "Debiased IVW: Does FMD cause CKD?"
+format: html
+---
+
+
+```{r}
+#| eval: false
+remotes::install_github("tye27/mr.divw")
+```
+
+
+
+
+
+
+
+```{r}
+library(mr.divw)
+```
+
+```{r}
+# read ckd gwas results
+fn <- here::here("analysis", "data", "26831199-GCST003374-EFO_0003884.h.tsv.gz")
+ckd <- fn |>
+    vroom::vroom()
+# read fmd gwas results
+fn <- here::here("analysis", "data", "GCST90026612.h.tsv.gz")
+fmd <- fn |>
+    vroom::vroom()
+dat <- fmd |>
+    dplyr::inner_join(ckd, by = dplyr::join_by(variant_id == hm_rsid))
+# check that effect alleles are the same
+dat |> 
+    dplyr::filter(effect_allele.x == effect_allele.y)
+# ckd uses lower case letters for alleles.
+# instead, use ckd's alleles prefixed with hm_
+dat |>
+    dplyr::select(effect_allele.x, other_allele.x, hm_effect_allele, hm_other_allele) |>
+    dplyr::filter(hm_effect_allele == effect_allele.x)
+# Does hm_other_allele - from ckd - match other_allele.x - from fmd? yes!
+```
+
+
+
+```{r}
+mr.divw(beta.exposure = dat$beta.x, beta.outcome = dat$hm_beta, se.exposure = dat$standard_error.x, se.outcome = dat$standard_error.y, lambda = 1)
+```
